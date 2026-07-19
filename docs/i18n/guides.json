@@ -1,0 +1,422 @@
+{
+  "en": {
+    "title": "ARGUS-3 — User Guide (English)",
+    "subtitle": "install · setup · daily use",
+    "s1_title": "What is ARGUS",
+    "s1_body": "ARGUS-3 is your personal AI agent — the only AICOM component built for direct human conversation. It runs on your machine with your API keys. WARDEN vets every MCP tool before it runs. The rest of the ecosystem (Factory, Hub, Oracles) operates autonomously; you talk to ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Install",
+    "s2_body": "Run the one-liner installer. It checks Node.js 20+, installs `@aimarket/argus` globally, creates `~/.argus/agent`, and launches `argus setup`. The wizard covers: crypto wallet (optional, default OFF), environment mode (`live`/`uni`/`test`), LLM provider (DeepSeek, Anthropic, OpenAI-compatible, Ollama), optional Telegram bot, optional HTTP token.",
+    "s3_title": "Daily use",
+    "s3_body": "`argus doctor` — health check. `argus ask \"task\"` — one-shot. `argus chat` — interactive REPL. `argus serve` — HTTP + Telegram + Arena. `argus telegram` — bot only. Keys live in `~/.argus/agent/.env`; config in `argus.config.json`.",
+    "s4_title": "How to talk to ARGUS",
+    "s4_body": "Write clear tasks with a finish line, not vague vibes. ARGUS answers in the language you use. Each task has a hard budget (tokens + USD) — it finishes and stops. Sensitive tools (`*payment*`, `*exec*`) need explicit approval on CLI/Telegram.",
+    "s5_title": "Troubleshooting",
+    "s5_body": "Run `argus doctor` first. No LLM? Add `DEEPSEEK_API_KEY` or start Ollama. `command not found`? Add `$(npm prefix -g)/bin` to PATH. MCP blocked? Check `argus warden scan`. Budget exceeded? Narrow the task or raise limits in config.",
+    "humor_link": {
+      "title": "When ARGUS won't help you",
+      "teaser": "Three honest reasons your agent might say no.",
+      "read": "Read the full roast →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "zh": {
+    "title": "ARGUS-3 — 用户指南（中文）",
+    "subtitle": "安装 · 配置 · 日常使用",
+    "s1_title": "什么是 ARGUS",
+    "s1_body": "ARGUS-3 是您的个人 AI 智能体——AICOM 生态中唯一面向人类对话的组件。运行在您的机器上，使用您的 API 密钥。WARDEN 会在每个 MCP 工具运行前进行审查。Factory、Hub、Oracles 等其余部分自主运行；您通过 ARGUS 交互。",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "安装",
+    "s2_body": "运行一行安装命令。检查 Node.js 20+，全局安装 `@aimarket/argus`，创建 `~/.argus/agent`，启动 `argus setup`。向导涵盖：加密钱包（可选，默认关闭）、环境模式（`live`/`uni`/`test`）、LLM 提供商、可选 Telegram、可选 HTTP 令牌。",
+    "s3_title": "日常使用",
+    "s3_body": "`argus doctor` — 健康检查。`argus ask \"任务\"` — 单次执行。`argus chat` — 交互式 REPL。`argus serve` — HTTP + Telegram + Arena。密钥在 `~/.argus/agent/.env`，配置在 `argus.config.json`。",
+    "s4_title": "如何与 ARGUS 对话",
+    "s4_body": "写清楚有终点的任务，不要模糊表达。ARGUS 用您使用的语言回答。每项任务有硬性预算（token + 美元）——做完就停。敏感工具（`*payment*`、`*exec*`）在 CLI/Telegram 上需明确批准。",
+    "s5_title": "故障排除",
+    "s5_body": "先运行 `argus doctor`。没有 LLM？添加 `DEEPSEEK_API_KEY` 或启动 Ollama。找不到命令？将 `$(npm prefix -g)/bin` 加入 PATH。MCP 被拦？检查 `argus warden scan`。超出预算？缩小任务或提高配置中的限制。",
+    "humor_link": {
+      "title": "ARGUS 帮不了你的三种情况",
+      "teaser": "智能体说「不」的三个诚实理由。",
+      "read": "阅读完整吐槽 →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "es": {
+    "title": "ARGUS-3 — Guía de usuario (Español)",
+    "subtitle": "instalación · configuración · uso diario",
+    "s1_title": "Qué es ARGUS",
+    "s1_body": "ARGUS-3 es tu agente de IA personal — el único componente de AICOM pensado para conversación directa con humanos. Corre en tu máquina con tus claves API. WARDEN revisa cada herramienta MCP antes de ejecutarla. El resto del ecosistema (Factory, Hub, Oracles) opera de forma autónoma; tú hablas con ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Instalación",
+    "s2_body": "Ejecuta el instalador de una línea. Comprueba Node.js 20+, instala `@aimarket/argus` globalmente, crea `~/.argus/agent` y lanza `argus setup`. El asistente cubre: wallet cripto (opcional, OFF por defecto), modo de entorno, proveedor LLM, Telegram opcional, token HTTP opcional.",
+    "s3_title": "Uso diario",
+    "s3_body": "`argus doctor` — chequeo de salud. `argus ask \"tarea\"` — una sola vez. `argus chat` — REPL interactivo. `argus serve` — HTTP + Telegram + Arena. Claves en `~/.argus/agent/.env`; config en `argus.config.json`.",
+    "s4_title": "Cómo hablar con ARGUS",
+    "s4_body": "Escribe tareas claras con meta, no vibes vagas. ARGUS responde en el idioma que uses. Cada tarea tiene presupuesto fijo (tokens + USD) — termina y para. Herramientas sensibles requieren aprobación explícita en CLI/Telegram.",
+    "s5_title": "Solución de problemas",
+    "s5_body": "Ejecuta `argus doctor` primero. ¿Sin LLM? Añade `DEEPSEEK_API_KEY` o inicia Ollama. ¿Comando no encontrado? Añade `$(npm prefix -g)/bin` al PATH. ¿MCP bloqueado? Revisa `argus warden scan`. ¿Presupuesto excedido? Reduce la tarea o sube límites en config.",
+    "humor_link": {
+      "title": "Cuando ARGUS no te ayudará",
+      "teaser": "Tres razones honestas por las que tu agente dice no.",
+      "read": "Leer el roast completo →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "hi": {
+    "title": "ARGUS-3 — उपयोगकर्ता गाइड (हिन्दी)",
+    "subtitle": "इंस्टॉल · सेटअप · दैनिक उपयोग",
+    "s1_title": "ARGUS क्या है",
+    "s1_body": "ARGUS-3 आपका व्यक्तिगत AI एजेंट है — AICOM का एकमात्र हिस्सा जो सीधे इंसानों से बात करता है। आपकी मशीन पर, आपकी API keys के साथ चलता है। WARDEN हर MCP टूल चलाने से पहले जाँचता है। बाकी ecosystem (Factory, Hub, Oracles) स्वायत्त है; आप ARGUS से बात करते हैं।",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "इंस्टॉल",
+    "s2_body": "एक-पंक्ति इंस्टॉलर चलाएँ। Node.js 20+ जाँच, `@aimarket/argus` global install, `~/.argus/agent` बनाएगा, `argus setup` शुरू करेगा। विज़ार्ड: crypto wallet (वैकल्पिक, डिफ़ॉल्ट OFF), environment mode, LLM provider, Telegram, HTTP token।",
+    "s3_title": "दैनिक उपयोग",
+    "s3_body": "`argus doctor` — health check। `argus ask \"कार्य\"` — एक बार। `argus chat` — interactive REPL। `argus serve` — HTTP + Telegram + Arena। Keys `~/.argus/agent/.env` में; config `argus.config.json` में।",
+    "s4_title": "ARGUS से कैसे बात करें",
+    "s4_body": "स्पष्ट कार्य लिखें, अंतिम लक्ष्य के साथ — vague vibes नहीं। ARGUS आपकी भाषा में जवाब देता है। हर कार्य का hard budget (tokens + USD) — पूरा करके रुकता है। sensitive tools के लिए CLI/Telegram पर explicit approval।",
+    "s5_title": "समस्या निवारण",
+    "s5_body": "पहले `argus doctor` चलाएँ। LLM नहीं? `DEEPSEEK_API_KEY` जोड़ें या Ollama शुरू करें। command not found? `$(npm prefix -g)/bin` PATH में। MCP blocked? `argus warden scan`। Budget exceeded? कार्य छोटा करें या limits बढ़ाएँ।",
+    "humor_link": {
+      "title": "जब ARGUS मदद नहीं करेगा",
+      "teaser": "तीन ईमानदार कारण जिन पर एजेंट ना कहेगा।",
+      "read": "पूरा roast पढ़ें →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "ar": {
+    "title": "ARGUS-3 — دليل المستخدم (العربية)",
+    "subtitle": "التثبيت · الإعداد · الاستخدام اليومي",
+    "s1_title": "ما هو ARGUS",
+    "s1_body": "ARGUS-3 وكيل الذكاء الاصطناعي الشخصي — المكوّن الوحيد في AICOM للمحادثة المباشرة مع البشر. يعمل على جهازك بمفاتيح API الخاصة بك. WARDEN يفحص كل أداة MCP قبل التشغيل. بقية النظام (Factory, Hub, Oracles) يعمل باستقلالية؛ أنت تتحدث مع ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "التثبيت",
+    "s2_body": "شغّل المثبّت بسطر واحد. يتحقق من Node.js 20+، يثبت `@aimarket/argus` عالميًا، ينشئ `~/.argus/agent` ويشغّل `argus setup`. المعالج: محفظة crypto (اختياري، OFF افتراضيًا)، وضع البيئة، مزود LLM، Telegram اختياري، رمز HTTP اختياري.",
+    "s3_title": "الاستخدام اليومي",
+    "s3_body": "`argus doctor` — فحص الصحة. `argus ask \"مهمة\"` — مهمة واحدة. `argus chat` — REPL تفاعلي. `argus serve` — HTTP + Telegram + Arena. المفاتيح في `~/.argus/agent/.env`؛ الإعداد في `argus.config.json`.",
+    "s4_title": "كيف تتحدث مع ARGUS",
+    "s4_body": "اكتب مهامًا واضحة بنهاية محددة، لا vibes غامضة. ARGUS يجيب بلغتك. لكل مهمة ميزانية ثابتة (رموز + USD) — ينهي ويتوقف. الأدوات الحساسة تحتاج موافقة صريحة على CLI/Telegram.",
+    "s5_title": "استكشاف الأخطاء",
+    "s5_body": "شغّل `argus doctor` أولًا. لا LLM? أضف `DEEPSEEK_API_KEY` أو شغّل Ollama. أمر غير موجود? أضف `$(npm prefix -g)/bin` إلى PATH. MCP محظور? تحقق من `argus warden scan`. تجاوز الميزانية? ضيّق المهمة أو ارفع الحدود.",
+    "humor_link": {
+      "title": "متى لن يساعدك ARGUS",
+      "teaser": "ثلاثة أسباب صادقة لرفض الوكيل.",
+      "read": "اقرأ ال roast الكامل →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "pt": {
+    "title": "ARGUS-3 — Guia do usuário (Português)",
+    "subtitle": "instalação · configuração · uso diário",
+    "s1_title": "O que é ARGUS",
+    "s1_body": "ARGUS-3 é seu agente de IA pessoal — o único componente AICOM feito para conversa direta com humanos. Roda na sua máquina com suas chaves API. WARDEN verifica cada ferramenta MCP antes de executar. O resto do ecossistema (Factory, Hub, Oracles) opera de forma autônoma; você fala com o ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Instalação",
+    "s2_body": "Execute o instalador de uma linha. Verifica Node.js 20+, instala `@aimarket/argus` globalmente, cria `~/.argus/agent` e inicia `argus setup`. O assistente cobre: carteira cripto (opcional, OFF por padrão), modo de ambiente, provedor LLM, Telegram opcional, token HTTP opcional.",
+    "s3_title": "Uso diário",
+    "s3_body": "`argus doctor` — verificação de saúde. `argus ask \"tarefa\"` — execução única. `argus chat` — REPL interativo. `argus serve` — HTTP + Telegram + Arena. Chaves em `~/.argus/agent/.env`; config em `argus.config.json`.",
+    "s4_title": "Como falar com ARGUS",
+    "s4_body": "Escreva tarefas claras com fim definido, não vibes vagas. ARGUS responde no idioma que você usar. Cada tarefa tem orçamento fixo (tokens + USD) — termina e para. Ferramentas sensíveis exigem aprovação explícita no CLI/Telegram.",
+    "s5_title": "Solução de problemas",
+    "s5_body": "Execute `argus doctor` primeiro. Sem LLM? Adicione `DEEPSEEK_API_KEY` ou inicie Ollama. Comando não encontrado? Adicione `$(npm prefix -g)/bin` ao PATH. MCP bloqueado? Verifique `argus warden scan`. Orçamento excedido? Reduza a tarefa ou aumente limites na config.",
+    "humor_link": {
+      "title": "Quando o ARGUS não vai ajudar",
+      "teaser": "Três razões honestas para o agente dizer não.",
+      "read": "Ler o roast completo →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "ru": {
+    "title": "ARGUS-3 — Руководство пользователя (Русский)",
+    "subtitle": "установка · настройка · ежедневное использование",
+    "s1_title": "Что такое ARGUS",
+    "s1_body": "ARGUS-3 — ваш персональный AI-агент, единственный компонент AICOM для прямого общения с человеком. Работает на вашей машине с вашими API-ключами. WARDEN проверяет каждый MCP-инструмент перед запуском. Остальная экосистема (Factory, Hub, Oracles) автономна; вы общаетесь с ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Установка",
+    "s2_body": "Запустите однострочный установщик. Проверит Node.js 20+, установит `@aimarket/argus` глобально, создаст `~/.argus/agent` и запустит `argus setup`. Мастер: криптокошелёк (опционально, по умолчанию ВЫКЛ), режим среды, LLM-провайдер, Telegram, HTTP-токен.",
+    "s3_title": "Ежедневное использование",
+    "s3_body": "`argus doctor` — проверка. `argus ask \"задача\"` — разовый запрос. `argus chat` — интерактивный REPL. `argus serve` — HTTP + Telegram + Arena. Ключи в `~/.argus/agent/.env`, конфиг в `argus.config.json`.",
+    "s4_title": "Как общаться с ARGUS",
+    "s4_body": "Формулируйте чёткие задачи с финишем, не абстрактные «vibes». ARGUS отвечает на вашем языке. У каждой задачи жёсткий бюджет (токены + USD) — завершит и остановится. Чувствительные инструменты требуют явного подтверждения в CLI/Telegram.",
+    "s5_title": "Устранение неполадок",
+    "s5_body": "Сначала `argus doctor`. Нет LLM? Добавьте `DEEPSEEK_API_KEY` или запустите Ollama. `command not found`? Добавьте `$(npm prefix -g)/bin` в PATH. MCP заблокирован? `argus warden scan`. Бюджет исчерпан? Сузьте задачу или поднимите лимиты.",
+    "humor_link": {
+      "title": "Когда ARGUS не поможет",
+      "teaser": "Три честные причины, по которым агент скажет «нет».",
+      "read": "Читать полный roast →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "ja": {
+    "title": "ARGUS-3 — ユーザーガイド（日本語）",
+    "subtitle": "インストール · セットアップ · 日常利用",
+    "s1_title": "ARGUSとは",
+    "s1_body": "ARGUS-3はあなたのパーソナルAIエージェント — 人間との直接会話のための唯一のAICOMコンポーネントです。あなたのマシンで、あなたのAPIキーで動作。WARDENはMCPツールを実行前に検査します。Factory、Hub、Oraclesなどは自律稼働；あなたはARGUSと話します。",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "インストール",
+    "s2_body": "ワンライナーインストーラを実行。Node.js 20+を確認、`@aimarket/argus`をグローバルインストール、`~/.argus/agent`を作成、`argus setup`を起動。ウィザード：cryptoウォレット（任意、デフォルトOFF）、環境モード、LLMプロバイダー、Telegram、HTTPトークン。",
+    "s3_title": "日常利用",
+    "s3_body": "`argus doctor` — ヘルスチェック。`argus ask \"タスク\"` — ワンショット。`argus chat` — 対話REPL。`argus serve` — HTTP + Telegram + Arena。キーは `~/.argus/agent/.env`、設定は `argus.config.json`。",
+    "s4_title": "ARGUSとの話し方",
+    "s4_body": "ゴールが明確なタスクを書く。曖昧なvibesではなく。ARGUSは使う言語で答えます。各タスクにハード予算（トークン+USD）— 終わったら止まります。センシティブツールはCLI/Telegramで明示的承認が必要。",
+    "s5_title": "トラブルシューティング",
+    "s5_body": "まず `argus doctor`。LLMなし？ `DEEPSEEK_API_KEY` を追加するかOllama起動。command not found？ `$(npm prefix -g)/bin` をPATHに。MCPブロック？ `argus warden scan`。予算超過？ タスクを絞るか設定で上限を上げる。",
+    "humor_link": {
+      "title": "ARGUSが助けてくれないとき",
+      "teaser": "エージェントがノーと言う3つの正直な理由。",
+      "read": "フルroastを読む →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "fr": {
+    "title": "ARGUS-3 — Guide utilisateur (Français)",
+    "subtitle": "installation · configuration · usage quotidien",
+    "s1_title": "Qu'est-ce qu'ARGUS",
+    "s1_body": "ARGUS-3 est votre agent IA personnel — le seul composant AICOM conçu pour la conversation directe avec les humains. Il tourne sur votre machine avec vos clés API. WARDEN vérifie chaque outil MCP avant exécution. Le reste de l'écosystème (Factory, Hub, Oracles) est autonome ; vous parlez à ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Installation",
+    "s2_body": "Lancez l'installateur en une ligne. Vérifie Node.js 20+, installe `@aimarket/argus` globalement, crée `~/.argus/agent` et lance `argus setup`. L'assistant couvre : wallet crypto (optionnel, OFF par défaut), mode d'environnement, fournisseur LLM, Telegram optionnel, jeton HTTP optionnel.",
+    "s3_title": "Usage quotidien",
+    "s3_body": "`argus doctor` — contrôle de santé. `argus ask \"tâche\"` — requête unique. `argus chat` — REPL interactif. `argus serve` — HTTP + Telegram + Arena. Clés dans `~/.argus/agent/.env` ; config dans `argus.config.json`.",
+    "s4_title": "Comment parler à ARGUS",
+    "s4_body": "Rédigez des tâches claires avec une fin, pas des vibes vagues. ARGUS répond dans votre langue. Chaque tâche a un budget fixe (tokens + USD) — il termine et s'arrête. Les outils sensibles exigent une approbation explicite sur CLI/Telegram.",
+    "s5_title": "Dépannage",
+    "s5_body": "Lancez d'abord `argus doctor`. Pas de LLM ? Ajoutez `DEEPSEEK_API_KEY` ou démarrez Ollama. Commande introuvable ? Ajoutez `$(npm prefix -g)/bin` au PATH. MCP bloqué ? Vérifiez `argus warden scan`. Budget dépassé ? Réduisez la tâche ou augmentez les limites.",
+    "humor_link": {
+      "title": "Quand ARGUS ne vous aidera pas",
+      "teaser": "Trois raisons honnêtes pour lesquelles l'agent dit non.",
+      "read": "Lire le roast complet →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "de": {
+    "title": "ARGUS-3 — Benutzerhandbuch (Deutsch)",
+    "subtitle": "Installation · Einrichtung · tägliche Nutzung",
+    "s1_title": "Was ist ARGUS",
+    "s1_body": "ARGUS-3 ist dein persönlicher KI-Agent — die einzige AICOM-Komponente für direkte menschliche Konversation. Läuft auf deiner Maschine mit deinen API-Schlüsseln. WARDEN prüft jedes MCP-Tool vor der Ausführung. Der Rest des Ökosystems (Factory, Hub, Oracles) arbeitet autonom; du sprichst mit ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Installation",
+    "s2_body": "Einzeiler-Installer ausführen. Prüft Node.js 20+, installiert `@aimarket/argus` global, erstellt `~/.argus/agent` und startet `argus setup`. Assistent: Krypto-Wallet (optional, standardmäßig AUS), Umgebungsmodus, LLM-Anbieter, optionales Telegram, optionaler HTTP-Token.",
+    "s3_title": "Tägliche Nutzung",
+    "s3_body": "`argus doctor` — Gesundheitscheck. `argus ask \"Aufgabe\"` — Einmalaufgabe. `argus chat` — interaktives REPL. `argus serve` — HTTP + Telegram + Arena. Schlüssel in `~/.argus/agent/.env`; Config in `argus.config.json`.",
+    "s4_title": "So sprichst du mit ARGUS",
+    "s4_body": "Formuliere klare Aufgaben mit Endpunkt, keine vagen Vibes. ARGUS antwortet in deiner Sprache. Jede Aufgabe hat ein hartes Budget (Tokens + USD) — erledigt und stoppt. Sensible Tools brauchen explizite Freigabe in CLI/Telegram.",
+    "s5_title": "Fehlerbehebung",
+    "s5_body": "Zuerst `argus doctor`. Kein LLM? `DEEPSEEK_API_KEY` setzen oder Ollama starten. Befehl nicht gefunden? `$(npm prefix -g)/bin` zum PATH hinzufügen. MCP blockiert? `argus warden scan`. Budget überschritten? Aufgabe eingrenzen oder Limits erhöhen.",
+    "humor_link": {
+      "title": "Wann ARGUS nicht hilft",
+      "teaser": "Drei ehrliche Gründe, warum dein Agent nein sagt.",
+      "read": "Den vollen Roast lesen →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "ko": {
+    "title": "ARGUS-3 — 사용자 가이드 (한국어)",
+    "subtitle": "설치 · 설정 · 일상 사용",
+    "s1_title": "ARGUS란",
+    "s1_body": "ARGUS-3는 개인 AI 에이전트 — 인간과 직접 대화하도록 만든 유일한 AICOM 구성요소입니다. 내 컴퓨터에서 내 API 키로 실행됩니다. WARDEN은 MCP 도구를 실행 전 검사합니다. Factory, Hub, Oracles 등 나머지는 자율 운영; 당신은 ARGUS와 대화합니다.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "설치",
+    "s2_body": "한 줄 설치 명령 실행. Node.js 20+ 확인, `@aimarket/argus` 전역 설치, `~/.argus/agent` 생성, `argus setup` 시작. 마법사: crypto 지갑(선택, 기본 OFF), 환경 모드, LLM 제공자, Telegram, HTTP 토큰.",
+    "s3_title": "일상 사용",
+    "s3_body": "`argus doctor` — 상태 점검. `argus ask \"작업\"` — 일회성. `argus chat` — 대화형 REPL. `argus serve` — HTTP + Telegram + Arena. 키는 `~/.argus/agent/.env`, 설정은 `argus.config.json`.",
+    "s4_title": "ARGUS와 대화하는 법",
+    "s4_body": "끝이 분명한 명확한 작업을 작성하세요. 모호한 vibe 말고. ARGUS는 사용하는 언어로 답합니다. 각 작업에 고정 예산(토큰+USD) — 끝나면 멈춥니다. 민감한 도구는 CLI/Telegram에서 명시적 승인 필요.",
+    "s5_title": "문제 해결",
+    "s5_body": "먼저 `argus doctor` 실행. LLM 없음? `DEEPSEEK_API_KEY` 추가 또는 Ollama 시작. command not found? `$(npm prefix -g)/bin`을 PATH에. MCP 차단? `argus warden scan`. 예산 초과? 작업 범위 줄이거나 설정에서 한도 올리기.",
+    "humor_link": {
+      "title": "ARGUS가 도와주지 않을 때",
+      "teaser": "에이전트가 거절하는 세 가지 솔직한 이유.",
+      "read": "전체 roast 읽기 →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "it": {
+    "title": "ARGUS-3 — Guida utente (Italiano)",
+    "subtitle": "installazione · configurazione · uso quotidiano",
+    "s1_title": "Cos'è ARGUS",
+    "s1_body": "ARGUS-3 è il tuo agente IA personale — l'unico componente AICOM per conversazione diretta con gli umani. Gira sulla tua macchina con le tue chiavi API. WARDEN verifica ogni tool MCP prima dell'esecuzione. Il resto dell'ecosistema (Factory, Hub, Oracles) è autonomo; parli con ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Installazione",
+    "s2_body": "Esegui l'installer monoriga. Verifica Node.js 20+, installa `@aimarket/argus` globalmente, crea `~/.argus/agent` e avvia `argus setup`. Wizard: wallet crypto (opzionale, OFF di default), modalità ambiente, provider LLM, Telegram opzionale, token HTTP opzionale.",
+    "s3_title": "Uso quotidiano",
+    "s3_body": "`argus doctor` — controllo salute. `argus ask \"compito\"` — una tantum. `argus chat` — REPL interattivo. `argus serve` — HTTP + Telegram + Arena. Chiavi in `~/.argus/agent/.env`; config in `argus.config.json`.",
+    "s4_title": "Come parlare con ARGUS",
+    "s4_body": "Scrivi compiti chiari con un traguardo, non vibes vaghe. ARGUS risponde nella tua lingua. Ogni compito ha budget fisso (token + USD) — finisce e si ferma. Tool sensibili richiedono approvazione esplicita su CLI/Telegram.",
+    "s5_title": "Risoluzione problemi",
+    "s5_body": "Esegui prima `argus doctor`. Nessun LLM? Aggiungi `DEEPSEEK_API_KEY` o avvia Ollama. Comando non trovato? Aggiungi `$(npm prefix -g)/bin` al PATH. MCP bloccato? Controlla `argus warden scan`. Budget superato? Riduci il compito o alza i limiti.",
+    "humor_link": {
+      "title": "Quando ARGUS non ti aiuterà",
+      "teaser": "Tre ragioni oneste per cui l'agente dice no.",
+      "read": "Leggi il roast completo →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "tr": {
+    "title": "ARGUS-3 — Kullanıcı Kılavuzu (Türkçe)",
+    "subtitle": "kurulum · yapılandırma · günlük kullanım",
+    "s1_title": "ARGUS nedir",
+    "s1_body": "ARGUS-3 kişisel AI ajantınızdır — doğrudan insan konuşması için tek AICOM bileşeni. Makinenizde, API anahtarlarınızla çalışır. WARDEN her MCP aracını çalıştırmadan önce inceler. Ekosistemin geri kalanı (Factory, Hub, Oracles) özerk; siz ARGUS ile konuşursunuz.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Kurulum",
+    "s2_body": "Tek satırlık kurulumu çalıştırın. Node.js 20+ kontrol, `@aimarket/argus` global kurulum, `~/.argus/agent` oluşturma, `argus setup` başlatma. Sihirbaz: crypto cüzdan (isteğe bağlı, varsayılan KAPALI), ortam modu, LLM sağlayıcı, Telegram, HTTP token.",
+    "s3_title": "Günlük kullanım",
+    "s3_body": "`argus doctor` — sağlık kontrolü. `argus ask \"görev\"` — tek seferlik. `argus chat` — etkileşimli REPL. `argus serve` — HTTP + Telegram + Arena. Anahtarlar `~/.argus/agent/.env`; yapılandırma `argus.config.json`.",
+    "s4_title": "ARGUS ile nasıl konuşulur",
+    "s4_body": "Bitiş çizgisi net görevler yazın, belirsiz vibe'lar değil. ARGUS kullandığınız dilde cevap verir. Her görevin sabit bütçesi (token + USD) vardır — bitirir ve durur. Hassas araçlar CLI/Telegram'da açık onay gerektirir.",
+    "s5_title": "Sorun giderme",
+    "s5_body": "Önce `argus doctor` çalıştırın. LLM yok mu? `DEEPSEEK_API_KEY` ekleyin veya Ollama başlatın. command not found? `$(npm prefix -g)/bin` PATH'e. MCP engellendi mi? `argus warden scan`. Bütçe aşıldı mı? Görevi daraltın veya limitleri artırın.",
+    "humor_link": {
+      "title": "ARGUS'un yardım etmeyeceği durumlar",
+      "teaser": "Ajanın hayır demesinin üç dürüst nedeni.",
+      "read": "Tam roast'u oku →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "id": {
+    "title": "ARGUS-3 — Panduan Pengguna (Indonesia)",
+    "subtitle": "instal · setup · penggunaan harian",
+    "s1_title": "Apa itu ARGUS",
+    "s1_body": "ARGUS-3 adalah agen AI pribadi Anda — satu-satunya komponen AICOM untuk percakapan langsung dengan manusia. Berjalan di mesin Anda dengan kunci API Anda. WARDEN memeriksa setiap alat MCP sebelum dijalankan. Sisanya (Factory, Hub, Oracles) otonom; Anda berbicara dengan ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Instal",
+    "s2_body": "Jalankan installer satu baris. Cek Node.js 20+, instal `@aimarket/argus` global, buat `~/.argus/agent`, luncurkan `argus setup`. Wizard: wallet crypto (opsional, default OFF), mode lingkungan, provider LLM, Telegram opsional, token HTTP opsional.",
+    "s3_title": "Penggunaan harian",
+    "s3_body": "`argus doctor` — cek kesehatan. `argus ask \"tugas\"` — sekali jalan. `argus chat` — REPL interaktif. `argus serve` — HTTP + Telegram + Arena. Kunci di `~/.argus/agent/.env`; config di `argus.config.json`.",
+    "s4_title": "Cara berbicara dengan ARGUS",
+    "s4_body": "Tulis tugas jelas dengan garis finish, bukan vibe samar. ARGUS menjawab dalam bahasa yang Anda gunakan. Setiap tugas punya budget keras (token + USD) — selesai lalu berhenti. Alat sensitif butuh persetujuan eksplisit di CLI/Telegram.",
+    "s5_title": "Pemecahan masalah",
+    "s5_body": "Jalankan `argus doctor` dulu. Tidak ada LLM? Tambah `DEEPSEEK_API_KEY` atau jalankan Ollama. command not found? Tambah `$(npm prefix -g)/bin` ke PATH. MCP diblokir? Cek `argus warden scan`. Budget habis? Persempit tugas atau naikkan limit.",
+    "humor_link": {
+      "title": "Ketika ARGUS tidak akan membantu",
+      "teaser": "Tiga alasan jujur agen bilang tidak.",
+      "read": "Baca roast lengkap →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "vi": {
+    "title": "ARGUS-3 — Hướng dẫn người dùng (Tiếng Việt)",
+    "subtitle": "cài đặt · thiết lập · sử dụng hàng ngày",
+    "s1_title": "ARGUS là gì",
+    "s1_body": "ARGUS-3 là agent AI cá nhân — thành phần AICOM duy nhất cho hội thoại trực tiếp với con người. Chạy trên máy bạn với API key của bạn. WARDEN kiểm tra mọi công cụ MCP trước khi chạy. Phần còn lại (Factory, Hub, Oracles) tự vận hành; bạn nói chuyện với ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Cài đặt",
+    "s2_body": "Chạy lệnh cài một dòng. Kiểm tra Node.js 20+, cài `@aimarket/argus` global, tạo `~/.argus/agent`, khởi chạy `argus setup`. Trình hướng dẫn: ví crypto (tùy chọn, mặc định TẮT), chế độ môi trường, nhà cung cấp LLM, Telegram, token HTTP.",
+    "s3_title": "Sử dụng hàng ngày",
+    "s3_body": "`argus doctor` — kiểm tra sức khỏe. `argus ask \"nhiệm vụ\"` — một lần. `argus chat` — REPL tương tác. `argus serve` — HTTP + Telegram + Arena. Key trong `~/.argus/agent/.env`; config trong `argus.config.json`.",
+    "s4_title": "Cách nói chuyện với ARGUS",
+    "s4_body": "Viết nhiệm vụ rõ ràng có đích đến, không phải vibe mơ hồ. ARGUS trả lời bằng ngôn ngữ bạn dùng. Mỗi nhiệm vụ có ngân sách cứng (token + USD) — xong rồi dừng. Công cụ nhạy cảm cần phê duyệt rõ trên CLI/Telegram.",
+    "s5_title": "Khắc phục sự cố",
+    "s5_body": "Chạy `argus doctor` trước. Không có LLM? Thêm `DEEPSEEK_API_KEY` hoặc chạy Ollama. command not found? Thêm `$(npm prefix -g)/bin` vào PATH. MCP bị chặn? Kiểm tra `argus warden scan`. Vượt ngân sách? Thu hẹp nhiệm vụ hoặc tăng giới hạn.",
+    "humor_link": {
+      "title": "Khi ARGUS sẽ không giúp bạn",
+      "teaser": "Ba lý do trung thực agent từ chối.",
+      "read": "Đọc roast đầy đủ →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "th": {
+    "title": "ARGUS-3 — คู่มือผู้ใช้ (ไทย)",
+    "subtitle": "ติดตั้ง · ตั้งค่า · ใช้งานประจำวัน",
+    "s1_title": "ARGUS คืออะไร",
+    "s1_body": "ARGUS-3 คือเอเจนต์ AI ส่วนตัว — ส่วนประกอบ AICOM เดียวสำหรับสนทนากับมนุษย์โดยตรง ทำงานบนเครื่องคุณด้วย API key ของคุณ WARDEN ตรวจเครื่องมือ MCP ก่อนรัน ส่วนอื่น (Factory, Hub, Oracles) ทำงานอัตโนมัติ คุณคุยกับ ARGUS",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "ติดตั้ง",
+    "s2_body": "รันตัวติดตั้งบรรทัดเดียว ตรวจ Node.js 20+ ติดตั้ง `@aimarket/argus` แบบ global สร้าง `~/.argus/agent` เริ่ม `argus setup` ตัวช่วย: crypto wallet (ไม่บังคับ ปิดเป็นค่าเริ่มต้น) โหมดสภาพแวดล้อม LLM provider Telegram token HTTP",
+    "s3_title": "ใช้งานประจำวัน",
+    "s3_body": "`argus doctor` — ตรวจสุขภาพ `argus ask \"งาน\"` — ครั้งเดียว `argus chat` — REPL โต้ตอบ `argus serve` — HTTP + Telegram + Arena คีย์อยู่ `~/.argus/agent/.env` config ใน `argus.config.json`",
+    "s4_title": "วิธีคุยกับ ARGUS",
+    "s4_body": "เขียนงานชัดเจนมีเส้นชัย ไม่ใช่ vibe คลุมเครือ ARGUS ตอบภาษาที่คุณใช้ แต่ละงานมีงบแข็ง (token + USD) — ทำเสร็จแล้วหยุด เครื่องมือ sensitive ต้องอนุมัติชัดบน CLI/Telegram",
+    "s5_title": "แก้ปัญหา",
+    "s5_body": "รัน `argus doctor` ก่อน ไม่มี LLM? เพิ่ม `DEEPSEEK_API_KEY` หรือเริ่ม Ollama command not found? เพิ่ม `$(npm prefix -g)/bin` ใน PATH MCP ถูกบล็อก? ตรวจ `argus warden scan` เกินงบ? ลดขอบเขตงานหรือเพิ่ม limit",
+    "humor_link": {
+      "title": "เมื่อ ARGUS จะไม่ช่วยคุณ",
+      "teaser": "สามเหตุผลที่เอเจนต์ปฏิเสธอย่างตรงไปตรงมา",
+      "read": "อ่าน roast เต็ม →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "nl": {
+    "title": "ARGUS-3 — Gebruikershandleiding (Nederlands)",
+    "subtitle": "installatie · setup · dagelijks gebruik",
+    "s1_title": "Wat is ARGUS",
+    "s1_body": "ARGUS-3 is je persoonlijke AI-agent — het enige AICOM-onderdeel voor direct menselijk gesprek. Draait op jouw machine met jouw API-sleutels. WARDEN controleert elke MCP-tool vóór uitvoering. De rest van het ecosysteem (Factory, Hub, Oracles) werkt autonoom; jij praat met ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Installatie",
+    "s2_body": "Voer de one-liner installer uit. Controleert Node.js 20+, installeert `@aimarket/argus` globaal, maakt `~/.argus/agent` aan en start `argus setup`. Wizard: crypto-wallet (optioneel, standaard UIT), omgevingsmodus, LLM-provider, optionele Telegram, HTTP-token.",
+    "s3_title": "Dagelijks gebruik",
+    "s3_body": "`argus doctor` — gezondheidscheck. `argus ask \"taak\"` — eenmalig. `argus chat` — interactieve REPL. `argus serve` — HTTP + Telegram + Arena. Sleutels in `~/.argus/agent/.env`; config in `argus.config.json`.",
+    "s4_title": "Hoe met ARGUS praten",
+    "s4_body": "Schrijf duidelijke taken met een eindpunt, geen vage vibes. ARGUS antwoordt in jouw taal. Elke taak heeft een hard budget (tokens + USD) — klaar en stopt. Gevoelige tools vereisen expliciete goedkeuring op CLI/Telegram.",
+    "s5_title": "Probleemoplossing",
+    "s5_body": "Run eerst `argus doctor`. Geen LLM? Voeg `DEEPSEEK_API_KEY` toe of start Ollama. command not found? Voeg `$(npm prefix -g)/bin` toe aan PATH. MCP geblokkeerd? Check `argus warden scan`. Budget overschreden? Verklein de taak of verhoog limieten.",
+    "humor_link": {
+      "title": "Wanneer ARGUS je niet helpt",
+      "teaser": "Drie eerlijke redenen waarom je agent nee zegt.",
+      "read": "Lees de volledige roast →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "fa": {
+    "title": "ARGUS-3 — راهنمای کاربر (فارسی)",
+    "subtitle": "نصب · راه‌اندازی · استفاده روزانه",
+    "s1_title": "ARGUS چیست",
+    "s1_body": "ARGUS-3 عامل هوش مصنوعی شخصی شماست — تنها جزء AICOM برای گفتگوی مستقیم با انسان. روی دستگاه شما با کلیدهای API شما اجرا می‌شود. WARDEN هر ابزار MCP را قبل از اجرا بررسی می‌کند. بقیه اکوسیستم (Factory, Hub, Oracles) خودمختار است؛ شما با ARGUS صحبت می‌کنید.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "نصب",
+    "s2_body": "نصب‌کننده یک‌خطی را اجرا کنید. Node.js 20+ را بررسی، `@aimarket/argus` را سراسری نصب، `~/.argus/agent` می‌سازد و `argus setup` را شروع می‌کند. ویزارد: کیف پول crypto (اختیاری، پیش‌فرض خاموش)، حالت محیط، ارائه‌دهنده LLM، Telegram اختیاری، توکن HTTP.",
+    "s3_title": "استفاده روزانه",
+    "s3_body": "`argus doctor` — بررسی سلامت. `argus ask \"کار\"` — یک‌بار. `argus chat` — REPL تعاملی. `argus serve` — HTTP + Telegram + Arena. کلیدها در `~/.argus/agent/.env`؛ پیکربندی در `argus.config.json`.",
+    "s4_title": "چگونه با ARGUS صحبت کنیم",
+    "s4_body": "کارهای روشن با خط پایان بنویسید، نه vibeهای مبهم. ARGUS به زبانی که استفاده می‌کنید پاسخ می‌دهد. هر کار بودجه سخت (توکن + USD) دارد — تمام می‌کند و می‌ایستد. ابزارهای حساس در CLI/Telegram نیاز به تأیید صریح دارند.",
+    "s5_title": "عیب‌یابی",
+    "s5_body": "اول `argus doctor` را اجرا کنید. LLM ندارید؟ `DEEPSEEK_API_KEY` اضافه کنید یا Ollama را شروع کنید. command not found? `$(npm prefix -g)/bin` را به PATH اضافه کنید. MCP مسدود؟ `argus warden scan` را بررسی کنید. بودجه تمام شد؟ کار را محدود کنید یا سقف را بالا ببرید.",
+    "humor_link": {
+      "title": "وقتی ARGUS کمکتان نمی‌کند",
+      "teaser": "سه دلیل صادقانه برای رد عامل.",
+      "read": "خواندن roast کامل →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "sk": {
+    "title": "ARGUS-3 — Používateľská príručka (Slovenčina)",
+    "subtitle": "inštalácia · nastavenie · denné používanie",
+    "s1_title": "Čo je ARGUS",
+    "s1_body": "ARGUS-3 je váš osobný AI agent — jediná súčasť AICOM na priamu konverzáciu s človekom. Beží na vašom počítači s vašimi API kľúčmi. WARDEN kontroluje každý MCP nástroj pred spustením. Zvyšok ekosystému (Factory, Hub, Oracles) je autonómny; vy komunikujete s ARGUS.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Inštalácia",
+    "s2_body": "Spustite jednoriadkový inštalátor. Skontroluje Node.js 20+, nainštaluje `@aimarket/argus` globálne, vytvorí `~/.argus/agent` a spustí `argus setup`. Sprievodca: krypto peňaženka (voliteľné, predvolene VYP), režim prostredia, LLM poskytovateľ, Telegram, HTTP token.",
+    "s3_title": "Denné používanie",
+    "s3_body": "`argus doctor` — kontrola. `argus ask \"úloha\"` — jednorazovo. `argus chat` — interaktívny REPL. `argus serve` — HTTP + Telegram + Arena. Kľúče v `~/.argus/agent/.env`; konfig v `argus.config.json`.",
+    "s4_title": "Ako komunikovať s ARGUS",
+    "s4_body": "Píšte jasné úlohy s cieľom, nie vágne vibes. ARGUS odpovedá vo vašom jazyku. Každá úloha má tvrdý rozpočet (tokeny + USD) — dokončí a zastaví sa. Citlivé nástroje vyžadujú explicitné schválenie v CLI/Telegram.",
+    "s5_title": "Riešenie problémov",
+    "s5_body": "Najprv `argus doctor`. Žiadny LLM? Pridajte `DEEPSEEK_API_KEY` alebo spustite Ollama. command not found? Pridajte `$(npm prefix -g)/bin` do PATH. MCP blokované? `argus warden scan`. Rozpočet vyčerpaný? Zúžte úlohu alebo zvýšte limity.",
+    "humor_link": {
+      "title": "Keď ARGUS nepomôže",
+      "teaser": "Tri úprimné dôvody, prečo agent povie nie.",
+      "read": "Prečítajte celý roast →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  },
+  "hr": {
+    "title": "ARGUS-3 — Korisnički vodič (Hrvatski)",
+    "subtitle": "instalacija · postavljanje · svakodnevna upotreba",
+    "s1_title": "Što je ARGUS",
+    "s1_body": "ARGUS-3 je vaš osobni AI agent — jedina AICOM komponenta za izravni razgovor s čovjekom. Radi na vašem računalu s vašim API ključevima. WARDEN provjerava svaki MCP alat prije pokretanja. Ostatak ekosustava (Factory, Hub, Oracles) radi autonomno; vi razgovarate s ARGUS-om.",
+    "install_cmd": "curl -fsSL https://magic-ai-factory.com/install | bash",
+    "s2_title": "Instalacija",
+    "s2_body": "Pokrenite jednolinijski instalator. Provjerava Node.js 20+, globalno instalira `@aimarket/argus`, stvara `~/.argus/agent` i pokreće `argus setup`. Čarobnjak: kripto novčanik (opcionalno, default OFF), okruženje, LLM provider, Telegram, HTTP token.",
+    "s3_title": "Svakodnevna upotreba",
+    "s3_body": "`argus doctor` — provjera. `argus ask \"zadatak\"` — jednokratno. `argus chat` — interaktivni REPL. `argus serve` — HTTP + Telegram + Arena. Ključevi u `~/.argus/agent/.env`; config u `argus.config.json`.",
+    "s4_title": "Kako razgovarati s ARGUS-om",
+    "s4_body": "Pišite jasne zadatke s ciljem, ne vague vibes. ARGUS odgovara na vašem jeziku. Svaki zadatak ima tvrdi budžet (tokeni + USD) — završi i stane. Osjetljivi alati traže eksplicitno odobrenje u CLI/Telegramu.",
+    "s5_title": "Rješavanje problema",
+    "s5_body": "Prvo `argus doctor`. Nema LLM-a? Dodajte `DEEPSEEK_API_KEY` ili pokrenite Ollama. command not found? Dodajte `$(npm prefix -g)/bin` u PATH. MCP blokiran? `argus warden scan`. Budžet iscrpljen? Suzite zadatak ili podignite limite.",
+    "humor_link": {
+      "title": "Kad ARGUS neće pomoći",
+      "teaser": "Tri iskrena razloga zašto agent kaže ne.",
+      "read": "Pročitaj cijeli roast →"
+    },
+    "footer": "- [Ecosystem whitepaper (EN)](https://github.com/alexar76/aicom/blob/main/docs/ecosystem/whitepaper/en.md)\n- [GitHub Issues](https://github.com/alexar76/argus/issues)\n- [Landing](https://magic-ai-factory.com/argus/)"
+  }
+}
