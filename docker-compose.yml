@@ -1,0 +1,79 @@
+# ARGUS — Docker Compose deployment.
+#
+# First-time setup:
+#   1. cp argus.config.example.json argus.config.json   # then edit to taste
+#   2. cp .env.example .env                              # add your secrets
+#         DEEPSEEK_API_KEY / ANTHROPIC_API_KEY, ARGUS_TELEGRAM_TOKEN, ARGUS_WALLET_KEY, ...
+#   3. docker compose up -d --build
+#
+# Economy is OFF by default in the container: the @aimarket/agent SDK is not installed
+# (it lives outside the build context) and no wallet is required. ARGUS still runs fully
+# autonomously — Telegram bot (if ARGUS_TELEGRAM_TOKEN is set) + HTTP server with /health.
+
+services:
+  argus:
+    build: .
+    image: aicom/argus:0.1
+    container_name: argus
+    restart: unless-stopped
+
+    # Secrets only — never committed, never baked into the image.
+    env_file: .env
+
+    environment:
+      ARGUS_HTTP_PORT: "8787"
+      # Monitor uses network_mode: host — Docker bridge cannot reach :9100 (UFW). Use nginx /monitor/.
+      ALIEN_MONITOR_URL: ${ALIEN_MONITOR_URL:-https://magic-ai-factory.com/monitor}
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    ports:
+      - "8787:8787"
+
+    volumes:
+      # Runtime config, mounted read-only (not baked into the image).
+      - ./argus.config.json:/app/argus.config.json:ro
+      # Persistent state: memory, telegram-owner.json, pins.
+      - argus-state:/root/.argus
+
+    # Mirrors the Dockerfile HEALTHCHECK — probes /health via Node's global fetch.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.ARGUS_HTTP_PORT||8787)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  # UNI mode — same image, local Anvil chain (Monitor universe :8545 on host).
+  argus-uni:
+    build: .
+    image: aicom/argus:0.1
+    container_name: argus-uni
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ARGUS_HTTP_PORT: "8787"
+      ARGUS_MODE: "uni"
+      ARGUS_UNI_RPC: "http://host.docker.internal:8545"
+      ARGUS_UNI_CHAIN_ID: "31337"
+      ALIEN_MONITOR_URL: ${ALIEN_MONITOR_URL:-https://magic-ai-factory.com/monitor}
+      # Same .env token as argus — only one container may long-poll Telegram.
+      ARGUS_TELEGRAM_DISABLED: "1"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8788:8787"
+    volumes:
+      - ./argus.config.json:/app/argus.config.json:ro
+      - argus-uni-state:/root/.argus
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.ARGUS_HTTP_PORT||8787)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  argus-state:
+  argus-uni-state:

@@ -1,0 +1,26 @@
+# Dependencies & build output — reinstalled/recompiled inside the image.
+node_modules
+dist
+
+# Secrets — passed via env_file/--env-file at runtime, NEVER baked in.
+.env
+.env.*
+
+# VCS
+.git
+.gitignore
+
+# Logs
+*.log
+
+# Persistent state — lives in a named volume (/root/.argus), not the image.
+.argus
+
+# Tests & docs — not needed at runtime; keeps the image small.
+test
+docs
+**/*.md
+
+# Runtime config — mounted read-only, must NOT be baked into the image.
+# (argus.config.example.json is COPYed explicitly in the Dockerfile and is not *.md.)
+argus.config.json
