@@ -1,0 +1,82 @@
+{
+  "name": "@alexar76/argus3",
+  "version": "0.2.5",
+  "mcpName": "io.github.alexar76/argus3",
+  "description": "ARGUS-3 — WARDEN MCP firewall blocks poisoned servers before any tool runs. Frugal personal AI agent; wallet and on-chain economy optional; crypto OFF by default.",
+  "type": "module",
+  "license": "MIT",
+  "author": "AICOM (alexar76)",
+  "homepage": "https://magic-ai-factory.com/argus/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexar76/argus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alexar76/argus/issues"
+  },
+  "bin": {
+    "argus": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "web",
+    "argus.config.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-security",
+    "prompt-injection",
+    "warden",
+    "firewall",
+    "ai-agent",
+    "llm",
+    "aicom",
+    "aimarket",
+    "agent-economy",
+    "multi-provider",
+    "telegram-bot",
+    "argus-warden"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@noble/post-quantum": "^0.6.1",
+    "viem": "^2.21.55",
+    "zod": "^3.24.1"
+  },
+  "peerDependencies": {
+    "@aimarket/agent": "^0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@aimarket/agent": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@aimarket/agent": "^0.1.0",
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

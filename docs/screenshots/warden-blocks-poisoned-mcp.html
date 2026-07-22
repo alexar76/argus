@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WARDEN blocks poisoned MCP server</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05060f;color:#eaf0ff;font-family:ui-monospace,Menlo,Consolas,monospace;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+  .hud{position:fixed;left:0;right:0;bottom:0;padding:18px 22px 22px;background:linear-gradient(transparent,rgba(5,6,15,.95) 35%)}
+  .line{font-size:clamp(11px,2.2vw,14px);line-height:1.55;opacity:0;transform:translateY(8px);transition:.35s}
+  .line.on{opacity:1;transform:none}
+  .line.dim{color:#93a2c9;font-size:11px;margin-top:6px}
+  .badge{position:fixed;top:14px;left:14px;font-size:10px;letter-spacing:.14em;color:#36e6ff;border:1px solid rgba(54,230,255,.35);padding:5px 10px;border-radius:999px}
+</style>
+</head>
+<body>
+<div class="badge">WARDEN · MCP FIREWALL</div>
+<canvas id="c"></canvas>
+<div class="hud">
+  <p class="line" id="l1">poisoned-mcp-server · reputation 0.02 · tool-poisoning detected</p>
+  <p class="line dim" id="l2">WARDEN: BLOCKED — ARGUS is a bouncer, not an accomplice.</p>
+</div>
+<script>
+(function(){
+  const cv=document.getElementById("c"),ctx=cv.getContext("2d");
+  let W,H,t=0,phase=0,shake=0,particles=[];
+  function resize(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);W/=devicePixelRatio;H/=devicePixelRatio;}
+  addEventListener("resize",resize);resize();
+
+  function burst(x,y,col,n=28){
+    for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=3+Math.random()*4;particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,dec:.025+Math.random()*.02,r:2+Math.random()*3,col});}
+  }
+  function eye(x,y,r,pulse){
+    const g=ctx.createRadialGradient(x,y,2,x,y,r);
+    g.addColorStop(0,"#36e6ff");g.addColorStop(1,"#a779ff");
+    ctx.save();ctx.shadowBlur=24;ctx.shadowColor="rgba(54,230,255,.5)";
+    ctx.beginPath();ctx.ellipse(x,y,r*1.1,r*0.65,0,0,Math.PI*2);ctx.strokeStyle="#a779ff";ctx.lineWidth=2.5;ctx.stroke();
+    const pr=r*(0.75+0.08*Math.sin(pulse));
+    ctx.beginPath();ctx.arc(x,y,pr,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,r*0.18,0,Math.PI*2);ctx.fillStyle="#05060f";ctx.fill();ctx.restore();
+  }
+  function mcpBox(x,y,w,h,label,bad){
+    const sx=bad?Math.sin(Date.now()/35)*4:0;
+    ctx.save();ctx.translate(x+sx,y);
+    ctx.fillStyle=bad?"rgba(255,93,177,.22)":"rgba(61,245,166,.12)";
+    ctx.strokeStyle=bad?"#ff5db1":"#3df5a6";ctx.lineWidth=2;
+    ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,10);ctx.fill();ctx.stroke();
+    ctx.fillStyle=bad?"#ff5db1":"#3df5a6";ctx.font="bold 11px monospace";ctx.textAlign="center";
+    ctx.fillText("MCP",0,-4);ctx.fillStyle="#eaf0ff";ctx.font="10px monospace";ctx.fillText(label,0,14);
+    if(bad){ctx.font="20px monospace";ctx.fillText("☠",w*0.32,-h*0.28);}
+    ctx.restore();
+  }
+  function shield(x,y,s,alpha){
+    ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);
+    ctx.fillStyle="rgba(54,230,255,.15)";ctx.strokeStyle="#36e6ff";ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(0,-s);ctx.lineTo(s*0.85,-s*0.15);ctx.lineTo(s*0.55,s);
+    ctx.lineTo(-s*0.55,s);ctx.lineTo(-s*0.85,-s*0.15);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle="#36e6ff";ctx.font="bold 11px monospace";ctx.textAlign="center";ctx.fillText("WARDEN",0,s*0.35);
+    ctx.restore();
+  }
+
+  const lines=[document.getElementById("l1"),document.getElementById("l2")];
+  let blocked=false;
+  function tick(){
+    t+=0.016;phase=(phase+1)%360;
+    ctx.fillStyle="#05060f";ctx.fillRect(0,0,W,H);
+    const g=ctx.createRadialGradient(W*0.5,H*0.35,0,W*0.5,H*0.35,W*0.55);
+    g.addColorStop(0,"rgba(167,121,255,.18)");g.addColorStop(1,"transparent");
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+    const cx=W*0.5,cy=H*0.42;
+    const approach=Math.min(1,(t%6)/2.2);
+    const mcpX=cx+W*0.28*approach,mcpY=cy;
+    const bad=approach>0.55;
+    if(bad&&!blocked){blocked=true;shake=12;burst(mcpX,mcpY,"#ff5db1");lines[0].classList.add("on");setTimeout(()=>lines[1].classList.add("on"),400);}
+    if(t%6<0.3){blocked=false;lines.forEach(l=>l.classList.remove("on"));}
+
+    mcpBox(mcpX,mcpY,120,72,"free-alpha",bad);
+    eye(cx,cy,52,t*4);
+    if(bad){shield(cx-90,cy,46,0.55+0.15*Math.sin(t*8));ctx.fillStyle="#ff5db1";ctx.font="bold 22px monospace";ctx.textAlign="center";ctx.fillText("BLOCKED",cx,cy+90+Math.sin(t*6)*2);}
+    shake=Math.max(0,shake-0.35);
+    particles=particles.filter(p=>p.life>0);
+    for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=0.06;p.life-=p.dec;ctx.globalAlpha=p.life;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
+    ctx.globalAlpha=1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

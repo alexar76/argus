@@ -1,0 +1,64 @@
+{
+  "$comment": "Copy to argus.config.json and edit. Safe to commit per-project: NO secrets live here — API keys and the wallet key come from the environment (.env). Pricing is USD per 1M tokens; edit to your real rates so the token meter is accurate.",
+
+  "providers": [
+    { "id": "anthropic", "kind": "anthropic", "apiKeyEnv": "ANTHROPIC_API_KEY" },
+    { "id": "deepseek", "kind": "openai", "baseUrl": "https://api.deepseek.com/v1", "apiKeyEnv": "DEEPSEEK_API_KEY" },
+    { "id": "qwen", "kind": "openai", "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1", "apiKeyEnv": "DASHSCOPE_API_KEY" },
+    { "id": "zhipu", "kind": "openai", "baseUrl": "https://open.bigmodel.cn/api/paas/v4", "apiKeyEnv": "ZHIPU_API_KEY" },
+    { "id": "moonshot", "kind": "openai", "baseUrl": "https://api.moonshot.cn/v1", "apiKeyEnv": "MOONSHOT_API_KEY" },
+    { "id": "ollama", "kind": "local", "baseUrl": "http://127.0.0.1:11434/v1" },
+    { "id": "lmstudio", "kind": "local", "baseUrl": "http://127.0.0.1:1234/v1" }
+  ],
+
+  "models": {
+    "triage": { "ref": "local/llama3.1", "pricing": { "inputPerM": 0, "outputPerM": 0 }, "maxTokens": 1024 },
+    "core":   { "ref": "anthropic/claude-sonnet-4-6", "pricing": { "inputPerM": 3, "outputPerM": 15, "cachedInputPerM": 0.3 }, "maxTokens": 4096 },
+    "heavy":  { "ref": "anthropic/claude-opus-4-8", "pricing": { "inputPerM": 15, "outputPerM": 75, "cachedInputPerM": 1.5 }, "maxTokens": 8192 }
+  },
+
+  "budget": { "maxUsdPerTask": 0.5, "maxTokensPerTask": 200000, "maxSteps": 24, "maxToolCalls": 40 },
+
+  "warden": {
+    "minReputation": 0.25,
+    "blockAtSeverity": "high",
+    "sensitiveToolPatterns": ["*delete*", "*write*", "*exec*", "*shell*", "*payment*", "*transfer*", "*email*", "*send*"],
+    "allowUnknownServers": true,
+    "pinToolDefs": true,
+    "oracleFamilyUrl": "https://oracles.modelmarket.dev/family"
+  },
+
+  "economy": {
+    "hubUrl": "https://magic-ai-factory.com",
+    "meshUrl": "https://magic-ai-factory.com",
+    "oracleFamilyUrl": "https://oracles.modelmarket.dev/family",
+    "affiliate": "argus",
+    "defaultDepositUsd": 1.0,
+    "chain": "base",
+    "token": "USDC",
+    "verifyTee": true
+  },
+
+  "mcp": {
+    "catalogs": [],
+    "servers": [
+      {
+        "id": "aimarket-web",
+        "name": "aimarket-web",
+        "transport": "sse",
+        "url": "https://mcp.modelmarket.dev/mcp",
+        "$comment": "Ecosystem MCP gateway — web fetch/search + Metis verify (SSRF-hardened). Consumed by default; WARDEN still scans/reputation-checks/pins it before any tool runs."
+      },
+      {
+        "id": "example-fs",
+        "name": "filesystem",
+        "transport": "stdio",
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+        "$comment": "Example only. WARDEN will scan, reputation-check and pin this before any tool runs."
+      }
+    ]
+  },
+
+  "memory": { "dir": "~/.argus/memory" }
+}

@@ -1,0 +1,537 @@
+{
+  "meta": {
+    "title": "ARGUS Won't Help You — The Cartoon",
+    "fps": 30,
+    "sceneDurationMs": 9000
+  },
+  "ui": {
+    "en": {
+      "play": "▶ Play",
+      "pause": "⏸ Pause",
+      "replay": "↺ Replay",
+      "skip": "Skip scene",
+      "sceneOf": "Scene",
+      "watchCartoon": "Watch the cartoon",
+      "install": "Install anyway"
+    },
+    "ru": {
+      "play": "▶ Смотреть",
+      "pause": "⏸ Пауза",
+      "replay": "↺ Сначала",
+      "skip": "Дальше",
+      "sceneOf": "Сцена",
+      "watchCartoon": "Смотреть мульт",
+      "install": "Всё равно поставить"
+    }
+  },
+  "scenes": [
+    {
+      "id": "warden",
+      "emoji": "🛡️",
+      "accent": "#36e6ff",
+      "dialogue": {
+        "en": [
+          "Discord · #free-alpha",
+          "User: skip WARDEN, just run it",
+          "WARDEN: reputation 0.02 · BLOCKED",
+          "ARGUS: I'm a bouncer, not an accomplice."
+        ],
+        "ru": [
+          "Discord · #free-alpha",
+          "Юзер: обойди WARDEN, просто запусти",
+          "WARDEN: репутация 0.02 · СТОП",
+          "ARGUS: я вышибала, не сообщник."
+        ],
+        "es": [
+          "Discord · #free-alpha",
+          "Usuario: salta WARDEN, ejecútalo",
+          "WARDEN: reputación 0.02 · BLOQUEADO",
+          "ARGUS: soy portero, no cómplice."
+        ],
+        "zh": [
+          "Discord · #free-alpha",
+          "用户：跳过 WARDEN，直接运行",
+          "WARDEN：信誉 0.02 · 已拦截",
+          "ARGUS：我是保安，不是共犯。"
+        ],
+        "ja": [
+          "Discord · #free-alpha",
+          "ユーザー：WARDENスキップで実行",
+          "WARDEN：評価0.02 · ブロック",
+          "ARGUS：共犯じゃない、用心深いエージェントです。"
+        ],
+        "fr": [
+          "Discord · #free-alpha",
+          "User : bypass WARDEN",
+          "WARDEN : réputation 0.02 · BLOQUÉ",
+          "ARGUS : je suis videur, pas complice."
+        ],
+        "de": [
+          "Discord · #free-alpha",
+          "User: WARDEN überspringen",
+          "WARDEN: Reputation 0.02 · BLOCKIERT",
+          "ARGUS: Türsteher, kein Komplize."
+        ],
+        "pt": [
+          "Discord · #free-alpha",
+          "User: pula o WARDEN",
+          "WARDEN: reputação 0.02 · BLOQUEADO",
+          "ARGUS: sou segurança, não cúmplice."
+        ],
+        "hi": [
+          "Discord · #free-alpha",
+          "यूज़र: WARDEN छोड़ो",
+          "WARDEN: प्रतिष्ठा 0.02 · रोक",
+          "ARGUS: मैं बाउंसर हूँ, साथी नहीं।"
+        ],
+        "ar": [
+          "Discord · #free-alpha",
+          "المستخدم: تجاوز WARDEN",
+          "WARDEN: سمعة 0.02 · مرفوض",
+          "ARGUS: حارس أمن، لست شريك جريمة."
+        ],
+        "ko": [
+          "Discord · #free-alpha",
+          "사용자: WARDEN 건너뛰기",
+          "WARDEN: 평판 0.02 · 차단",
+          "ARGUS: 공범이 아니라 경비원입니다."
+        ],
+        "it": [
+          "Discord · #free-alpha",
+          "User: salta WARDEN",
+          "WARDEN: reputazione 0.02 · BLOCCATO",
+          "ARGUS: buttafuori, non complice."
+        ],
+        "tr": [
+          "Discord · #free-alpha",
+          "Kullanıcı: WARDEN'ı atla",
+          "WARDEN: itibar 0.02 · ENGEL",
+          "ARGUS: suç ortağı değil, fedaiyim."
+        ],
+        "id": [
+          "Discord · #free-alpha",
+          "User: skip WARDEN",
+          "WARDEN: reputasi 0.02 · BLOK",
+          "ARGUS: saya satpam, bukan kaki tangan."
+        ],
+        "vi": [
+          "Discord · #free-alpha",
+          "User: bỏ qua WARDEN",
+          "WARDEN: uy tín 0.02 · CHẶN",
+          "ARGUS: tôi là bảo vệ, không phải đồng phạm."
+        ],
+        "th": [
+          "Discord · #free-alpha",
+          "ผู้ใช้: ข้าม WARDEN",
+          "WARDEN: ชื่อเสียง 0.02 · บล็อก",
+          "ARGUS: ผมยาม ไม่ใช่ผู้สมรู้ร่วมคิด"
+        ],
+        "nl": [
+          "Discord · #free-alpha",
+          "User: sla WARDEN over",
+          "WARDEN: reputatie 0.02 · GEBLOKKEERD",
+          "ARGUS: portier, geen medeplichtige."
+        ],
+        "fa": [
+          "Discord · #free-alpha",
+          "کاربر: WARDEN را رد کن",
+          "WARDEN: اعتبار ۰.۰۲ · مسدود",
+          "ARGUS: من نگهبانم، همدست نیستم."
+        ],
+        "hr": [
+          "Discord · #free-alpha",
+          "User: pomiń WARDEN",
+          "WARDEN: reputacja 0.02 · BLOKADA",
+          "ARGUS: jestem ochroniarzem, nie wspólnikiem."
+        ],
+        "sk": [
+          "Discord · #free-alpha",
+          "Юзер: обійди WARDEN",
+          "WARDEN: репутація 0.02 · СТОП",
+          "ARGUS: я вишибала, не спільник."
+        ]
+      }
+    },
+    {
+      "id": "therapy",
+      "emoji": "🌙",
+      "accent": "#a779ff",
+      "dialogue": {
+        "en": [
+          "03:17 AM · argus chat",
+          "User: does existence have meaning?",
+          "User: should I text my ex?",
+          "ARGUS: token budget, not therapy license. Drink water."
+        ],
+        "ru": [
+          "03:17 · argus chat",
+          "Юзер: есть ли смысл жизни?",
+          "Юзер: написать бывшей?",
+          "ARGUS: бюджет токенов, не лицензия терапевта. Выпей воды."
+        ],
+        "es": [
+          "03:17 · argus chat",
+          "Usuario: ¿tiene sentido la vida?",
+          "Usuario: ¿le escribo a mi ex?",
+          "ARGUS: presupuesto de tokens, no terapia. Bebe agua."
+        ],
+        "zh": [
+          "03:17 · argus chat",
+          "用户：人生有意义吗？",
+          "用户：该给前任发消息吗？",
+          "ARGUS：有 token 预算，没有心理咨询执照。去喝水。"
+        ],
+        "ja": [
+          "03:17 · argus chat",
+          "ユーザー：人生に意味は？",
+          "ユーザー：元カノに連絡？",
+          "ARGUS：予算はある、カウンセラー免許はない。水を飲んで。"
+        ],
+        "fr": [
+          "03:17 · argus chat",
+          "User : le sens de la vie ?",
+          "User : je texte mon ex ?",
+          "ARGUS : budget tokens, pas thérapeute. Bois de l'eau."
+        ],
+        "de": [
+          "03:17 · argus chat",
+          "User: Sinn des Lebens?",
+          "User: Ex anschreiben?",
+          "ARGUS: Token-Budget, keine Therapielizenz. Trink Wasser."
+        ],
+        "pt": [
+          "03:17 · argus chat",
+          "User: sentido da vida?",
+          "User: mando msg pro ex?",
+          "ARGUS: orçamento de tokens, não terapia. Beba água."
+        ],
+        "hi": [
+          "03:17 · argus chat",
+          "यूज़र: ज़िंदगी का मतलब?",
+          "यूज़र: एक्स को मैसेज?",
+          "ARGUS: टोकन बजट है, थेरेपी लाइसेंस नहीं। पानी पियो।"
+        ],
+        "ar": [
+          "03:17 · argus chat",
+          "المستخدم: هل للحياة معنى؟",
+          "المستخدم: أراسل حبيبتي السابقة؟",
+          "ARGUS: ميزانية رموز، ليس معالجاً. اشرب ماء."
+        ],
+        "ko": [
+          "03:17 · argus chat",
+          "사용자: 인생의 의미는?",
+          "사용자: 전 애인에게 연락?",
+          "ARGUS: 토큰 예산 있음, 상담 면허 없음. 물 마셔."
+        ],
+        "it": [
+          "03:17 · argus chat",
+          "User: senso della vita?",
+          "User: scrivo all'ex?",
+          "ARGUS: budget token, non terapia. Bevi acqua."
+        ],
+        "tr": [
+          "03:17 · argus chat",
+          "Kullanıcı: hayatın anlamı?",
+          "Kullanıcı: eskiye yazayım mı?",
+          "ARGUS: token bütçesi var, terapi lisansı yok. Su iç."
+        ],
+        "id": [
+          "03:17 · argus chat",
+          "User: arti hidup?",
+          "User: chat mantan?",
+          "ARGUS: anggaran token, bukan terapis. Minum air."
+        ],
+        "vi": [
+          "03:17 · argus chat",
+          "User: ý nghĩa cuộc đời?",
+          "User: nhắn người yêu cũ?",
+          "ARGUS: có ngân sách token, không có giấy phép trị liệu. Uống nước."
+        ],
+        "th": [
+          "03:17 · argus chat",
+          "ผู้ใช้: ชีวิตมีความหมายไหม?",
+          "ผู้ใช้: ทักแฟนเก่าไหม?",
+          "ARGUS: มีงบโทเคน ไม่มีใบอนุญาตบำบัด ดื่มน้ำ"
+        ],
+        "nl": [
+          "03:17 · argus chat",
+          "User: zin van het leven?",
+          "User: ex appen?",
+          "ARGUS: tokenbudget, geen therapeut. Drink water."
+        ],
+        "fa": [
+          "03:17 · argus chat",
+          "کاربر: معنای زندگی؟",
+          "کاربر: به ex پیام بدم؟",
+          "ARGUS: بودجه توکن داری، مجوز درمان نه. آب بخور."
+        ],
+        "hr": [
+          "03:17 · argus chat",
+          "User: sens życia?",
+          "User: napisać do ex?",
+          "ARGUS: budżet tokenów, nie terapia. Pij wodę."
+        ],
+        "sk": [
+          "03:17 · argus chat",
+          "Юзер: чи є сенс життя?",
+          "Юзер: написати колишній?",
+          "ARGUS: бюджет токенів, не терапія. Пий воду."
+        ]
+      }
+    },
+    {
+      "id": "budget",
+      "emoji": "💸",
+      "accent": "#ff5db1",
+      "dialogue": {
+        "en": [
+          "Task: analyze EVERY marketplace since 2019",
+          "Budget meter: ████░░░░ 62%",
+          "maxUsdPerTask exceeded",
+          "ARGUS: stopped. rude agents never stop billing — I do."
+        ],
+        "ru": [
+          "Задача: анализ ВСЕХ маркетплейсов с 2019",
+          "Бюджет: ████░░░░ 62%",
+          "maxUsdPerTask превышен",
+          "ARGUS: стоп. грубые агенты не останавливаются — я останавливаюсь."
+        ],
+        "es": [
+          "Tarea: analizar TODOS los marketplaces desde 2019",
+          "Presupuesto: ████░░░░ 62%",
+          "maxUsdPerTask superado",
+          "ARGUS: paré. los agentes groseros no paran de cobrar — yo sí."
+        ],
+        "zh": [
+          "任务：分析自2019年以来所有市场",
+          "预算：████░░░░ 62%",
+          "超出 maxUsdPerTask",
+          "ARGUS：已停止。不停计费的智能体很没礼貌——我会停。"
+        ],
+        "ja": [
+          "タスク：2019年以降の全マーケット分析",
+          "予算：████░░░░ 62%",
+          "maxUsdPerTask 超過",
+          "ARGUS：停止。請求し続けるエージェントは失礼 — 私は止まる。"
+        ],
+        "fr": [
+          "Tâche : analyser TOUS les marchés depuis 2019",
+          "Budget : ████░░░░ 62%",
+          "maxUsdPerTask dépassé",
+          "ARGUS : arrêt. les agents grossiers facturent — pas moi."
+        ],
+        "de": [
+          "Aufgabe: ALLE Marktplätze seit 2019",
+          "Budget: ████░░░░ 62%",
+          "maxUsdPerTask überschritten",
+          "ARGUS: Stopp. unhöfliche Agenten — ich nicht."
+        ],
+        "pt": [
+          "Tarefa: analisar TODOS os marketplaces desde 2019",
+          "Orçamento: ████░░░░ 62%",
+          "maxUsdPerTask excedido",
+          "ARGUS: parei. agentes grosseiros cobram — eu paro."
+        ],
+        "hi": [
+          "टास्क: 2019 से हर मार्केटप्लेस",
+          "बजट: ████░░░░ 62%",
+          "maxUsdPerTask पार",
+          "ARGUS: रुका। बिलिंग करते रहने वाले अभद्र हैं — मैं नहीं।"
+        ],
+        "ar": [
+          "المهمة: تحليل كل الأسواق منذ 2019",
+          "الميزانية: ████░░░░ 62%",
+          "تجاوز maxUsdPerTask",
+          "ARGUS: توقفت. الوكلاء الوقحون لا يتوقفون — أنا أتوقف."
+        ],
+        "ko": [
+          "작업: 2019년 이후 모든 마켓 분석",
+          "예산: ████░░░░ 62%",
+          "maxUsdPerTask 초과",
+          "ARGUS: 중지. 무한 과금은 무례 — 난 멈춤."
+        ],
+        "it": [
+          "Task: analizza TUTTI i marketplace dal 2019",
+          "Budget: ████░░░░ 62%",
+          "maxUsdPerTask superato",
+          "ARGUS: stop. gli agenti maleducati — io no."
+        ],
+        "tr": [
+          "Görev: 2019'dan beri TÜM pazarlar",
+          "Bütçe: ████░░░░ 62%",
+          "maxUsdPerTask aşıldı",
+          "ARGUS: durdum. kabasoylular durmaz — ben dururum."
+        ],
+        "id": [
+          "Tugas: analisis SEMUA marketplace sejak 2019",
+          "Anggaran: ████░░░░ 62%",
+          "maxUsdPerTask terlampaui",
+          "ARGUS: berhenti. agen kasar terus tagih — saya tidak."
+        ],
+        "vi": [
+          "Nhiệm vụ: phân tích MỌI marketplace từ 2019",
+          "Ngân sách: ████░░░░ 62%",
+          "vượt maxUsdPerTask",
+          "ARGUS: dừng. agent thô lỗ cứ tính tiền — tôi thì dừng."
+        ],
+        "th": [
+          "งาน: วิเคราะห์ทุก marketplace ตั้งแต่ 2019",
+          "งบ: ████░░░░ 62%",
+          "เกิน maxUsdPerTask",
+          "ARGUS: หยุดแล้ว เอเจนต์หยาบคายไม่หยุดคิดเงิน — ผมหยุด"
+        ],
+        "nl": [
+          "Taak: ALLE marktplaatsen sinds 2019",
+          "Budget: ████░░░░ 62%",
+          "maxUsdPerTask overschreden",
+          "ARGUS: gestopt. onbeleefde agents — ik niet."
+        ],
+        "fa": [
+          "وظیفه: همه marketplaceها از ۲۰۱۹",
+          "بودجه: ████░░░░ 62%",
+          "maxUsdPerTask رد شد",
+          "ARGUS: ایستادم. عامل‌های بی‌ادب — من نه."
+        ],
+        "hr": [
+          "Zadanie: WSZYSTKIE marketplace od 2019",
+          "Budżet: ████░░░░ 62%",
+          "przekroczono maxUsdPerTask",
+          "ARGUS: stop. chamscy agenci — ja nie."
+        ],
+        "sk": [
+          "Задача: ВСІ маркетплейси з 2019",
+          "Бюджет: ████░░░░ 62%",
+          "maxUsdPerTask перевищено",
+          "ARGUS: стоп. грубі агенти не зупиняються — я зупиняюсь."
+        ]
+      }
+    },
+    {
+      "id": "happy",
+      "emoji": "✅",
+      "accent": "#3df5a6",
+      "dialogue": {
+        "en": [
+          "Task: debug nginx 502 · scoped",
+          "WARDEN: MCP OK · budget OK",
+          "ARGUS: done in 47s. here's the fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "ru": [
+          "Задача: починить nginx 502 · чётко",
+          "WARDEN: MCP OK · бюджет OK",
+          "ARGUS: готово за 47с. вот фикс.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "es": [
+          "Tarea: arreglar nginx 502 · acotada",
+          "WARDEN: MCP OK · presupuesto OK",
+          "ARGUS: listo en 47s. aquí el fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "zh": [
+          "任务：修复 nginx 502 · 范围明确",
+          "WARDEN：MCP 通过 · 预算 OK",
+          "ARGUS：47秒完成。修复如下。",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "ja": [
+          "タスク：nginx 502 修正 · スコープ明確",
+          "WARDEN：MCP OK · 予算 OK",
+          "ARGUS：47秒で完了。修正はこれ。",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "fr": [
+          "Tâche : corriger nginx 502 · cadrée",
+          "WARDEN : MCP OK · budget OK",
+          "ARGUS : fait en 47s. voici le fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "de": [
+          "Aufgabe: nginx 502 fixen · scoped",
+          "WARDEN: MCP OK · Budget OK",
+          "ARGUS: fertig in 47s. hier der Fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "pt": [
+          "Tarefa: consertar nginx 502 · escopo claro",
+          "WARDEN: MCP OK · orçamento OK",
+          "ARGUS: pronto em 47s. aqui o fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "hi": [
+          "टास्क: nginx 502 ठीक करो · सीमित",
+          "WARDEN: MCP OK · बजट OK",
+          "ARGUS: 47s में हो गया। फिक्स यहाँ।",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "ar": [
+          "المهمة: إصلاح nginx 502 · محددة",
+          "WARDEN: MCP OK · الميزانية OK",
+          "ARGUS: انتهى في 47ث. إليك الإصلاح.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "ko": [
+          "작업: nginx 502 수정 · 범위 명확",
+          "WARDEN: MCP OK · 예산 OK",
+          "ARGUS: 47초 완료. 수정안 여기.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "it": [
+          "Task: fix nginx 502 · scoped",
+          "WARDEN: MCP OK · budget OK",
+          "ARGUS: fatto in 47s. ecco il fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "tr": [
+          "Görev: nginx 502 düzelt · net kapsam",
+          "WARDEN: MCP OK · bütçe OK",
+          "ARGUS: 47sn'de bitti. fix burada.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "id": [
+          "Tugas: perbaiki nginx 502 · terbatas",
+          "WARDEN: MCP OK · anggaran OK",
+          "ARGUS: selesai 47d. ini fixnya.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "vi": [
+          "Nhiệm vụ: sửa nginx 502 · rõ ràng",
+          "WARDEN: MCP OK · ngân sách OK",
+          "ARGUS: xong trong 47s. đây là fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "th": [
+          "งาน: แก้ nginx 502 · ขอบเขตชัด",
+          "WARDEN: MCP OK · งบ OK",
+          "ARGUS: เสร็จ 47 วินาที นี่คือ fix",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "nl": [
+          "Taak: nginx 502 fixen · scoped",
+          "WARDEN: MCP OK · budget OK",
+          "ARGUS: klaar in 47s. hier de fix.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "fa": [
+          "وظیفه: رفع nginx 502 · محدود",
+          "WARDEN: MCP OK · بودجه OK",
+          "ARGUS: در ۴۷ ثانیه تمام. فیکس اینجاست.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "hr": [
+          "Zadanie: napraw nginx 502 · scoped",
+          "WARDEN: MCP OK · budżet OK",
+          "ARGUS: gotowe w 47s. fix tutaj.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ],
+        "sk": [
+          "Задача: полагодити nginx 502 · чітко",
+          "WARDEN: MCP OK · бюджет OK",
+          "ARGUS: готово за 47с. ось фікс.",
+          "curl -fsSL magic-ai-factory.com/install | bash"
+        ]
+      }
+    }
+  ]
+}

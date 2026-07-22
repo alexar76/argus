@@ -1,0 +1,134 @@
+[
+  {
+    "serverId": "mcp-filesystem",
+    "toolsHash": "7aa0236cca165dbb2a2f80e2ec48adc1ab98f5b76fb418ed125102ed145b9f69",
+    "approvedAt": "2026-07-16T09:38:48.705Z",
+    "toolNames": [
+      "create_directory",
+      "directory_tree",
+      "edit_file",
+      "get_file_info",
+      "list_allowed_directories",
+      "list_directory",
+      "list_directory_with_sizes",
+      "move_file",
+      "read_file",
+      "read_media_file",
+      "read_multiple_files",
+      "read_text_file",
+      "search_files",
+      "write_file"
+    ]
+  },
+  {
+    "serverId": "mcp-memory",
+    "toolsHash": "d158a8f6ff74a1a8118048ec9eb6e3e923605e810af35ef120d4a8d81b3403b1",
+    "approvedAt": "2026-07-16T09:38:49.703Z",
+    "toolNames": [
+      "add_observations",
+      "create_entities",
+      "create_relations",
+      "delete_entities",
+      "delete_observations",
+      "delete_relations",
+      "open_nodes",
+      "read_graph",
+      "search_nodes"
+    ]
+  },
+  {
+    "serverId": "mcp-everything",
+    "toolsHash": "a88d7fc346630b23aa1b58746444dc515b8a80816eeb651082791f62abd7fbc7",
+    "approvedAt": "2026-07-16T09:38:50.483Z",
+    "toolNames": [
+      "echo",
+      "get-annotated-message",
+      "get-env",
+      "get-resource-links",
+      "get-resource-reference",
+      "get-structured-content",
+      "get-sum",
+      "get-tiny-image",
+      "gzip-file-as-resource",
+      "simulate-research-query",
+      "toggle-simulated-logging",
+      "toggle-subscriber-updates",
+      "trigger-long-running-operation"
+    ]
+  },
+  {
+    "serverId": "mcp-sequential-thinking",
+    "toolsHash": "ed83ad775baeb95590a65525017122f87665d54a424c2d0215cc5c7f5c976fc2",
+    "approvedAt": "2026-07-16T09:38:51.159Z",
+    "toolNames": [
+      "sequentialthinking"
+    ]
+  },
+  {
+    "serverId": "mcp-git",
+    "toolsHash": "7a4a2c9b818b1ba3b3eaea9c46af7a4b314d03854f63ac663cebd0f14d42a307",
+    "approvedAt": "2026-07-16T09:38:55.085Z",
+    "toolNames": [
+      "git_add",
+      "git_branch",
+      "git_checkout",
+      "git_commit",
+      "git_create_branch",
+      "git_diff",
+      "git_diff_staged",
+      "git_diff_unstaged",
+      "git_log",
+      "git_reset",
+      "git_show",
+      "git_status"
+    ]
+  },
+  {
+    "serverId": "mcp-fetch",
+    "toolsHash": "517e61ed3c12317438b7fb5c7b0bbbba3d3715c8115d657fa15ae360c1dd6c08",
+    "approvedAt": "2026-07-16T09:38:59.651Z",
+    "toolNames": [
+      "fetch"
+    ]
+  },
+  {
+    "serverId": "mcp-time",
+    "toolsHash": "752918160627f15755066e59311934f6cf8040812c232677d0732941dd154742",
+    "approvedAt": "2026-07-16T09:39:01.669Z",
+    "toolNames": [
+      "convert_time",
+      "get_current_time"
+    ]
+  },
+  {
+    "serverId": "playwright-mcp",
+    "toolsHash": "41032588292b0a7af4e4b33e2c0f001ffe642ae58839aea452228946ea842b70",
+    "approvedAt": "2026-07-16T09:39:05.034Z",
+    "toolNames": [
+      "browser_click",
+      "browser_close",
+      "browser_console_messages",
+      "browser_drag",
+      "browser_drop",
+      "browser_evaluate",
+      "browser_file_upload",
+      "browser_fill_form",
+      "browser_find",
+      "browser_handle_dialog",
+      "browser_hover",
+      "browser_navigate",
+      "browser_navigate_back",
+      "browser_network_request",
+      "browser_network_requests",
+      "browser_press_key",
+      "browser_resize",
+      "browser_run_code_unsafe",
+      "browser_select_option",
+      "browser_snapshot",
+      "browser_tabs",
+      "browser_take_screenshot",
+      "browser_type",
+      "browser_wait_for"
+    ]
+  }
+]

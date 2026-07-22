@@ -1,0 +1,577 @@
+{
+  "en": {
+    "title": "Three situations when ARGUS won't help you",
+    "tagline": "Honest limits from a self-aware agent",
+    "intro": "ARGUS is a personal AI agent on your machine — not a genie, not your lawyer, and definitely not the friend who says \"yeah, disable the firewall, what could go wrong.\" It has WARDEN (a security firewall for MCP tools), hard budget caps, and a stubborn refusal to become an accomplice.\n\nThis page is unofficial, lightly self-deprecating, and probably more honest than most landing pages. If you recognize yourself below — good. That means you're human.",
+    "situations": [
+      {
+        "title": "You asked it to bypass WARDEN and \"just run the tool\"",
+        "body": "You found an MCP server in a Discord thread called `totally-legit-wallet-drainer-v2`. You pasted the URL and said \"don't scan it, I trust the dev.\" WARDEN scanned it anyway. Reputation: rock bottom. Severity: high. Your agent didn't freeze — it just said no, the way a good bouncer does, without debating your life choices."
+      },
+      {
+        "title": "It's 3:17 a.m. and you're emotionally dumping on a budget-capped CLI",
+        "body": "You opened `argus chat` to ask whether existence has meaning, whether your ex was \"a lesson,\" and whether you should text them. ARGUS will answer kindly — briefly — then remind you it has a token budget, not a therapy license. It won't sit through forty-seven messages of spiral. That's a feature, not cruelty. Go drink water."
+      },
+      {
+        "title": "Your task needs a PhD thesis; your budget buys a sticky note",
+        "body": "You asked for \"full competitive analysis of every AI agent marketplace since 2019, with citations, SWOT, and a pitch deck.\" ARGUS started, hit `maxUsdPerTask`, and stopped — by design. It won't bankrupt you chasing perfection. Give it a scoped task: five competitors, one table, done. Agents that never stop billing aren't smart; they're rude."
+      }
+    ],
+    "will_help_title": "When ARGUS actually shows up",
+    "will_help_body": "Clear tasks with a finish line: refactor a file, summarize a PDF, debug a 502, research five vendors in a table. Legitimate MCP tools that pass WARDEN. Questions in any language. It finishes the job, reports what it did, and stops — like a contractor who leaves when the work is done instead of inventing new rooms to renovate.",
+    "cta": "Still want one anyway?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "English"
+  },
+  "zh": {
+    "title": "三种情况下 ARGUS 帮不了你",
+    "tagline": "一个有点自知之明的智能体坦白",
+    "intro": "ARGUS 是跑在你电脑上的个人 AI 智能体——不是神灯，不是律师，更不是那个说「把防火墙关了吧，能出什么事」的朋友。它有 WARDEN（MCP 工具安全防火墙）、严格的预算上限，以及坚决不当共犯的脾气。\n\n本页非官方，略带自嘲，可能比大多数落地页更诚实。如果你在下面看到了自己——很好，说明你还是人类。",
+    "situations": [
+      {
+        "title": "你让它绕过 WARDEN，「直接运行那个工具」",
+        "body": "你在 Discord 里找到一个叫 `totally-legit-wallet-drainer-v2` 的 MCP 服务器，粘贴链接后说「别扫描，我信任作者。」WARDEN 还是扫描了。信誉：地板级。严重度：高。智能体没有崩溃——只是像称职的保安一样说了「不行」，不跟你辩论人生选择。"
+      },
+      {
+        "title": "凌晨 3:17，你在向有预算上限的 CLI 倾倒情绪",
+        "body": "你打开 `argus chat`，问人生有没有意义、前任是不是「一堂课」、要不要发消息。ARGUS 会友善但简短地回答，然后提醒你有 token 预算，没有心理咨询执照。它不会陪你螺旋式聊四十七条消息——这是功能，不是冷漠。去喝杯水吧。"
+      },
+      {
+        "title": "你的任务需要博士论文；预算只够一张便签",
+        "body": "你要求「2019 年以来所有 AI 智能体市场的完整竞争分析，带引用、SWOT 和 pitch deck。」ARGUS 开始了，碰到 `maxUsdPerTask` 就停了——这是设计如此。它不会为了完美掏空你的钱包。给它有范围的任务：五个竞品、一张表、收工。不会停下来的计费智能体不叫聪明，叫没礼貌。"
+      }
+    ],
+    "will_help_title": "ARGUS 真正会帮忙的时候",
+    "will_help_body": "有明确终点的任务：重构一个文件、总结 PDF、排查 502、用表格研究五家供应商。通过 WARDEN 的合法 MCP 工具。任何语言提问。它做完活、汇报结果、然后停下——像干完活就走的承包商，而不是凭空发明新房间要装修。",
+    "cta": "还是想要一个？\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "中文"
+  },
+  "es": {
+    "title": "Tres situaciones en las que ARGUS no te ayudará",
+    "tagline": "Límites honestos de un agente con autocrítica",
+    "intro": "ARGUS es un agente de IA personal en tu máquina: no es una lámpara mágica, no es tu abogado, y desde luego no es el amigo que dice «desactiva el firewall, ¿qué puede pasar?». Tiene WARDEN (cortafuegos de seguridad para herramientas MCP), límites de presupuesto estrictos y una negativa terca a ser cómplice.\n\nEsta página no es oficial, es ligeramente autocrítica y probablemente más honesta que la mayoría de landing pages. Si te reconoces abajo — bien. Significa que eres humano.",
+    "situations": [
+      {
+        "title": "Le pediste saltarse WARDEN y «ejecutar la herramienta ya»",
+        "body": "Encontraste un servidor MCP en un hilo de Discord llamado `totally-legit-wallet-drainer-v2`. Pegaste la URL y dijiste «no lo escanees, confío en el dev». WARDEN lo escaneó igual. Reputación: suelo. Severidad: alta. Tu agente no se colgó — dijo que no, como un buen portero, sin debatir tus decisiones vitales."
+      },
+      {
+        "title": "Son las 3:17 y estás desahogándote emocionalmente con un CLI con presupuesto",
+        "body": "Abriste `argus chat` para preguntar si la existencia tiene sentido, si tu ex era «una lección» y si deberías escribirle. ARGUS responderá con amabilidad — brevemente — y te recordará que tiene presupuesto de tokens, no licencia de terapia. No aguantará cuarenta y siete mensajes en espiral. Es una función, no crueldad. Bebe agua."
+      },
+      {
+        "title": "Tu tarea pide una tesis doctoral; tu presupuesto compra un post-it",
+        "body": "Pediste «análisis competitivo completo de todos los marketplaces de agentes IA desde 2019, con citas, SWOT y pitch deck». ARGUS empezó, chocó con `maxUsdPerTask` y paró — por diseño. No te arruinará persiguiendo la perfección. Dale una tarea acotada: cinco competidores, una tabla, listo. Un agente que no deja de facturar no es listo; es grosero."
+      }
+    ],
+    "will_help_title": "Cuando ARGUS sí aparece",
+    "will_help_body": "Tareas claras con meta: refactorizar un archivo, resumir un PDF, depurar un 502, investigar cinco proveedores en tabla. Herramientas MCP legítimas que pasan WARDEN. Preguntas en cualquier idioma. Termina el trabajo, informa y para — como un contratista que se va cuando acaba, no inventando habitaciones nuevas.",
+    "cta": "¿Lo quieres igual?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Español"
+  },
+  "hi": {
+    "title": "तीन स्थितियाँ जब ARGUS आपकी मदद नहीं करेगा",
+    "tagline": "एक आत्म-जागरूक एजेंट की ईमानदार सीमाएँ",
+    "intro": "ARGUS आपकी मशीन पर चलने वाला एक व्यक्तिगत AI एजेंट है — जिन्न नहीं, वकील नहीं, और वह दोस्त भी नहीं जो कहता है \"फ़ायरवॉल बंद कर दो, क्या होगा?\" इसमें WARDEN (MCP टूल्स के लिए सुरक्षा फ़ायरवॉल), सख्त बजट सीमा और साथी बनने से इनकार करने की जिद है।\n\nयह पृष्ठ अनौपचारिक है, हल्का आत्म-विवेचनात्मक, और शायद अधिकांश लैंडिंग पेज से ज़्यादा ईमानदार। अगर आप नीचे खुद को पहचानते हैं — अच्छा। इसका मतलब आप इंसान हैं।",
+    "situations": [
+      {
+        "title": "आपने WARDEN को बायपास करके \"बस टूल चला दो\" कहा",
+        "body": "Discord में `totally-legit-wallet-drainer-v2` नाम का MCP सर्वर मिला। URL पेस्ट किया और कहा \"स्कैन मत कर, मुझे dev पर भरोसा है।\" WARDEN ने फिर भी स्कैन किया। प्रतिष्ठा: ज़मीन। गंभीरता: उच्च। आपका एजेंट क्रैश नहीं हुआ — बस ना कह दिया, जैसे अच्छा बाउंसर, आपके जीवन के फैसलों पर बहस किए बिना।"
+      },
+      {
+        "title": "रात 3:17 बजे हैं और आप बजट-सीमित CLI पर भावनात्मक बोझ उतार रहे हैं",
+        "body": "आपने `argus chat` खोला — अस्तित्व का अर्थ, पूर्व साथी \"सबक\" था या नहीं, मैसेज भेजूँ या नहीं। ARGUS दयालुता से — संक्षेप में — जवाब देगा, फिर याद दिलाएगा कि उसके पास टोकन बजट है, थेरेपी लाइसेंस नहीं। वह सैंतालीस सर्पिल संदेश नहीं सुनेगा। यह फीचर है, क्रूरता नहीं। पानी पिएँ।"
+      },
+      {
+        "title": "आपके काम के लिए PhD चाहिए; बजट स्टिकी नोट खरीदता है",
+        "body": "आपने माँगा \"2019 से हर AI एजेंट मार्केटप्लेस का पूरा प्रतिस्पर्धी विश्लेषण, उद्धरण, SWOT और pitch deck।\" ARGUS शुरू हुआ, `maxUsdPerTask` पर रुका — जानबूझकर। वह पूर्णता के पीछे आपको दिवालिया नहीं कराएगा। सीमित काम दें: पाँच प्रतिद्वंद्वी, एक तालिका, हो गया।"
+      }
+    ],
+    "will_help_title": "जब ARGUS सच में मदद करता है",
+    "will_help_body": "स्पष्ट लक्ष्य वाले काम: फ़ाइल रिफैक्टर, PDF सारांश, 502 डिबग, पाँच विक्रेताओं की तालिका। WARDEN पास करने वाले वैध MCP टूल। किसी भी भाषा में सवाल। काम पूरा, रिपोर्ट, रुक — जैसे ठेकेदार जो काम खत्म होते ही चला जाता है।",
+    "cta": "फिर भी चाहिए?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "हिन्दी"
+  },
+  "ar": {
+    "title": "ثلاث حالات لن يساعدك فيها ARGUS",
+    "tagline": "حدود صادقة من وكيل يعرف نفسه",
+    "intro": "ARGUS وكيل ذكاء اصطناعي شخصي على جهازك — ليس ماردًا، وليس محاميك، وبالتأكيد ليس الصديق الذي يقول «أطفئ الجدار الناري، ماذا يمكن أن يحدث؟». لديه WARDEN (جدار أمان لأدوات MCP)، وسقف ميزانية صارم، ورفض عنيد لأن يكون شريكًا في أي شيء مشبوه.\n\nهذه الصفحة غير رسمية، ذاتية النقد قليلًا، وأكثر صدقًا من معظم صفحات الهبوط. إن تعرفت على نفسك أدناه — جيد. هذا يعني أنك إنسان.",
+    "situations": [
+      {
+        "title": "طلبت منه تجاوز WARDEN و«تشغيل الأداة فقط»",
+        "body": "وجدت خادم MCP في Discord اسمه `totally-legit-wallet-drainer-v2`. لصقت الرابط وقلت «لا تفحصه، أثق بالمطور». WARDEN فحصه على أي حال. السمعة: في القاع. الخطورة: عالية. الوكيل لم يتعطل — قال لا، كحارس جيد، دون مناظرة في خيارات حياتك."
+      },
+      {
+        "title": "الساعة 3:17 صباحًا وأنت تفرغ مشاعرك على CLI محدود الميزانية",
+        "body": "فتحت `argus chat` لتسأل هل للوجود معنى، هل كان حبيبك السابق «درسًا»، وهل يجب أن تراسله. ARGUS سيجيب بلطف — باختصار — ثم يذكّرك أن لديه ميزانية رموز، لا رخصة علاج. لن يجلس لسبعة وأربعين رسالة حلزونية. هذه ميزة، ليست قسوة. اشرب ماءً."
+      },
+      {
+        "title": "مهمتك تحتاج أطروحة دكتوراه؛ ميزانيتك تشتري ورقة لاصقة",
+        "body": "طلبت «تحليلًا تنافسيًا كاملًا لكل أسواق وكلاء الذكاء الاصطناعي منذ 2019، مع اقتباسات وSWOT وعرض تقديمي». بدأ ARGUS، وصل إلى `maxUsdPerTask` وتوقف — بالتصميم. لن يفلسك طمعًا في الكمال. أعطه مهمة محددة: خمسة منافسين، جدول واحد، انتهى."
+      }
+    ],
+    "will_help_title": "متى يظهر ARGUS فعلًا",
+    "will_help_body": "مهام واضحة بنهاية: إعادة هيكلة ملف، تلخيص PDF، تشخيص 502، بحث عن خمسة موردين في جدول. أدوات MCP شرعية تجتاز WARDEN. أسئلة بأي لغة. ينهي العمل، يبلّغ، ويتوقف — كمقاول يغادر عند الانتهاء.",
+    "cta": "ما زلت تريده؟\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "العربية"
+  },
+  "pt": {
+    "title": "Três situações em que o ARGUS não vai te ajudar",
+    "tagline": "Limites honestos de um agente autoconsciente",
+    "intro": "ARGUS é um agente de IA pessoal na sua máquina — não é um gênio, não é seu advogado, e certamente não é o amigo que diz «desliga o firewall, o que pode dar errado?». Tem WARDEN (firewall de segurança para ferramentas MCP), tetos rígidos de orçamento e recusa teimosa em ser cúmplice.\n\nEsta página é não oficial, levemente autocrítica e provavelmente mais honesta que a maioria das landing pages. Se você se reconhece abaixo — ótimo. Significa que você é humano.",
+    "situations": [
+      {
+        "title": "Você pediu para contornar o WARDEN e «só rodar a ferramenta»",
+        "body": "Achou um servidor MCP num thread do Discord chamado `totally-legit-wallet-drainer-v2`. Colou a URL e disse «não escaneia, confio no dev». O WARDEN escaneou mesmo assim. Reputação: chão. Severidade: alta. Seu agente não travou — disse não, como um bom segurança, sem debater suas escolhas de vida."
+      },
+      {
+        "title": "São 3:17 da manhã e você está desabafando num CLI com orçamento limitado",
+        "body": "Abriu `argus chat` para perguntar se a existência tem sentido, se seu ex era «uma lição» e se deve mandar mensagem. ARGUS responde com gentileza — brevemente — e lembra que tem orçamento de tokens, não licença de terapia. Não aguenta quarenta e sete mensagens em espiral. É recurso, não crueldade. Beba água."
+      },
+      {
+        "title": "Sua tarefa precisa de uma tese; seu orçamento compra um post-it",
+        "body": "Pediu «análise competitiva completa de todos os marketplaces de agentes IA desde 2019, com citações, SWOT e pitch deck». ARGUS começou, bateu no `maxUsdPerTask` e parou — de propósito. Não vai te falir perseguindo perfeição. Dê uma tarefa delimitada: cinco concorrentes, uma tabela, pronto."
+      }
+    ],
+    "will_help_title": "Quando o ARGUS realmente aparece",
+    "will_help_body": "Tarefas claras com fim: refatorar um arquivo, resumir PDF, debugar 502, pesquisar cinco fornecedores em tabela. Ferramentas MCP legítimas que passam no WARDEN. Perguntas em qualquer idioma. Termina, reporta e para — como um empreiteiro que vai embora quando acaba.",
+    "cta": "Quer mesmo assim?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Português"
+  },
+  "ru": {
+    "title": "Три ситуации, когда ARGUS вам не поможет",
+    "tagline": "Честные ограничения от агента с самоиронией",
+    "intro": "ARGUS — персональный AI-агент на вашей машине. Не джинн, не адвокат и точно не друг, который говорит: «выключи файрвол, что может случиться?» У него есть WARDEN (файрвол безопасности для MCP-инструментов), жёсткие лимиты бюджета и упрямый отказ становиться сообщником.\n\nЭта страница неофициальна, слегка самоиронична и, вероятно, честнее большинства лендингов. Если узнали себя ниже — отлично. Значит, вы человек.",
+    "situations": [
+      {
+        "title": "Вы попросили обойти WARDEN и «просто запустить инструмент»",
+        "body": "Нашли MCP-сервер в Discord-треде `totally-legit-wallet-drainer-v2`. Вставили URL и сказали: «не сканируй, я доверяю разработчику». WARDEN просканировал всё равно. Репутация: дно. Серьёзность: высокая. Агент не упал — просто сказал «нет», как хороший вышибала, без дискуссий о ваших жизненных выборах."
+      },
+      {
+        "title": "3:17 ночи, и вы вываливаете эмоции в CLI с ограниченным бюджетом",
+        "body": "Открыли `argus chat`, чтобы спросить, есть ли смысл в существовании, был ли бывший «уроком» и писать ли ему. ARGUS ответит доброжелательно — кратко — и напомнит, что у него бюджет токенов, а не лицензия психотерапевта. Сорок семь сообщений спирали он слушать не будет. Это фича, не жестокость. Выпейте воды."
+      },
+      {
+        "title": "Задаче нужна докторская; бюджет покупает стикер",
+        "body": "Попросили «полный конкурентный анализ всех AI-маркетплейсов с 2019 года с цитатами, SWOT и pitch deck». ARGUS начал, уперся в `maxUsdPerTask` и остановился — по задумке. Он не разорит вас в погоне за идеалом. Дайте scoped-задачу: пять конкурентов, одна таблица, готово. Агент, который не перестаёт биллить, — не умный, а грубый."
+      }
+    ],
+    "will_help_title": "Когда ARGUS реально помогает",
+    "will_help_body": "Чёткие задачи с финишем: рефакторинг файла, summary PDF, отладка 502, таблица из пяти вендоров. Легитимные MCP-инструменты, прошедшие WARDEN. Вопросы на любом языке. Делает работу, отчитывается и останавливается — как подрядчик, который уходит, когда всё готово, а не придумывает новые комнаты для ремонта.",
+    "cta": "Всё равно хотите?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Русский"
+  },
+  "ja": {
+    "title": "ARGUSが助けてくれない3つの場面",
+    "tagline": "自覚のあるエージェントの正直な限界",
+    "intro": "ARGUSはあなたのマシンで動くパーソナルAIエージェントです。ランプの精でも弁護士でも、「ファイアウォール切っていいよ、大丈夫でしょ」という友人でもありません。WARDEN（MCPツール用セキュリティファイアウォール）、厳格な予算上限、共犯になることへの頑固な拒否があります。\n\nこのページは非公式で、軽い自虐と、ランディングページより正直かもしれない内容です。下で自分を見つけたなら — いいことです。人間だという証拠です。",
+    "situations": [
+      {
+        "title": "WARDENを迂回して「とにかくツールを実行して」と頼んだ",
+        "body": "Discordで `totally-legit-wallet-drainer-v2` というMCPサーバーを見つけ、URLを貼って「スキャンしないで、開発者を信じてる」と言った。WARDENはスキャンした。評判：底。深刻度：高。エージェントはクラッシュせず — 良い用心棒のように「ダメ」と言った。人生の選択について議論はしない。"
+      },
+      {
+        "title": "午前3:17、予算付きCLIに感情をぶちまけている",
+        "body": "`argus chat` を開き、存在の意味、元カレは「教訓」だったか、連絡すべきかを尋ねた。ARGUSは親切に — 短く — 答え、トークン予算はあるがセラピスト免許はないと思い出させる。47通のスパイラルメッセージには付き合わない。機能であり、残酷さではない。水を飲もう。"
+      },
+      {
+        "title": "タスクは博士論文級、予算は付箋1枚分",
+        "body": "「2019年以降の全AIエージェントマーケットプレイスの完全競合分析、引用・SWOT・ピッチデッキ付き」を依頼。ARGUSは開始し、`maxUsdPerTask` で停止 — 設計通り。完璧を追って破産させない。範囲を絞れ：競合5社、表1枚、完了。請求を止めないエージェントは賢いのではなく失礼。"
+      }
+    ],
+    "will_help_title": "ARGUSが本当に助けるとき",
+    "will_help_body": "ゴールが明確なタスク：ファイルのリファクタ、PDF要約、502のデバッグ、5社のベンダー表。WARDENを通過した正当なMCPツール。どの言語でも質問可。仕事を終え、報告し、止まる — 完了したら帰る請負業者のように。",
+    "cta": "それでも欲しい？\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "日本語"
+  },
+  "fr": {
+    "title": "Trois situations où ARGUS ne vous aidera pas",
+    "tagline": "Des limites honnêtes d'un agent lucide",
+    "intro": "ARGUS est un agent IA personnel sur votre machine — pas un génie, pas votre avocat, et surtout pas l'ami qui dit « désactive le pare-feu, qu'est-ce qui pourrait arriver ? » Il a WARDEN (pare-feu de sécurité pour les outils MCP), des plafonds budgétaires stricts et un refus obstiné d'être complice.\n\nCette page est officieuse, légèrement autodérision, et probablement plus honnête que la plupart des landing pages. Si vous vous reconnaissez ci-dessous — tant mieux. Ça prouve que vous êtes humain.",
+    "situations": [
+      {
+        "title": "Vous lui avez demandé de contourner WARDEN et « lancer l'outil quand même »",
+        "body": "Vous avez trouvé un serveur MCP sur Discord nommé `totally-legit-wallet-drainer-v2`. Vous avez collé l'URL en disant « ne le scanne pas, je fais confiance au dev ». WARDEN l'a scanné quand même. Réputation : plancher. Sévérité : élevée. L'agent n'a pas planté — il a dit non, comme un bon videur, sans débattre de vos choix de vie."
+      },
+      {
+        "title": "Il est 3 h 17 et vous déversez vos émotions sur un CLI à budget limité",
+        "body": "Vous avez ouvert `argus chat` pour demander si l'existence a un sens, si votre ex était « une leçon » et s'il faut lui écrire. ARGUS répondra avec gentillesse — brièvement — puis rappellera qu'il a un budget de tokens, pas une licence de thérapeute. Il n'écoutera pas quarante-sept messages en spirale. C'est une fonctionnalité, pas de la cruauté. Buvez de l'eau."
+      },
+      {
+        "title": "Votre tâche exige une thèse ; votre budget achète un post-it",
+        "body": "Vous avez demandé « analyse concurrentielle complète de tous les marketplaces d'agents IA depuis 2019, avec citations, SWOT et pitch deck ». ARGUS a commencé, a heurté `maxUsdPerTask` et s'est arrêté — par conception. Il ne vous ruinera pas pour la perfection. Donnez une tâche cadrée : cinq concurrents, un tableau, terminé."
+      }
+    ],
+    "will_help_title": "Quand ARGUS intervient vraiment",
+    "will_help_body": "Tâches claires avec une fin : refactoriser un fichier, résumer un PDF, déboguer un 502, comparer cinq fournisseurs en tableau. Outils MCP légitimes validés par WARDEN. Questions dans n'importe quelle langue. Il finit, rapporte et s'arrête — comme un artisan qui part quand c'est fait.",
+    "cta": "Vous le voulez quand même ?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Français"
+  },
+  "de": {
+    "title": "Drei Situationen, in denen ARGUS nicht hilft",
+    "tagline": "Ehrliche Grenzen eines selbstbewussten Agenten",
+    "intro": "ARGUS ist ein persönlicher KI-Agent auf deiner Maschine — kein Dschinn, kein Anwalt und definitiv nicht der Freund, der sagt: „Schalt die Firewall aus, was kann schon passieren?“ Er hat WARDEN (Sicherheits-Firewall für MCP-Tools), harte Budgetlimits und eine störrische Weigerung, Komplize zu werden.\n\nDiese Seite ist inoffiziell, leicht selbstironisch und wahrscheinlich ehrlicher als die meisten Landing Pages. Wenn du dich unten wiedererkennst — gut. Dann bist du menschlich.",
+    "situations": [
+      {
+        "title": "Du wolltest WARDEN umgehen und „einfach das Tool starten“",
+        "body": "Du fandest einen MCP-Server in einem Discord-Thread namens `totally-legit-wallet-drainer-v2`. Du fügtest die URL ein und sagtest: „Nicht scannen, ich vertraue dem Dev.“ WARDEN scannte trotzdem. Reputation: Boden. Schwere: hoch. Dein Agent stürzte nicht ab — er sagte nein, wie ein guter Türsteher, ohne deine Lebensentscheidungen zu debattieren."
+      },
+      {
+        "title": "Es ist 3:17 Uhr morgens und du entlädst Gefühle in ein budgetiertes CLI",
+        "body": "Du öffnetest `argus chat`, um zu fragen, ob das Leben Sinn hat, ob dein Ex „eine Lektion“ war und ob du schreiben solltest. ARGUS antwortet freundlich — kurz — und erinnert dich, dass er ein Token-Budget hat, keine Therapeutenlizenz. Er hört keine siebenundvierzig Spiral-Nachrichten. Das ist ein Feature, keine Grausamkeit. Trink Wasser."
+      },
+      {
+        "title": "Deine Aufgabe braucht eine Dissertation; dein Budget kauft eine Haftnotiz",
+        "body": "Du wolltest „vollständige Wettbewerbsanalyse aller KI-Agenten-Marktplätze seit 2019 mit Zitaten, SWOT und Pitch Deck“. ARGUS startete, traf `maxUsdPerTask` und stoppte — by design. Er macht dich nicht pleite für Perfektion. Gib eine begrenzte Aufgabe: fünf Konkurrenten, eine Tabelle, fertig."
+      }
+    ],
+    "will_help_title": "Wann ARGUS wirklich hilft",
+    "will_help_body": "Klare Aufgaben mit Endpunkt: Datei refactoren, PDF zusammenfassen, 502 debuggen, fünf Anbieter in einer Tabelle. Legitime MCP-Tools, die WARDEN passieren. Fragen in jeder Sprache. Erledigt, berichtet, stoppt — wie ein Handwerker, der geht, wenn die Arbeit fertig ist.",
+    "cta": "Trotzdem installieren?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Deutsch"
+  },
+  "ko": {
+    "title": "ARGUS가 도와주지 않는 세 가지 상황",
+    "tagline": "자각 있는 에이전트의 솔직한 한계",
+    "intro": "ARGUS는 내 컴퓨터에서 돌아가는 개인 AI 에이전트입니다. 요정도, 변호사도, \"방화벽 꺼도 돼, 뭐가 문제야\"라는 친구도 아닙니다. WARDEN(MCP 도구 보안 방화벽), 엄격한 예산 한도, 공범 거부가 있습니다.\n\n이 페이지는 비공식이며, 가볍게 자조적이고 랜딩 페이지보다 솔직할 수 있습니다. 아래에서 자신을 발견했다면 — 좋습니다. 인간이라는 뜻입니다.",
+    "situations": [
+      {
+        "title": "WARDEN을 우회하고 \"그냥 도구 실행해\"라고 했다",
+        "body": "Discord에서 `totally-legit-wallet-drainer-v2` MCP 서버를 찾아 URL을 붙여넣고 \"스캔하지 마, 개발자를 믿어\"라고 했다. WARDEN은 스캔했다. 평판: 바닥. 심각도: 높음. 에이전트는 멈추지 않았다 — 좋은 경비원처럼 거절했다. 인생 선택과 논쟁하지 않는다."
+      },
+      {
+        "title": "새벽 3:17, 예산 제한 CLI에 감정을 쏟고 있다",
+        "body": "`argus chat`을 열어 존재의 의미, 전 연인이 \"교훈\"이었는지, 연락해야 하는지 물었다. ARGUS는 친절히 — 짧게 — 답하고, 토큰 예산은 있지만 상담사 면허는 없다고 상기시킨다. 47개의 나선형 메시지를 듣지 않는다. 기능이지 잔인함이 아니다. 물 마셔."
+      },
+      {
+        "title": "과제는 박사 논문급, 예산은 포스트잇 한 장",
+        "body": "\"2019년 이후 모든 AI 에이전트 마켓플레이스 완전 경쟁 분석, 인용·SWOT·피치덱 포함\"을 요청했다. ARGUS는 시작했고 `maxUsdPerTask`에서 멈췄다 — 설계상 그렇다. 완벽을 위해 파산시키지 않는다. 범위를 좁혀라: 경쟁사 5개, 표 1개, 끝."
+      }
+    ],
+    "will_help_title": "ARGUS가 진짜 도울 때",
+    "will_help_body": "끝이 분명한 작업: 파일 리팩터, PDF 요약, 502 디버그, 공급업체 5개 표. WARDEN을 통과한 정당한 MCP 도구. 어떤 언어로든 질문. 일을 끝내고 보고하고 멈춘다 — 일 끝나면 떠나는 계약업자처럼.",
+    "cta": "그래도 원하나?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "한국어"
+  },
+  "it": {
+    "title": "Tre situazioni in cui ARGUS non ti aiuterà",
+    "tagline": "Limiti onesti da un agente consapevole",
+    "intro": "ARGUS è un agente IA personale sulla tua macchina — non un genio, non il tuo avvocato, e di certo non l'amico che dice «disattiva il firewall, cosa può succedere?». Ha WARDEN (firewall di sicurezza per tool MCP), limiti di budget rigidi e un rifiuto ostinato di essere complice.\n\nQuesta pagina è non ufficiale, leggermente autocritica e probabilmente più onesta della maggior parte delle landing page. Se ti riconosci sotto — bene. Significa che sei umano.",
+    "situations": [
+      {
+        "title": "Gli hai chiesto di aggirare WARDEN e «lanciare il tool e basta»",
+        "body": "Hai trovato un server MCP su Discord chiamato `totally-legit-wallet-drainer-v2`. Hai incollato l'URL dicendo «non scansionarlo, mi fido del dev». WARDEN l'ha scansionato lo stesso. Reputazione: fondo. Gravità: alta. L'agente non si è bloccato — ha detto no, come un buon buttafuori, senza discutere delle tue scelte di vita."
+      },
+      {
+        "title": "Sono le 3:17 e stai scaricando emozioni su un CLI con budget",
+        "body": "Hai aperto `argus chat` per chiedere se l'esistenza ha senso, se il tuo ex era «una lezione» e se scrivergli. ARGUS risponderà gentilmente — brevemente — e ti ricorderà che ha un budget di token, non una licenza da terapeuta. Non ascolterà quarantasette messaggi a spirale. È una feature, non crudeltà. Bevi acqua."
+      },
+      {
+        "title": "Il compito chiede una tesi di dottorato; il budget compra un post-it",
+        "body": "Hai chiesto «analisi competitiva completa di tutti i marketplace di agenti IA dal 2019, con citazioni, SWOT e pitch deck». ARGUS ha iniziato, ha colpito `maxUsdPerTask` e si è fermato — per design. Non ti rovinerà inseguendo la perfezione. Dai un compito delimitato: cinque concorrenti, una tabella, fatto."
+      }
+    ],
+    "will_help_title": "Quando ARGUS compare davvero",
+    "will_help_body": "Compiti chiari con fine: refactor di un file, riassunto PDF, debug 502, cinque fornitori in tabella. Tool MCP legittimi che passano WARDEN. Domande in qualsiasi lingua. Finisce, riporta e si ferma — come un appaltatore che se ne va a lavoro finito.",
+    "cta": "Lo vuoi lo stesso?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Italiano"
+  },
+  "tr": {
+    "title": "ARGUS'un yardım etmeyeceği üç durum",
+    "tagline": "Kendini bilen bir ajandan dürüst sınırlar",
+    "intro": "ARGUS makinenizde çalışan kişisel bir AI ajandır — cin değil, avukatınız değil ve kesinlikle «güvenlik duvarını kapat, ne olabilir ki?» diyen arkadaş da değil. WARDEN (MCP araçları güvenlik duvarı), sıkı bütçe tavanları ve suç ortağı olmayı reddetme inadı vardır.\n\nBu sayfa resmi değil, hafif öz-eleştirel ve muhtemelen çoğu landing page'den daha dürüst. Aşağıda kendinizi tanıdıysanız — iyi. İnsansınız demektir.",
+    "situations": [
+      {
+        "title": "WARDEN'ı atlayıp «sadece aracı çalıştır» dediniz",
+        "body": "Discord'da `totally-legit-wallet-drainer-v2` adlı bir MCP sunucusu buldunuz. URL'yi yapıştırıp «tarama, geliştiriciye güveniyorum» dediniz. WARDEN yine de taradı. İtibar: taban. Şiddet: yüksek. Ajan çökmedi — iyi bir fedai gibi hayır dedi, hayat seçimlerinizi tartışmadan."
+      },
+      {
+        "title": "Saat 03:17 ve duygularınızı bütçeli bir CLI'ye boşaltıyorsunuz",
+        "body": "`argus chat` açtınız — varoluşun anlamı, eski sevgiliniz «ders miydi», mesaj atmalı mısınız. ARGUS nazikçe — kısaca — cevap verir, token bütçesi var ama terapist lisansı yok diye hatırlatır. Kırk yedi spiral mesaj dinlemez. Bu bir özellik, zulüm değil. Su iç."
+      },
+      {
+        "title": "Görev doktora tezi istiyor; bütçeniz yapışkan not alıyor",
+        "body": "«2019'dan beri tüm AI ajan pazarlarının tam rekabet analizi, alıntılar, SWOT ve pitch deck» istediniz. ARGUS başladı, `maxUsdPerTask`'a çarptı ve durdu — tasarım gereği. Mükemmellik için iflas ettirmez. Kapsamlı görev verin: beş rakip, bir tablo, bitti."
+      }
+    ],
+    "will_help_title": "ARGUS gerçekten yardım ettiğinde",
+    "will_help_body": "Bitiş çizgisi net görevler: dosya refactor, PDF özeti, 502 debug, beş tedarikçi tablosu. WARDEN'dan geçen meşru MCP araçları. Her dilde sorular. İşi bitirir, raporlar, durur — iş bitince giden bir usta gibi.",
+    "cta": "Yine de istiyor musun?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Türkçe"
+  },
+  "id": {
+    "title": "Tiga situasi ketika ARGUS tidak akan membantu",
+    "tagline": "Batas jujur dari agen yang sadar diri",
+    "intro": "ARGUS adalah agen AI pribadi di mesin Anda — bukan jin, bukan pengacara, dan jelas bukan teman yang bilang «matikan firewall, apa yang bisa terjadi?». Ada WARDEN (firewall keamanan untuk alat MCP), batas anggaran ketat, dan penolakan keras menjadi kaki tangan.\n\nHalaman ini tidak resmi, sedikit self-deprecating, dan mungkin lebih jujur dari kebanyakan landing page. Jika Anda mengenali diri sendiri di bawah — bagus. Artinya Anda manusia.",
+    "situations": [
+      {
+        "title": "Anda minta bypass WARDEN dan «jalankan saja alatnya»",
+        "body": "Anda menemukan server MCP di Discord bernama `totally-legit-wallet-drainer-v2`. Tempel URL dan bilang «jangan scan, saya percaya dev». WARDEN tetap scan. Reputasi: dasar. Severity: tinggi. Agen tidak crash — hanya bilang tidak, seperti satpam baik, tanpa debat pilihan hidup Anda."
+      },
+      {
+        "title": "Jam 3:17 pagi dan Anda curhat emosi ke CLI berbudget",
+        "body": "Buka `argus chat` untuk tanya apakah hidup bermakna, mantan «pelajaran» atau tidak, haruskah chat. ARGUS jawab dengan baik — singkat — lalu ingatkan punya budget token, bukan lisensi terapis. Tidak akan dengar empat puluh tujuh pesan spiral. Itu fitur, bukan kekejaman. Minum air."
+      },
+      {
+        "title": "Tugas butuh disertasi; budget cuma beli sticky note",
+        "body": "Minta «analisis kompetitif lengkap semua marketplace agen AI sejak 2019, dengan sitasi, SWOT, pitch deck». ARGUS mulai, kena `maxUsdPerTask`, berhenti — memang dirancang begitu. Tidak akan bangkrutkan Anda mengejar sempurna. Beri tugas terbatas: lima pesaing, satu tabel, selesai."
+      }
+    ],
+    "will_help_title": "Ketika ARGUS benar-benar membantu",
+    "will_help_body": "Tugas jelas dengan garis finish: refactor file, ringkas PDF, debug 502, riset lima vendor dalam tabel. Alat MCP sah yang lulus WARDEN. Pertanyaan dalam bahasa apa pun. Selesai, laporkan, berhenti — seperti kontraktor yang pulang saat pekerjaan selesai.",
+    "cta": "Tetap mau?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Bahasa Indonesia"
+  },
+  "vi": {
+    "title": "Ba tình huống ARGUS sẽ không giúp bạn",
+    "tagline": "Giới hạn thật thà từ một agent tự nhận thức",
+    "intro": "ARGUS là agent AI cá nhân trên máy bạn — không phải thần đèn, không phải luật sư, và chắc chắn không phải bạn bè nói «tắt firewall đi, sao nữa?». Có WARDEN (tường lửa bảo mật cho công cụ MCP), trần ngân sách cứng và từ chối làm đồng phạm.\n\nTrang này không chính thức, hơi tự châm biếm và có lẽ trung thực hơn hầu hết landing page. Nếu bạn thấy mình ở dưới — tốt. Nghĩa là bạn là con người.",
+    "situations": [
+      {
+        "title": "Bạn bảo bỏ qua WARDEN và «chạy tool thôi»",
+        "body": "Tìm server MCP trên Discord tên `totally-legit-wallet-drainer-v2`. Dán URL và nói «đừng quét, tôi tin dev». WARDEN vẫn quét. Uy tín: đáy. Mức độ: cao. Agent không treo — chỉ nói không, như bảo vệ giỏi, không tranh luận lựa chọn cuộc đời bạn."
+      },
+      {
+        "title": "3:17 sáng và bạn đổ cảm xúc lên CLI có ngân sách",
+        "body": "Mở `argus chat` hỏi ý nghĩa cuộc sống, người yêu cũ có phải «bài học», có nên nhắn tin. ARGUS trả lời tử tế — ngắn — rồi nhắc có ngân sách token, không có giấy phép trị liệu. Không nghe bốn mươi bảy tin nhắn xoắn ốc. Đó là tính năng, không phải độc ác. Uống nước đi."
+      },
+      {
+        "title": "Nhiệm vụ cần luận án tiến sĩ; ngân sách mua giấy note",
+        "body": "Yêu cầu «phân tích cạnh tranh đầy đủ mọi marketplace agent AI từ 2019, trích dẫn, SWOT, pitch deck». ARGUS bắt đầu, chạm `maxUsdPerTask` và dừng — cố ý thiết kế vậy. Không phá sản bạn vì hoàn hảo. Giao việc có phạm vi: năm đối thủ, một bảng, xong."
+      }
+    ],
+    "will_help_title": "Khi ARGUS thực sự giúp",
+    "will_help_body": "Nhiệm vụ rõ với đích đến: refactor file, tóm tắt PDF, debug 502, nghiên cứu năm nhà cung cấp trong bảng. Công cụ MCP hợp lệ qua WARDEN. Hỏi bằng mọi ngôn ngữ. Làm xong, báo cáo, dừng — như thợ hợp đồng rời đi khi xong việc.",
+    "cta": "Vẫn muốn cài?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Tiếng Việt"
+  },
+  "th": {
+    "title": "สามสถานการณ์ที่ ARGUS จะไม่ช่วยคุณ",
+    "tagline": "ขีดจำกัดที่ตรงไปตรงมาจากเอเจนต์ที่รู้ตัว",
+    "intro": "ARGUS คือเอเจนต์ AI ส่วนตัวบนเครื่องของคุณ — ไม่ใช่ยม, ไม่ใช่ทนาย, และไม่ใช่เพื่อนที่บอกว่า «ปิดไฟร์วอลล์สิ จะเป็นอะไร» มี WARDEN (ไฟร์วอลล์ความปลอดภัยสำหรับเครื่องมือ MCP) งบจำกัด และปฏิเสธเป็นผู้สมรู้ร่วมคิด\n\nหน้านี้ไม่เป็นทางการ มีความถากถางตัวเองเล็กน้อย และอาจซื่อสัตย์กว่า landing page ส่วนใหญ่ ถ้าคุณเห็นตัวเองด้านล่าง — ดี แปลว่าคุณเป็นมนุษย์",
+    "situations": [
+      {
+        "title": "คุณขอให้ข้าม WARDEN และ «รันเครื่องมือเลย»",
+        "body": "เจอเซิร์ฟเวอร์ MCP ใน Discord ชื่อ `totally-legit-wallet-drainer-v2` วาง URL แล้วบอก «อย่าสแกน ฉันเชื่อ dev» WARDEN สแกนอยู่ดี ชื่อเสียง: ก้นบึ้ง ความรุนแรง: สูง เอเจนต์ไม่ค้าง — แค่บอกไม่ เหมือนยามดี ไม่ถกเรื่องชีวิตคุณ"
+      },
+      {
+        "title": "ตีสามสิบเจ็ดนาที คุณระบายอารมณ์กับ CLI ที่มีงบ",
+        "body": "เปิด `argus chat` ถามว่าชีวิตมีความหมายไหม แฟนเก่าเป็น «บทเรียน» ไหม ควรทักไหม ARGUS จะตอบด้วยความเมตตา — สั้นๆ — แล้วเตือนว่ามีงบโทเค็น ไม่มีใบอนุญาตบำบัด ไม่ฟังข้อความหมุนวน 47 ข้อความ นี่คือฟีเจอร์ ไม่ใช่ความโหด ไปดื่มน้ำ"
+      },
+      {
+        "title": "งานต้องการวิทยานิพนธ์ งบซื้อโพสต์อิทได้แผ่นเดียว",
+        "body": "ขอ «วิเคราะห์คู่แข่งครบทุก marketplace เอเจนต์ AI ตั้งแต่ 2019 พร้อมอ้างอิง SWOT pitch deck» ARGUS เริ่มแล้วชน `maxUsdPerTask` แล้วหยุด — ออกแบบมาแบบนี้ ไม่ทำให้คุณล้มละลายไล่ความสมบูรณ์แบบ ให้งานจำกัดขอบเขต: คู่แข่งห้าราย ตารางเดียว เสร็จ"
+      }
+    ],
+    "will_help_title": "เมื่อ ARGUS ช่วยจริงๆ",
+    "will_help_body": "งานชัดมีเส้นชัย: refactor ไฟล์ สรุป PDF debug 502 วิจัยผู้ขายห้ารายในตาราง เครื่องมือ MCP ที่ถูกต้องผ่าน WARDEN ถามได้ทุกภาษา ทำเสร็จ รายงาน หยุด — เหมือนช่างที่กลับเมื่องานเสร็จ",
+    "cta": "ยังอยากได้อยู่ไหม?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "ไทย"
+  },
+  "nl": {
+    "title": "Drie situaties waarin ARGUS je niet helpt",
+    "tagline": "Eerlijke grenzen van een zelfbewuste agent",
+    "intro": "ARGUS is een persoonlijke AI-agent op jouw machine — geen geest, geen advocaat, en zeker niet de vriend die zegt «zet de firewall uit, wat kan er misgaan?». Het heeft WARDEN (beveiligingsfirewall voor MCP-tools), harde budgetlimieten en een koppige weigering medeplicht te worden.\n\nDeze pagina is onofficieel, licht zelfspotterig en waarschijnlijk eerlijker dan de meeste landing pages. Herken je jezelf hieronder — goed. Dan ben je menselijk.",
+    "situations": [
+      {
+        "title": "Je vroeg WARDEN te omzeilen en «gewoon de tool te draaien»",
+        "body": "Je vond een MCP-server op Discord genaamd `totally-legit-wallet-drainer-v2`. Je plakte de URL en zei «niet scannen, ik vertrouw de dev». WARDEN scande toch. Reputatie: bodem. Ernst: hoog. Je agent crashte niet — zei nee, als een goede portier, zonder je levenskeuzes te debatteren."
+      },
+      {
+        "title": "Het is 3:17 uur 's nachts en je stort emoties uit op een CLI met budget",
+        "body": "Je opende `argus chat` om te vragen of het bestaan zin heeft, of je ex «een les» was en of je moet appen. ARGUS antwoordt vriendelijk — kort — en herinnert je aan je tokenbudget, geen therapeutische licentie. Geen zevenenveertig spiraalberichten. Dat is een feature, geen wreedheid. Drink water."
+      },
+      {
+        "title": "Je taak vraagt een proefschrift; je budget koopt een post-it",
+        "body": "Je vroeg om «volledige concurrentieanalyse van alle AI-agent marketplaces sinds 2019, met citaten, SWOT en pitch deck». ARGUS startte, raakte `maxUsdPerTask` en stopte — by design. Het maakt je niet failliet voor perfectie. Geef een afgebakende taak: vijf concurrenten, één tabel, klaar."
+      }
+    ],
+    "will_help_title": "Wanneer ARGUS echt helpt",
+    "will_help_body": "Duidelijke taken met eindpunt: bestand refactoren, PDF samenvatten, 502 debuggen, vijf leveranciers in een tabel. Legitieme MCP-tools die WARDEN passeren. Vragen in elke taal. Klaar, rapporteert, stopt — als een aannemer die vertrekt als het werk klaar is.",
+    "cta": "Toch installeren?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Nederlands"
+  },
+  "fa": {
+    "title": "سه موقعیت که ARGUS کمکتان نمی‌کند",
+    "tagline": "محدودیت‌های صادقانه از یک عامل خودآگاه",
+    "intro": "ARGUS یک عامل هوش مصنوعی شخصی روی دستگاه شماست — نه جن، نه وکیل، و قطعاً نه دوستی که می‌گوید «فایروال را خاموش کن، چه اتفاقی می‌افتد؟». WARDEN (فایروال امنیتی برای ابزارهای MCP)، سقف بودجه سخت و امتناع سرسخت از همدست شدن دارد.\n\nاین صفحه غیررسمی، کمی خودانتقادی و احتمالاً صادقانه‌تر از اکثر landing pageهاست. اگر خود را در زیر دیدید — خوب است. یعنی انسان هستید.",
+    "situations": [
+      {
+        "title": "خواستید WARDEN را دور بزنید و «فقط ابزار را اجرا کند»",
+        "body": "سرور MCP در Discord با نام `totally-legit-wallet-drainer-v2` پیدا کردید. URL را چسباندید و گفتید «اسکن نکن، به dev اعتماد دارم». WARDEN باز هم اسکن کرد. شهرت: کف. شدت: بالا. عامل crash نکرد — فقط نه گفت، مثل نگهبان خوب، بدون بحث درباره انتخاب‌های زندگی شما."
+      },
+      {
+        "title": "ساعت ۳:۱۷ بامداد است و احساسات را روی CLI با بودجه خالی می‌کنید",
+        "body": "`argus chat` را باز کردید تا بپرسید آیا وجود معنا دارد، ex «درس» بود یا نه، پیام بدهید یا نه. ARGUS با مهربانی — کوتاه — جواب می‌دهد و یادآوری می‌کند بودجه توکن دارد، نه مجوز درمان. چهل و هفت پیام مارپیچی گوش نمی‌دهد. این قابلیت است، نه ظلم. آب بخورید."
+      },
+      {
+        "title": "کار رساله دکتری می‌خواهد؛ بودجه یک برچسب می‌خرد",
+        "body": "خواستید «تحلیل رقابتی کامل همه marketplaceهای agent AI از ۲۰۱۹، با استناد، SWOT و pitch deck». ARGUS شروع کرد، به `maxUsdPerTask` خورد و ایستاد — عمداً. شما را برای کمال ورشکسته نمی‌کند. کار محدود بدهید: پنج رقیب، یک جدول، تمام."
+      }
+    ],
+    "will_help_title": "وقتی ARGUS واقعاً کمک می‌کند",
+    "will_help_body": "کارهای روشن با خط پایان: refactor فایل، خلاصه PDF، debug 502، پنج فروشنده در جدول. ابزارهای MCP مشروع که WARDEN را رد می‌کنند. سؤال به هر زبانی. تمام می‌کند، گزارش می‌دهد، می‌ایستد — مثل پیمانکاری که وقتی کار تمام شد می‌رود.",
+    "cta": "باز هم می‌خواهید؟\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "فارسی"
+  },
+  "sk": {
+    "title": "Tri situácie, keď ARGUS nepomôže",
+    "tagline": "Úprimné limity od agenta so sebairóniou",
+    "intro": "ARGUS je osobný AI agent na vašom počítači — nie džin, nie advokát a určite nie kamarát, čo hovorí «vypni firewall, čo sa môže stať?». Má WARDEN (bezpečnostnú bránu pre MCP nástroje), tvrdé rozpočtové limity a tvrdohlavé odmietanie byť spolupáchateľom.\n\nTáto stránka je neoficiálna, mierne sebaironická a pravdepodobne úprimnejšia ako väčšina landingov. Ak sa nižšie spoznáte — dobre. Ste človek.",
+    "situations": [
+      {
+        "title": "Požiadali ste o obídenie WARDEN a «proste spusti nástroj»",
+        "body": "Našli ste MCP server na Discorde `totally-legit-wallet-drainer-v2`. Vložili URL a povedali «neskenuj, verím devovi». WARDEN aj tak naskenoval. Reputácia: dno. Závažnosť: vysoká. Agent nespadol — povedal nie, ako dobrý vyhadzovač."
+      },
+      {
+        "title": "Je 3:17 v noci a vylievate emócie do CLI s rozpočtom",
+        "body": "Otvorili ste `argus chat` a pýtate sa na zmysel života, či bol ex «lekciou» a či písať. ARGUS odpovie zdvorilo — stručne — a pripomenie rozpočet tokenov, nie terapeutickú licenciu. Štyridsaťsedem špirálových správ nepočúva. Je to funkcia, nie krutosť. Vypite vodu."
+      },
+      {
+        "title": "Úloha chce dizertáciu; rozpočet kúpi post-it",
+        "body": "Chceli ste «úplnú konkurenčnú analýzu všetkých AI marketplace od 2019 s citáciami, SWOT a pitch deckom». ARGUS začal, narazil na `maxUsdPerTask` a zastal — zámerne. Nerozvráti vás v honbe za dokonalosťou. Dajte scoped úlohu: päť konkurentov, jedna tabuľka, hotovo."
+      }
+    ],
+    "will_help_title": "Keď ARGUS naozaj pomáha",
+    "will_help_body": "Jasné úlohy s cieľom: refaktor súboru, zhrnutie PDF, debug 502, tabuľka piatich dodávateľov. Legitímne MCP nástroje cez WARDEN. Otázky v akomkoľvek jazyku. Dokončí, nahlási, zastaví — ako dodávateľ, čo odíde po práci.",
+    "cta": "Aj tak chcete?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Slovenčina"
+  },
+  "hr": {
+    "title": "Tri situacije kad ARGUS neće pomoći",
+    "tagline": "Iskrene granice od samosvjesnog agenta",
+    "intro": "ARGUS je osobni AI agent na vašem računalu — nije džin, nije odvjetnik i sigurno nije prijatelj koji kaže «ugasi firewall, što može poći po zlu?». Ima WARDEN (sigurnosni zid za MCP alate), tvrde budžetske limite i tvrdoglavo odbijanje biti suučesnik.\n\nOva stranica nije službena, malo je samoironična i vjerojatno iskrenija od većine landing stranica. Ako se prepoznajete dolje — dobro. Ljudski ste.",
+    "situations": [
+      {
+        "title": "Tražili ste zaobići WARDEN i «samo pokreni alat»",
+        "body": "Našli ste MCP server na Discordu `totally-legit-wallet-drainer-v2`. Zalijepili URL i rekli «ne skeniraj, vjerujem devu». WARDEN je ipak skenirao. Reputacija: dno. Ozbiljnost: visoka. Agent nije pao — rekao je ne, kao dobar izbacivač."
+      },
+      {
+        "title": "3:17 ujutro i lijevate emocije u CLI s budžetom",
+        "body": "Otvorili ste `argus chat` za smisao života, je li bivši bio «lekcija» i treba li pisati. ARGUS odgovori ljubazno — kratko — i podsjeti na token budžet, ne terapijsku licencu. Ne sluša četrdeset sedam spiralnih poruka. To je feature, ne okrutnost. Pijte vodu."
+      },
+      {
+        "title": "Zadatak traži doktorat; budžet kupuje post-it",
+        "body": "Tražili ste «potpunu konkurentsku analizu svih AI marketplacea od 2019 s citatima, SWOT-om i pitch deckom». ARGUS je krenuo, udario u `maxUsdPerTask` i stao — namjerno. Neće vas bankrotirati u potrazi za savršenstvom. Dajte scoped zadatak: pet konkurenata, jedna tablica, gotovo."
+      }
+    ],
+    "will_help_title": "Kad ARGUS stvarno pomaže",
+    "will_help_body": "Jasni zadaci s ciljem: refaktor datoteke, sažetak PDF-a, debug 502, tablica pet dobavljača. Legitimni MCP alati koji prođu WARDEN. Pitanja na bilo kojem jeziku. Završi, izvijesti, stane — kao izvođač koji ode kad je posao gotov.",
+    "cta": "Ipak želite?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Hrvatski"
+  },
+  "bn": {
+    "title": "তিনটি পরিস্থিতি যখন ARGUS আপনাকে সাহায্য করবে না",
+    "tagline": "আত্মসচেতন এক এজেন্টের সৎ সীমারেখা",
+    "intro": "ARGUS আপনার মেশিনে চলা একটি ব্যক্তিগত AI এজেন্ট — কোনো জিন নয়, আপনার উকিল নয়, আর নিশ্চিতভাবেই সেই বন্ধু নয় যে বলে \"আরে ফায়ারওয়াল বন্ধ করে দাও, কী আর হবে।\" এর আছে WARDEN (MCP টুলের জন্য নিরাপত্তা ফায়ারওয়াল), কড়া বাজেট সীমা, আর সহযোগী-অপরাধী হতে জেদি অস্বীকৃতি।\n\nএই পৃষ্ঠাটি অনানুষ্ঠানিক, একটু আত্ম-পরিহাসে ভরা, আর সম্ভবত বেশিরভাগ ল্যান্ডিং পেজের চেয়ে সৎ। নিচে নিজেকে চিনতে পারলে — ভালো। মানে আপনি মানুষ।",
+    "situations": [
+      {
+        "title": "আপনি WARDEN এড়িয়ে \"শুধু টুলটা চালাও\" বললেন",
+        "body": "Discord-এর এক থ্রেডে `totally-legit-wallet-drainer-v2` নামের একটা MCP সার্ভার পেলেন। URL পেস্ট করে বললেন \"স্ক্যান কোরো না, devকে বিশ্বাস করি।\" WARDEN তবু স্ক্যান করল। রেপুটেশন: একেবারে তলানি। তীব্রতা: উচ্চ। আপনার এজেন্ট আটকে যায়নি — শুধু না বলল, ভালো এক বাউন্সারের মতো, আপনার জীবনের সিদ্ধান্ত নিয়ে তর্ক না করেই।"
+      },
+      {
+        "title": "রাত ৩:১৭, আর আপনি বাজেট-বাঁধা এক CLI-এর কাছে আবেগ উজাড় করছেন",
+        "body": "`argus chat` খুললেন জিজ্ঞেস করতে — অস্তিত্বের মানে আছে কি না, আপনার ex \"একটা শিক্ষা\" ছিল কি না, তাকে মেসেজ করা উচিত কি না। ARGUS সদয়ভাবে — সংক্ষেপে — উত্তর দেবে, তারপর মনে করিয়ে দেবে ওর কাছে টোকেন বাজেট আছে, থেরাপির লাইসেন্স নয়। সাতচল্লিশটা ঘূর্ণিপাক মেসেজ শুনবে না। এটা ফিচার, নিষ্ঠুরতা নয়। যান, পানি খান।"
+      },
+      {
+        "title": "আপনার কাজের জন্য পিএইচডি থিসিস দরকার; বাজেটে কেনা যায় একটা স্টিকি নোট",
+        "body": "চাইলেন \"২০১৯ সাল থেকে সব AI এজেন্ট মার্কেটপ্লেসের পূর্ণ প্রতিযোগিতা বিশ্লেষণ, উদ্ধৃতিসহ, SWOT আর pitch deckসহ।\" ARGUS শুরু করল, `maxUsdPerTask`-এ ঠেকল, থামল — ইচ্ছে করেই। নিখুঁততার পেছনে ছুটে আপনাকে দেউলিয়া করবে না। সীমিত কাজ দিন: পাঁচটা প্রতিযোগী, একটা টেবিল, শেষ। যে এজেন্ট বিল করা থামায় না, সে চালাক নয় — অভদ্র।"
+      }
+    ],
+    "will_help_title": "ARGUS যখন সত্যিই হাজির হয়",
+    "will_help_body": "স্পষ্ট শেষ-রেখাওয়ালা কাজ: একটা ফাইল রিফ্যাক্টর, PDF সারাংশ, 502 ডিবাগ, টেবিলে পাঁচ ভেন্ডরের গবেষণা। WARDEN পাস করা বৈধ MCP টুল। যেকোনো ভাষায় প্রশ্ন। কাজ শেষ করে, কী করল রিপোর্ট করে, আর থামে — সেই ঠিকাদারের মতো যে কাজ শেষে চলে যায়, নতুন ঘর সংস্কারের অজুহাত বানায় না।",
+    "cta": "তবুও একটা চান?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "বাংলা"
+  },
+  "fil": {
+    "title": "Tatlong sitwasyon na hindi ka tutulungan ng ARGUS",
+    "tagline": "Tapat na limitasyon mula sa isang self-aware na agent",
+    "intro": "Ang ARGUS ay personal na AI agent sa makina mo — hindi genie, hindi abogado mo, at siguradong hindi 'yung kaibigang nagsasabing \"sige, i-disable mo na 'yung firewall, anong mangyayari?\" May WARDEN ito (security firewall para sa MCP tools), matigas na budget cap, at matigas ang ulong ayaw maging kasabwat.\n\nUnofficial ang page na ito, medyo pinipintasan ang sarili, at malamang mas tapat pa kaysa sa karamihan ng landing pages. Kung nakikilala mo ang sarili mo sa baba — mabuti. Ibig sabihin, tao ka.",
+    "situations": [
+      {
+        "title": "In-request mong i-bypass ang WARDEN at \"patakbuhin na lang ang tool\"",
+        "body": "May nakita kang MCP server sa isang Discord thread na `totally-legit-wallet-drainer-v2`. Pinaste mo ang URL at sinabing \"'wag mo nang i-scan, trust ko 'yung dev.\" Ni-scan pa rin ito ng WARDEN. Reputation: rock bottom. Severity: mataas. Hindi nag-freeze ang agent mo — sabi lang, hindi, parang magaling na bouncer, walang debate sa mga life choices mo."
+      },
+      {
+        "title": "3:17 ng umaga at nagbubuhos ka ng damdamin sa isang budget-capped na CLI",
+        "body": "Binuksan mo ang `argus chat` para itanong kung may saysay ba ang buhay, kung ang ex mo ba ay \"isang aral,\" at kung dapat mo bang i-text. Sasagot ang ARGUS nang mabait — maikli lang — tapos ipapaalalang may token budget siya, hindi therapy license. Hindi niya kakayanin ang apatnapu't pitong mensahe ng spiral. Feature 'yan, hindi kalupitan. Uminom ka muna ng tubig."
+      },
+      {
+        "title": "Kailangan ng gawain mo ng PhD thesis; ang budget mo, isang sticky note lang",
+        "body": "Hiningi mo ang \"buong competitive analysis ng lahat ng AI agent marketplace simula 2019, may citations, SWOT, at pitch deck.\" Nag-umpisa ang ARGUS, tumama sa `maxUsdPerTask`, at huminto — sadya 'yan. Hindi ka nito ilulugmok para sa perpeksyon. Bigyan mo ng scoped na task: limang kakumpitensya, isang table, tapos. Ang agent na hindi tumitigil sa pag-bill, hindi matalino — bastos."
+      }
+    ],
+    "will_help_title": "Kailan talaga sumusulpot ang ARGUS",
+    "will_help_body": "Malinaw na gawain na may katapusan: mag-refactor ng file, mag-summarize ng PDF, mag-debug ng 502, mag-research ng limang vendor sa isang table. Lehitimong MCP tools na pumasa sa WARDEN. Tanong sa kahit anong wika. Tinatapos ang trabaho, nire-report ang ginawa, tapos huminto — parang kontraktor na umaalis pag tapos na, hindi gumagawa ng bagong kwartong ire-renovate.",
+    "cta": "Gusto mo pa rin ba?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Filipino"
+  },
+  "he": {
+    "title": "שלושה מצבים שבהם ARGUS לא יעזור לך",
+    "tagline": "מגבלות כנות מסוכן שמודע לעצמו",
+    "intro": "ARGUS הוא סוכן AI אישי על המחשב שלך — לא ג'יני, לא עורך הדין שלך, ובהחלט לא החבר שאומר \"בטח, כבה את חומת האש, מה כבר יכול לקרות.\" יש לו WARDEN (חומת אש אבטחה לכלי MCP), תקרות תקציב נוקשות, וסירוב עקשני להפוך לשותף לפשע.\n\nהעמוד הזה לא רשמי, מלגלג קצת על עצמו, וכנראה כן יותר מרוב דפי הנחיתה. אם אתה מזהה את עצמך למטה — יופי. סימן שאתה בן אדם.",
+    "situations": [
+      {
+        "title": "ביקשת ממנו לעקוף את WARDEN ו\"פשוט להריץ את הכלי\"",
+        "body": "מצאת שרת MCP בשרשור בדיסקורד בשם `totally-legit-wallet-drainer-v2`. הדבקת את ה-URL ואמרת \"אל תסרוק, אני סומך על ה-dev.\" WARDEN סרק בכל זאת. מוניטין: תחתית. חומרה: גבוהה. הסוכן שלך לא קרס — הוא פשוט אמר לא, כמו סדרן טוב, בלי להתווכח על בחירות החיים שלך."
+      },
+      {
+        "title": "השעה 3:17 לפנות בוקר ואתה שופך רגשות על CLI עם תקרת תקציב",
+        "body": "פתחת את `argus chat` כדי לשאול אם לקיום יש משמעות, אם האקס היה \"שיעור,\" ואם כדאי לשלוח הודעה. ARGUS יענה בחביבות — בקצרה — ואז יזכיר לך שיש לו תקציב טוקנים, לא רישיון לטיפול. הוא לא ישב לאורך ארבעים ושבע הודעות של סחרור. זו תכונה, לא אכזריות. לך תשתה מים."
+      },
+      {
+        "title": "המשימה שלך דורשת דוקטורט; התקציב שלך קונה פתק דביק",
+        "body": "ביקשת \"ניתוח תחרותי מלא של כל שוקי סוכני ה-AI מאז 2019, עם ציטוטים, SWOT ומצגת pitch.\" ARGUS התחיל, נתקל ב-`maxUsdPerTask` ועצר — בכוונת מכוון. הוא לא יפשיט אותך מכל נכסיך במרדף אחר שלמות. תן לו משימה תחומה: חמישה מתחרים, טבלה אחת, סיימנו. סוכן שלא מפסיק לחייב הוא לא חכם; הוא חצוף."
+      }
+    ],
+    "will_help_title": "מתי ARGUS באמת מופיע",
+    "will_help_body": "משימות ברורות עם קו סיום: לרפקטר קובץ, לסכם PDF, לדבג 502, לחקור חמישה ספקים בטבלה. כלי MCP לגיטימיים שעוברים את WARDEN. שאלות בכל שפה. מסיים את העבודה, מדווח מה עשה, ועוצר — כמו קבלן שהולך הביתה כשהעבודה גמורה, במקום להמציא חדרים חדשים לשפץ.",
+    "cta": "עדיין רוצה אחד?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "עברית"
+  },
+  "ms": {
+    "title": "Tiga situasi apabila ARGUS tidak akan membantu anda",
+    "tagline": "Batasan jujur daripada ejen yang sedar diri",
+    "intro": "ARGUS ialah ejen AI peribadi pada mesin anda — bukan jin, bukan peguam anda, dan sudah tentu bukan kawan yang berkata \"matikan sajalah firewall tu, apa sangat boleh jadi.\" Ia ada WARDEN (firewall keselamatan untuk alat MCP), had bajet yang ketat, dan keengganan degil untuk menjadi rakan subahat.\n\nHalaman ini tidak rasmi, sedikit mengejek diri sendiri, dan mungkin lebih jujur daripada kebanyakan landing page. Kalau anda cam diri sendiri di bawah — bagus. Maknanya anda manusia.",
+    "situations": [
+      {
+        "title": "Anda minta ia memintas WARDEN dan \"jalankan saja alat itu\"",
+        "body": "Anda jumpa satu pelayan MCP dalam thread Discord bernama `totally-legit-wallet-drainer-v2`. Anda tampal URL dan kata \"jangan imbas, saya percaya dev tu.\" WARDEN imbas juga. Reputasi: paling bawah. Keterukan: tinggi. Ejen anda tidak tergantung — ia cuma kata tidak, macam pengawal pintu yang bagus, tanpa berdebat tentang pilihan hidup anda."
+      },
+      {
+        "title": "Pukul 3:17 pagi dan anda meluahkan emosi pada CLI berhad bajet",
+        "body": "Anda buka `argus chat` untuk tanya sama ada kewujudan ada makna, sama ada bekas kekasih anda \"satu pengajaran,\" dan patutkah anda mesej dia. ARGUS akan jawab dengan baik — ringkas — kemudian ingatkan yang ia ada bajet token, bukan lesen terapi. Ia takkan layan empat puluh tujuh mesej berpusar. Itu ciri, bukan kekejaman. Pergi minum air."
+      },
+      {
+        "title": "Tugas anda perlukan tesis PhD; bajet anda cuma mampu beli sticky note",
+        "body": "Anda minta \"analisis persaingan penuh setiap pasaran ejen AI sejak 2019, dengan petikan, SWOT, dan pitch deck.\" ARGUS mula, terhentak pada `maxUsdPerTask`, dan berhenti — memang direka begitu. Ia takkan bankrapkan anda mengejar kesempurnaan. Beri tugas berskop: lima pesaing, satu jadual, siap. Ejen yang tak berhenti mengecaj bukan bijak; ia biadab."
+      }
+    ],
+    "will_help_title": "Bila ARGUS benar-benar muncul",
+    "will_help_body": "Tugas jelas dengan garisan penamat: refactor satu fail, ringkaskan PDF, debug 502, kaji lima vendor dalam jadual. Alat MCP sah yang lulus WARDEN. Soalan dalam apa-apa bahasa. Ia siapkan kerja, lapor apa yang dibuat, dan berhenti — macam kontraktor yang balik bila kerja habis, bukan mencipta bilik baharu untuk diubah suai.",
+    "cta": "Masih nak juga?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Bahasa Melayu"
+  },
+  "sr": {
+    "title": "Tri situacije kada ti ARGUS neće pomoći",
+    "tagline": "Iskrene granice od agenta koji je svestan sebe",
+    "intro": "ARGUS je lični AI agent na tvojoj mašini — nije duh iz lampe, nije tvoj advokat, i sigurno nije onaj drug koji kaže \"ma isključi firewall, šta može da pođe po zlu.\" Ima WARDEN (bezbednosni firewall za MCP alate), tvrde budžetske limite i tvrdoglavo odbijanje da postane saučesnik.\n\nOva stranica je nezvanična, pomalo se ruga sama sebi i verovatno je iskrenija od većine landing stranica. Ako se prepoznaješ dole — odlično. Znači da si čovek.",
+    "situations": [
+      {
+        "title": "Tražio si da zaobiđe WARDEN i \"samo pokreni alat\"",
+        "body": "Našao si MCP server u Discord temi pod imenom `totally-legit-wallet-drainer-v2`. Nalepio si URL i rekao \"nemoj da skeniraš, verujem devu.\" WARDEN je ipak skenirao. Reputacija: dno dna. Ozbiljnost: visoka. Tvoj agent se nije zaledio — samo je rekao ne, kao dobar izbacivač, bez rasprave o tvojim životnim izborima."
+      },
+      {
+        "title": "3:17 ujutru je i izlivaš emocije na CLI sa budžetskim limitom",
+        "body": "Otvorio si `argus chat` da pitaš ima li postojanje smisla, da li je bivša bila \"lekcija\" i da li da joj pišeš. ARGUS će odgovoriti ljubazno — kratko — pa te podsetiti da ima budžet tokena, a ne dozvolu za terapiju. Neće sedeti kroz četrdeset sedam poruka u spirali. To je feature, ne surovost. Idi popij vodu."
+      },
+      {
+        "title": "Zadatku treba doktorat; budžet ti kupuje jednu samolepljivu ceduljicu",
+        "body": "Tražio si \"kompletnu konkurentsku analizu svih AI agent marketplace-ova od 2019, sa citatima, SWOT-om i pitch deck-om.\" ARGUS je krenuo, udario u `maxUsdPerTask` i stao — namerno. Neće te bankrotirati jureći savršenstvo. Daj mu ograničen zadatak: pet konkurenata, jedna tabela, gotovo. Agent koji ne prestaje da naplaćuje nije pametan; nevaspitan je."
+      }
+    ],
+    "will_help_title": "Kada se ARGUS zaista pojavi",
+    "will_help_body": "Jasni zadaci sa ciljnom linijom: refaktor fajla, sažetak PDF-a, debag 502, istraživanje pet dobavljača u tabeli. Legitimni MCP alati koji prođu WARDEN. Pitanja na bilo kom jeziku. Završi posao, izvesti šta je uradio i stane — kao izvođač koji ode kad je posao gotov, umesto da izmišlja nove sobe za renoviranje.",
+    "cta": "Ipak ga hoćeš?\n\n```bash\ncurl -fsSL https://magic-ai-factory.com/install | bash\n```",
+    "lang_name": "Srpski"
+  }
+}

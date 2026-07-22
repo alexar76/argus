@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.alexar76/argus3",
+  "title": "ARGUS-3 MCP Server",
+  "description": "ARGUS-3 stdio MCP: argus_ask, argus_status, argus_capabilities — WARDEN-hardened, annotated tool defs for Glama TDQS.",
+  "repository": {
+    "url": "https://github.com/alexar76/argus",
+    "source": "github"
+  },
+  "version": "0.2.5",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@alexar76/argus3",
+      "version": "0.2.5",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
