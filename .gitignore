@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# Local state & secrets — NEVER commit
+.env
+.env.*
+!.env.example
+argus.config.json
+.argus/
+data/
+*.key
+*.pem
+wallet.json
+.npmrc.publish
