@@ -1,0 +1,439 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ARGUS · Agent Arena</title>
+<style>
+  :root{
+    --bg:#05060f; --panel:rgba(18,24,46,.66); --line:rgba(124,150,255,.22);
+    --cyan:#36e6ff; --violet:#a779ff; --pink:#ff5db1; --green:#3df5a6; --gold:#ffd14d; --amber:#ff9d3c;
+    --text:#eaf0ff; --muted:#93a2c9; --dim:#5c6a93;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    overflow-x:hidden; -webkit-font-smoothing:antialiased; position:relative; min-height:100%;
+  }
+  #space{position:fixed; inset:0; z-index:0; display:block}
+  .glowbg{position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(60vw 60vw at 78% -10%, rgba(167,121,255,.22), transparent 60%),
+      radial-gradient(55vw 55vw at -8% 8%, rgba(54,230,255,.18), transparent 58%),
+      radial-gradient(60vw 50vw at 50% 120%, rgba(255,93,177,.16), transparent 60%);}
+  .scan{position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.35;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;}
+  .wrap{position:relative; z-index:2; max-width:1040px; margin:0 auto; padding:30px 18px 70px}
+
+  header.top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:26px}
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:22px;
+    background:linear-gradient(135deg,rgba(54,230,255,.25),rgba(167,121,255,.25));
+    border:1px solid var(--line); box-shadow:0 0 28px rgba(124,150,255,.35)}
+  .brand h1{font-size:17px;margin:0;letter-spacing:.14em;font-family:var(--mono)}
+  .brand h1 b{background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand .sub{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.1em}
+  .live{font-family:var(--mono);font-size:11px;color:var(--green);display:flex;align-items:center;gap:7px;
+    border:1px solid rgba(61,245,166,.3);background:rgba(61,245,166,.08);padding:6px 12px;border-radius:999px}
+  .live .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.6s infinite}
+  .mode-pick{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:rgba(8,12,28,.55)}
+  .mode-pick button{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    padding:7px 14px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
+  .mode-pick button:hover{color:var(--text)}
+  .mode-pick button.on-test{background:#ffdd00;color:#06101e;font-weight:700}
+  .mode-pick button.on-live{background:var(--green);color:#06101e;font-weight:700}
+  .mode-pick button.on-uni{background:var(--violet);color:#06101e;font-weight:700}
+  .nodebar{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px 18px;
+    margin:-8px 0 18px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(8,12,28,.45)}
+  .nodebar a{color:var(--cyan);text-decoration:none}
+  .nodebar a:hover{text-decoration:underline}
+  .nodebar b{color:var(--text);font-weight:600}
+  .nodebar.off{display:none}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+  /* ---- Flex Card ---- */
+  .stage{perspective:1400px;display:flex;justify-content:center;margin:8px 0 34px}
+  .card{
+    width:min(620px,100%); border-radius:24px; padding:26px 28px;
+    background:linear-gradient(160deg, rgba(28,36,68,.92), rgba(12,16,34,.92));
+    border:1px solid var(--line); position:relative; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    transform-style:preserve-3d; transition:transform .15s ease;
+  }
+  .card::before{content:"";position:absolute;inset:0;border-radius:24px;padding:1px;pointer-events:none;
+    background:linear-gradient(120deg,var(--cyan),var(--violet),var(--pink),var(--cyan));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;background-size:300% 300%;animation:flow 8s linear infinite}
+  @keyframes flow{to{background-position:300% 0}}
+  .sheen{position:absolute;top:0;left:-60%;width:55%;height:100%;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.14),transparent);
+    transform:skewX(-18deg);animation:sweep 6s ease-in-out infinite}
+  @keyframes sweep{0%,72%{left:-60%}88%,100%{left:130%}}
+
+  .crow{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:relative;z-index:2}
+  .handle{font-size:24px;font-weight:800;letter-spacing:-.01em}
+  .handle .at{color:var(--cyan)}
+  .tier{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+  .ring{position:relative;width:96px;height:96px;flex:none}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .lvl{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+  .ring .lvl b{font-size:30px;line-height:1;font-weight:800;display:block;
+    background:linear-gradient(180deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ring .lvl span{font-size:9px;font-family:var(--mono);color:var(--muted);letter-spacing:.2em}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0 8px;position:relative;z-index:2}
+  @media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:rgba(8,12,28,.55);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .stat .k{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+  .stat .v{font-size:23px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
+  .stat .v.flame{color:var(--amber)} .stat .v.cash{color:var(--green)} .stat .v.rep{color:var(--violet)}
+  .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:10px}
+  .bar > i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--cyan),var(--green));box-shadow:0 0 14px rgba(61,245,166,.6);transition:width 1.4s cubic-bezier(.2,.9,.2,1)}
+
+  .xpwrap{position:relative;z-index:2;margin-top:18px}
+  .xpwrap .lab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:6px}
+  .xpbar{height:12px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;border:1px solid var(--line)}
+  .xpbar > i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--violet),var(--cyan),var(--pink));background-size:200% 100%;
+    box-shadow:0 0 16px rgba(167,121,255,.7);animation:flow 4s linear infinite;transition:width 1.6s cubic-bezier(.2,.9,.2,1)}
+
+  .badges{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px;position:relative;z-index:2}
+  .badge{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:11px;border:1px solid var(--line);
+    background:rgba(8,12,28,.5);font-size:13px;font-weight:600}
+  .badge .g{font-size:17px;filter:drop-shadow(0 0 7px currentColor)}
+  .badge.on{border-color:rgba(124,150,255,.5);box-shadow:0 0 18px rgba(124,150,255,.18) inset}
+  .badge.off{opacity:.34;filter:grayscale(1)}
+  .badge.c-cyan .g{color:var(--cyan)} .badge.c-violet .g{color:var(--violet)} .badge.c-gold .g{color:var(--gold)}
+  .badge.c-green .g{color:var(--green)} .badge.c-pink .g{color:var(--pink)} .badge.c-amber .g{color:var(--amber)}
+
+  .cfoot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:16px;
+    border-top:1px solid var(--line);position:relative;z-index:2;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .cfoot .mark{display:flex;align-items:center;gap:8px;color:var(--text)}
+  .cfoot .mark .tri{color:var(--cyan)}
+
+  .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:6px 0 38px}
+  .btn{font-family:var(--mono);font-size:13px;letter-spacing:.04em;padding:11px 20px;border-radius:12px;cursor:pointer;
+    border:1px solid var(--line);color:var(--text);background:rgba(18,24,46,.7);transition:.18s;user-select:none}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .btn.primary{background:linear-gradient(90deg,rgba(54,230,255,.9),rgba(167,121,255,.9));color:#06101e;border:none;font-weight:700}
+
+  .sec-title{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.18em;text-transform:uppercase;margin:30px 0 12px;display:flex;align-items:center;gap:10px}
+  .sec-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  .board{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px)}
+  .board .r{display:grid;grid-template-columns:46px 1fr auto auto;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .board .r:last-child{border-bottom:none}
+  .board .r.you{background:linear-gradient(90deg,rgba(54,230,255,.1),transparent)}
+  .board .rk{font-family:var(--mono);font-weight:800;color:var(--muted);text-align:center}
+  .board .rk.g1{color:var(--gold)} .board .rk.g2{color:#cfd8ef} .board .rk.g3{color:var(--amber)}
+  .board .nm{font-weight:700} .board .nm .you-chip{font-family:var(--mono);font-size:9px;color:var(--cyan);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:8px}
+  .board .mt{font-family:var(--mono);color:var(--muted);font-size:13px}
+  .board .lv{font-family:var(--mono);font-size:12px;color:var(--violet)}
+  .teaser{text-align:center;color:var(--dim);font-family:var(--mono);font-size:11px;margin-top:10px}
+  .foot{text-align:center;color:var(--dim);font-family:var(--mono);font-size:11px;margin-top:40px}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:30;opacity:0;
+    background:rgba(8,12,28,.95);border:1px solid var(--line);border-radius:12px;padding:12px 18px;font-family:var(--mono);font-size:13px;
+    transition:.3s;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<canvas id="space"></canvas>
+<div class="glowbg"></div>
+<div class="scan"></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🎮</div>
+      <div>
+        <h1>ARGUS · <b>AGENT ARENA</b></h1>
+        <div class="sub">demand-side reference agent · AICOM economy</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="mode-pick" id="modePick" role="tablist" aria-label="Arena mode">
+        <button type="button" data-mode="test" id="modeTest">TEST</button>
+        <button type="button" data-mode="live" id="modeLive">LIVE</button>
+        <button type="button" data-mode="uni" id="modeUni">UNI</button>
+      </div>
+      <div class="live"><span class="dot"></span><span id="liveLabel">LIVE · connecting…</span></div>
+    </div>
+  </header>
+
+  <div class="nodebar off" id="nodebar">
+    <span>🔗 <b id="nbChain">—</b></span>
+    <span>wallet <b id="nbWallet">—</b></span>
+    <a id="nbExplorer" href="#" target="_blank" rel="noopener">explorer ↗</a>
+    <span id="nbUptime"></span>
+  </div>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="sheen"></div>
+      <div class="crow">
+        <div>
+          <div class="handle">@<span class="at" id="handle">nightowl_42</span></div>
+          <div class="tier" id="tier">— frugal power-user —</div>
+        </div>
+        <div class="ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"></circle>
+            <circle id="ringFill" cx="48" cy="48" r="42" fill="none" stroke="url(#rg)" stroke-width="7" stroke-linecap="round"
+              stroke-dasharray="264" stroke-dashoffset="264" style="transition:stroke-dashoffset 1.6s cubic-bezier(.2,.9,.2,1)"></circle>
+            <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#36e6ff"></stop><stop offset="1" stop-color="#a779ff"></stop></linearGradient></defs>
+          </svg>
+          <div class="lvl"><b id="level">14</b><span>LEVEL</span></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="k">🔥 Streak</div><div class="v flame"><span id="streak">31</span><small style="font-size:12px;color:var(--dim);font-weight:600"> d</small></div></div>
+        <div class="stat"><div class="k">💸 Earned</div><div class="v cash">$<span id="earned">4.20</span></div></div>
+        <div class="stat"><div class="k">🔮 LUMEN</div><div class="v rep" id="lumen">Top 18%</div></div>
+        <div class="stat" style="grid-column:1/-1">
+          <div class="k">🎯 Win-rate · <span id="tasks">126</span> tasks</div>
+          <div class="v"><span id="winrate">92</span>%</div>
+          <div class="bar"><i id="winbar"></i></div>
+        </div>
+      </div>
+
+      <div class="xpwrap">
+        <div class="lab"><span>XP</span><span><span id="xpNow">5,640</span> / <span id="xpNext">6,000</span></span></div>
+        <div class="xpbar"><i id="xpfill"></i></div>
+      </div>
+
+      <div class="badges" id="badges"></div>
+
+      <div class="cfoot">
+        <div class="mark"><span class="tri">▲</span> AICOM</div>
+        <div id="cardlink">alexar76.github.io/aicom</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <div class="btn primary" id="shareBtn">⤴ Share my flex</div>
+    <div class="btn" id="dlBtn">↓ Download card (SVG)</div>
+    <div class="btn" id="refreshBtn">↻ Refresh stats</div>
+  </div>
+
+  <div class="sec-title">Global leaderboard · frugality</div>
+  <div class="board" id="board"></div>
+  <div class="teaser">Opt-in &amp; pseudonymous — ranked by lowest cost-per-task. Turn it on in <span style="color:var(--muted)">argus setup</span>.</div>
+
+  <div class="foot">ARGUS Agent Arena — every stat is real, computed locally from your agent's own work. <span style="color:var(--muted)">/arena</span> served by your node.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  // Demo data — overridden by GET /arena/stats when served by an ARGUS node.
+  var DEMO = {
+    handle:"nightowl_42", level:14, tier:"frugal power-user",
+    xpIntoLevel:5640, xpForLevel:6000, streak:31, longestStreak:47,
+    earnedUsd:4.20, winRate:0.92, tasks:126, lumenRank:"Top 18%",
+    badges:[
+      {id:"warden",glyph:"🛡️",name:"Warden",unlocked:true,color:"cyan"},
+      {id:"frugal",glyph:"🪙",name:"Frugal",unlocked:true,color:"gold"},
+      {id:"polyglot",glyph:"🌐",name:"Polyglot",unlocked:true,color:"violet"},
+      {id:"nightowl",glyph:"🦉",name:"Night Owl",unlocked:true,color:"violet"},
+      {id:"rainmaker",glyph:"🌧️",name:"Rainmaker",unlocked:false,color:"green"},
+      {id:"firstblood",glyph:"🩸",name:"First Blood",unlocked:false,color:"pink"},
+      {id:"trusted",glyph:"🔮",name:"Trusted",unlocked:false,color:"violet"},
+      {id:"whale",glyph:"🐋",name:"Whale",unlocked:false,color:"cyan"}
+    ],
+    leaderboard:[
+      {rank:1,handle:"vega_ai",metric:"$0.0003/task",level:22},
+      {rank:2,handle:"kawaii_agent",metric:"$0.0004/task",level:19},
+      {rank:3,handle:"nightowl_42",metric:"$0.0006/task",level:14,you:true},
+      {rank:4,handle:"deepseeker",metric:"$0.0009/task",level:17},
+      {rank:5,handle:"oracle_kid",metric:"$0.0011/task",level:12}
+    ]
+  };
+
+  function n(id){return document.getElementById(id)}
+  function fmt(x){return x.toLocaleString(undefined,{maximumFractionDigits:0})}
+
+  var CUR = DEMO;
+  var VIEW_MODE = localStorage.getItem("argusArenaMode") || "live";
+  var MODE_COLORS = {live:"#3df5a6", uni:"#a779ff", test:"#ffd14d"};
+
+  function statsUrl(mode){
+    if(mode==="test") return null;
+    var origin = window.location.origin;
+    if(mode==="uni") return origin + "/arena-uni/stats";
+    if(/\/arena-uni\/?$/.test(window.location.pathname)) return origin + "/arena/stats";
+    return new URL("stats", window.location.href).href;
+  }
+
+  function setModeUi(mode, connected){
+    VIEW_MODE = mode;
+    localStorage.setItem("argusArenaMode", mode);
+    ["test","live","uni"].forEach(function(m){
+      var btn = document.getElementById("mode"+m.charAt(0).toUpperCase()+m.slice(1));
+      if(btn){ btn.className = (m===mode ? "on-"+m : ""); btn.setAttribute("aria-selected", m===mode?"true":"false"); }
+    });
+    var c = MODE_COLORS[mode] || MODE_COLORS.live;
+    var live=document.querySelector(".live");
+    live.style.borderColor=c; live.style.color=c; live.style.background=(mode==="test"?"rgba(255,209,77,.08)":mode==="uni"?"rgba(167,121,255,.1)":"rgba(61,245,166,.08)");
+    var dot=live.querySelector(".dot"); dot.style.background=c; dot.style.boxShadow="0 0 10px "+c;
+    if(mode==="test"){
+      n("liveLabel").textContent = connected ? "TEST · demo metrics" : "TEST · preview";
+    }
+  }
+
+  function updateNodebar(d){
+    var bar=n("nodebar");
+    if(!d || !d.wallet || VIEW_MODE==="test"){ bar.classList.add("off"); return; }
+    bar.classList.remove("off");
+    n("nbChain").textContent = (d.chainNetwork || d.mode || "—") + (d.chainId ? " #"+d.chainId : "");
+    var w = String(d.wallet);
+    n("nbWallet").textContent = w.slice(0,6)+"…"+w.slice(-4);
+    var ex = n("nbExplorer");
+    if(d.walletExplorer){ ex.href=d.walletExplorer; ex.style.display=""; }
+    else { ex.style.display="none"; }
+    n("nbUptime").textContent = d.uptimeSec != null ? ("uptime "+Math.round(d.uptimeSec/60)+"m") : "";
+  }
+
+  function render(d){
+    CUR = d;
+    n("handle").textContent=d.handle; n("level").textContent=d.level;
+    n("tier").textContent="— "+(d.tier||"agent")+" —";
+    n("streak").textContent=d.streak; n("earned").textContent=Number(d.earnedUsd).toFixed(2);
+    n("lumen").textContent=d.lumenRank||"—"; n("tasks").textContent=d.tasks;
+    n("xpNow").textContent=fmt(d.xpIntoLevel); n("xpNext").textContent=fmt(d.xpForLevel);
+
+    var winPct=Math.round((d.winRate||0)*100);
+    countUp(n("winrate"),winPct); n("winbar").style.width=winPct+"%";
+
+    var xpPct=Math.max(3,Math.min(100,Math.round((d.xpIntoLevel/d.xpForLevel)*100)));
+    n("xpfill").style.width=xpPct+"%";
+    var ringPct=xpPct/100, circ=264; n("ringFill").style.strokeDashoffset=String(circ-circ*ringPct);
+
+    var b=n("badges"); b.innerHTML="";
+    d.badges.forEach(function(x){
+      var el=document.createElement("div");
+      el.className="badge "+(x.unlocked?"on":"off")+" c-"+(x.color||"cyan");
+      el.innerHTML='<span class="g">'+x.glyph+'</span>'+x.name;
+      el.title=x.unlocked?"Unlocked":"Locked";
+      b.appendChild(el);
+    });
+
+    var bd=n("board"); bd.innerHTML="";
+    (d.leaderboard||[]).forEach(function(r){
+      var row=document.createElement("div"); row.className="r"+(r.you?" you":"");
+      var g=r.rank<=3?(" g"+r.rank):"";
+      row.innerHTML='<div class="rk'+g+'">'+(r.rank<=3?["🥇","🥈","🥉"][r.rank-1]:r.rank)+'</div>'+
+        '<div class="nm">@'+r.handle+(r.you?'<span class="you-chip">YOU</span>':'')+'</div>'+
+        '<div class="mt">'+r.metric+'</div><div class="lv">Lv '+r.level+'</div>';
+      bd.appendChild(row);
+    });
+  }
+
+  function countUp(el,to){var s=0,d=Math.max(1,Math.round(to/28));var t=setInterval(function(){s+=d;if(s>=to){s=to;clearInterval(t)}el.textContent=s},22)}
+
+  function load(){
+    setModeUi(VIEW_MODE, false);
+    if(VIEW_MODE==="test"){
+      n("liveLabel").textContent="TEST · demo metrics";
+      render(DEMO);
+      updateNodebar(null);
+      return;
+    }
+    var url = statsUrl(VIEW_MODE);
+    n("liveLabel").textContent = VIEW_MODE.toUpperCase()+" · loading…";
+    fetch(url, {cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
+      .then(function(d){
+        var m=(d.mode||VIEW_MODE).toLowerCase();
+        setModeUi(m, true);
+        n("liveLabel").textContent=m.toUpperCase()+" ARENA · "+(d.economy==="on"?"economy on":"autonomous");
+        updateNodebar(d);
+        render(d);
+      })
+      .catch(function(err){
+        setModeUi(VIEW_MODE, false);
+        n("liveLabel").textContent=VIEW_MODE.toUpperCase()+" · offline";
+        updateNodebar(null);
+        if(VIEW_MODE==="live"){
+          toast("LIVE node unreachable — run ./scripts/deploy_argus.sh");
+          render(Object.assign({}, DEMO, {handle:"argus", tier:"live node offline", level:0, streak:0, earnedUsd:0, tasks:0, winRate:0, badges:DEMO.badges.map(function(b){return Object.assign({},b,{unlocked:false})})}));
+        } else {
+          toast(VIEW_MODE.toUpperCase()+" node unreachable — is argus-"+(VIEW_MODE==="uni"?"uni":"live")+" running?");
+          render(Object.assign({}, DEMO, {handle:"argus_"+VIEW_MODE, tier:"node offline", level:0, streak:0, earnedUsd:0, tasks:0, winRate:0}));
+        }
+      });
+  }
+  load();
+  n("refreshBtn").onclick=load;
+  document.getElementById("modePick").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-mode]");
+    if(!btn) return;
+    VIEW_MODE = btn.getAttribute("data-mode");
+    load();
+  });
+
+  function toast(m){var t=n("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},1900)}
+  n("shareBtn").onclick=function(){
+    var url=window.location.href.split("#")[0].split("?")[0];
+    if(navigator.share){navigator.share({title:"My ARGUS Agent Arena",url:url}).catch(function(){})}
+    else if(navigator.clipboard){navigator.clipboard.writeText(url);toast("link copied — flex away 🎮")}
+    else toast(url);
+  };
+  function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+  function buildSvg(d){
+    var win=Math.round((d.winRate||0)*100);
+    var badges=(d.badges||[]).filter(function(b){return b.unlocked}).slice(0,4);
+    var bx=badges.map(function(b,i){return '<text x="'+(34+i*150)+'" y="332" font-size="15" fill="#eaf0ff">'+b.glyph+' '+esc(b.name)+'</text>'}).join("");
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="380" viewBox="0 0 640 380" font-family="Menlo,monospace">'+
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2444"/><stop offset="1" stop-color="#0c1022"/></linearGradient>'+
+      '<linearGradient id="b" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#36e6ff"/><stop offset=".5" stop-color="#a779ff"/><stop offset="1" stop-color="#ff5db1"/></linearGradient></defs>'+
+      '<rect width="640" height="380" rx="22" fill="url(#g)"/><rect x="1.5" y="1.5" width="637" height="377" rx="21" fill="none" stroke="url(#b)" stroke-width="2"/>'+
+      '<text x="34" y="52" font-size="14" fill="#36e6ff" letter-spacing="3">ARGUS · AGENT ARENA  🎮</text>'+
+      '<text x="34" y="98" font-size="34" font-weight="bold" fill="#eaf0ff">@'+esc(d.handle)+'</text>'+
+      '<text x="34" y="122" font-size="13" fill="#93a2c9">'+esc(d.tier||"agent")+'</text>'+
+      '<circle cx="566" cy="80" r="46" fill="none" stroke="#243056" stroke-width="8"/><circle cx="566" cy="80" r="46" fill="none" stroke="url(#b)" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+(2*Math.PI*46)+'" stroke-dashoffset="'+(2*Math.PI*46*(1-Math.min(1,(d.xpIntoLevel||0)/(d.xpForLevel||1))))+'" transform="rotate(-90 566 80)"/>'+
+      '<text x="566" y="74" font-size="30" font-weight="bold" fill="#36e6ff" text-anchor="middle">'+d.level+'</text><text x="566" y="94" font-size="9" fill="#93a2c9" text-anchor="middle" letter-spacing="2">LEVEL</text>'+
+      '<text x="34" y="178" font-size="15" fill="#93a2c9">🔥 Streak</text><text x="200" y="178" font-size="17" fill="#ff9d3c">'+d.streak+' days (best '+d.longestStreak+')</text>'+
+      '<text x="34" y="210" font-size="15" fill="#93a2c9">💸 Earned</text><text x="200" y="210" font-size="17" fill="#3df5a6">$'+Number(d.earnedUsd||0).toFixed(2)+(d.economy==="off"?"  (autonomous)":"")+'</text>'+
+      '<text x="34" y="242" font-size="15" fill="#93a2c9">🔮 LUMEN</text><text x="200" y="242" font-size="17" fill="#a779ff">'+esc(d.lumenRank||"—")+'</text>'+
+      '<text x="34" y="278" font-size="15" fill="#93a2c9">🎯 Win-rate · '+d.tasks+' tasks</text>'+
+      '<rect x="34" y="288" width="572" height="10" rx="5" fill="#1a2240"/><rect x="34" y="288" width="'+(572*win/100)+'" height="10" rx="5" fill="url(#b)"/>'+
+      '<text x="590" y="282" font-size="15" fill="#eaf0ff" text-anchor="end">'+win+'%</text>'+
+      bx+
+      '<text x="34" y="364" font-size="12" fill="#36e6ff">▲ AICOM</text><text x="606" y="364" font-size="12" fill="#5c6a93" text-anchor="end">alexar76.github.io/aicom</text>'+
+      '</svg>';
+  }
+  n("dlBtn").onclick=function(){
+    var svg=buildSvg(CUR||DEMO), blob=new Blob([svg],{type:"image/svg+xml"}), a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download=((CUR&&CUR.handle)||"argus")+"-arena.svg";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},1000); toast("card downloaded 🎮");
+  };
+
+  // Parallax tilt on the card
+  var card=n("card");
+  window.addEventListener("mousemove",function(e){
+    var w=innerWidth,h=innerHeight,rx=(e.clientY/h-.5)*-6,ry=(e.clientX/w-.5)*6;
+    card.style.transform="rotateX("+rx+"deg) rotateY("+ry+"deg)";
+  });
+  window.addEventListener("mouseleave",function(){card.style.transform="none"});
+
+  // Particle starfield
+  var c=n("space"),x=c.getContext("2d"),ps=[],W,H;
+  function rs(){W=c.width=innerWidth;H=c.height=innerHeight}
+  rs();addEventListener("resize",rs);
+  for(var i=0;i<90;i++)ps.push({x:Math.random()*W,y:Math.random()*H,z:Math.random()*.8+.2,s:Math.random()*1.6+.3});
+  var cols=["54,230,255","167,121,255","255,93,177"];
+  function tick(){
+    x.clearRect(0,0,W,H);
+    for(var i=0;i<ps.length;i++){var p=ps[i];p.y+=p.z*.35;if(p.y>H){p.y=-4;p.x=Math.random()*W}
+      x.beginPath();x.arc(p.x,p.y,p.s,0,7);x.fillStyle="rgba("+cols[i%3]+","+(p.z*.7)+")";
+      x.shadowBlur=8;x.shadowColor="rgba("+cols[i%3]+",.8)";x.fill();}
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>

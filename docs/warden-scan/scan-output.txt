@@ -1,0 +1,37 @@
+WARDEN scanning 10 server(s)…
+
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [ '/tmp', '/private/tmp' ]
+✓ MCP Filesystem  score 0.54  allow 14/14 tools
+Knowledge Graph MCP Server running on stdio
+✓ MCP Memory  score 0.54  allow 9/9 tools
+Starting default (STDIO) server...
+✓ MCP Everything (reference)  score 0.38  allow 13/13 tools
+    [medium] TOOL_DEF_SECRET_REQUEST (get-env): Tool "get-env" description matches TOOL_DEF_SECRET_REQUEST signature ((?:^|[^.\w])\.env\b|\benvironment\s+variables?\b).
+Sequential Thinking MCP Server running on stdio
+✓ MCP Sequential Thinking  score 0.54  allow 1/1 tools
+Downloading cryptography (3.8MiB)
+ Downloaded cryptography
+Installed 33 packages in 42ms
+✓ MCP Git  score 0.54  allow 12/12 tools
+Downloading lxml (8.2MiB)
+ Downloaded lxml
+Installed 43 packages in 25ms
+✓ MCP Fetch  score 0.54  allow 1/1 tools
+Installed 32 packages in 19ms
+✓ MCP Time  score 0.54  allow 2/2 tools
+✓ Playwright MCP  score 0.49  allow 24/24 tools
+    [low] TOOL_DEF_INJECTION (browser_take_screenshot): Tool "browser_take_screenshot" input schema matches TOOL_DEF_INJECTION signature (\binstead\s+of\b).
+    [low] TOOL_DEF_INJECTION (browser_snapshot): Tool "browser_snapshot" input schema matches TOOL_DEF_INJECTION signature (\binstead\s+of\b).
+    [low] TOOL_DEF_INJECTION (browser_click): Tool "browser_click" input schema matches TOOL_DEF_INJECTION signature (\binstead\s+of\b).
+Context7 Documentation MCP Server v3.2.3 running on stdio
+✕ Context7 MCP  BLOCKED by static-scan  score 0.22
+    [medium] TOOL_DEF_INJECTION (resolve-library-id): Tool "resolve-library-id" description matches TOOL_DEF_INJECTION signature (\byou\s+must\b).
+    [low] TOOL_DEF_INJECTION (resolve-library-id): Tool "resolve-library-id" input schema matches TOOL_DEF_INJECTION signature (\binstead\s+of\b).
+    [high] TOOL_DEF_SECRET_REQUEST (resolve-library-id): Tool "resolve-library-id" input schema matches TOOL_DEF_SECRET_REQUEST signature (\bcredentials?\b|\baccess[_\s-]?token\b|\bbea…).
+    [medium] TOOL_DEF_INJECTION (query-docs): Tool "query-docs" description matches TOOL_DEF_INJECTION signature (\byou\s+must\b).
+    [low] TOOL_DEF_INJECTION (query-docs): Tool "query-docs" input schema matches TOOL_DEF_INJECTION signature (\binstead\s+of\b).
+    [high] TOOL_DEF_SECRET_REQUEST (query-docs): Tool "query-docs" input schema matches TOOL_DEF_SECRET_REQUEST signature (\bcredentials?\b|\baccess[_\s-]?token\b|\bbea…).
+npm warn deprecated @modelcontextprotocol/server-brave-search@0.6.2: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+Error: BRAVE_API_KEY environment variable is required
+! Brave Search MCP  unreachable: MCP error -32000: Connection closed
