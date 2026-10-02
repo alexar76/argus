@@ -1,0 +1,28 @@
+# ARGUS-3 — stdio MCP server for Glama / Claude Desktop / Cursor
+# syntax=docker/dockerfile:1
+FROM node:22-slim AS build
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install --omit=optional
+
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
+
+FROM node:22-slim
+WORKDIR /app
+ENV NODE_ENV=production
+
+LABEL org.opencontainers.image.title="argus"
+LABEL org.opencontainers.image.description="ARGUS-3 stdio MCP server (argus_ask, argus_status) with WARDEN firewall"
+LABEL ai-market.mcp="true"
+
+COPY package.json package-lock.json ./
+RUN npm install --omit=dev --omit=optional
+
+COPY --from=build /app/dist ./dist
+COPY web ./web
+COPY argus.config.example.json ./
+
+ENTRYPOINT ["node", "dist/index.js", "mcp"]
