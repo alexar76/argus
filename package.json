@@ -60,12 +60,12 @@
   "dependencies": {
     "@aimarket/warden": "0.8.2",
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "@noble/post-quantum": "^0.6.1",
+    "@noble/post-quantum": "^0.7.1",
     "viem": "^2.21.55",
     "zod": "^3.24.1"
   },
   "peerDependencies": {
-    "@aimarket/agent": "^0.1.0"
+    "@aimarket/agent": "^0.2.1"
   },
   "peerDependenciesMeta": {
     "@aimarket/agent": {
@@ -73,7 +73,7 @@
     }
   },
   "devDependencies": {
-    "@aimarket/agent": "^0.1.0",
+    "@aimarket/agent": "^0.2.1",
     "@types/node": "^22.10.2",
     "@vitest/coverage-v8": "^4.1.11",
     "tsx": "^4.19.2",
