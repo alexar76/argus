@@ -62,7 +62,7 @@
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@noble/post-quantum": "^0.6.1",
     "viem": "^2.21.55",
-    "zod": "^3.24.1"
+    "zod": "^4.6.5"
   },
   "peerDependencies": {
     "@aimarket/agent": "^0.1.0"
