@@ -1,0 +1,25 @@
+# Independent / bare-metal ARGUS (no Docker). Copy to /etc/systemd/system/argus.service
+# and point WorkingDirectory + EnvironmentFile at the install.
+#
+#   systemctl enable --now argus
+#
+# Secrets live in EnvironmentFile (chmod 600), never in this unit.
+
+[Unit]
+Description=ARGUS personal agent (Independent work-seat)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/argus
+EnvironmentFile=/opt/argus/.env
+Environment=NODE_ENV=production
+ExecStart=/opt/independentai/node-v22.22.1/bin/node dist/index.js serve
+Restart=on-failure
+RestartSec=5
+User=root
+# HTTP is loopback-only via ARGUS bind; do not publish 8787 on the public NIC.
+
+[Install]
+WantedBy=multi-user.target

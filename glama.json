@@ -1,0 +1,8 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["alexar76"],
+  "name": "argus",
+  "description": "MCP server (stdio): ARGUS-3 — argus_ask (bounded NL; budget-metered; sensitive tools deny-by-default), argus_status + argus_capabilities (read-only). WARDEN gates third-party MCP (static → threat → LUMEN → pinning).",
+  "dockerfile": "Dockerfile.glama",
+  "command": ["node", "dist/index.js", "mcp"]
+}
