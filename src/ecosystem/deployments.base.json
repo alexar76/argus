@@ -1,0 +1,13 @@
+{
+  "_generated": "GENERATED FILE — do not edit. Source: config/deployments/base-mainnet.json. Regenerate with: python scripts/sync_deployment_addresses.py",
+  "chainId": 8453,
+  "addresses": {
+    "lottery": "0xEcB3A01b44C5b78210F72768C446c3E4E6175af4",
+    "usdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "escrow": "0xa4cb6ef73B982B847fB06Ec75540d05D0311B2Eb",
+    "acexAmm": "0x0A70AA84903ecB2E0aF5c435AFd9EDd178559E47",
+    "acexRegistry": "0x3636A636262940Ff4E49aC1BCf34b958F589acC9",
+    "lendingPool": "0x51a61d25b799C17A012eB671e3EDe2569E2d9C3d",
+    "capabilityNft": "0x544dcdd8B01A7ee1444bf89A5381aA981735a281"
+  }
+}
