@@ -14,7 +14,7 @@
 
 <!-- aicom-readme-badges -->
 <p align="center">
-  <a href="https://github.com/alexar76/argus/actions/workflows/ci.yml"><img src="https://raw.githubusercontent.com/alexar76/argus/refs/heads/main/docs/badges/ci.svg" alt="CI" /></a>
+  <a href="https://github.com/alexar76/argus/actions/workflows/ci.yml"><img src="https://github.com/alexar76/argus/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://glama.ai/mcp/servers/alexar76/argus"><img src="https://glama.ai/mcp/servers/alexar76/argus/badges/score.svg" alt="argus MCP server" /></a>
   <img src="https://raw.githubusercontent.com/alexar76/argus/refs/heads/main/docs/badges/warden.svg" alt="WARDEN MCP firewall" />
   <img src="https://raw.githubusercontent.com/alexar76/argus/refs/heads/main/docs/badges/crypto.svg" alt="Crypto off by default" />

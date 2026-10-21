@@ -5,7 +5,7 @@
 **Fecha:** 2026-07-16  
 **Herramienta:** `argus warden scan` (ARGUS v0.2.0)  
 **Política:** `blockAtSeverity: high`, `minReputation: 0.25`, `allowUnknownServers: true`  
-**Config:** [`warden-scan/argus.config.json`](./warden-scan/argus.config.json)  
+**Config:** `argus.config.json` (la configuración del propio host analizado, no se publica)  
 **Log en bruto:** [`warden-scan/scan-output.txt`](./warden-scan/scan-output.txt)
 
 ---

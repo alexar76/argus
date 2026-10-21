@@ -5,7 +5,7 @@
 **Дата:** 2026-07-16  
 **Инструмент:** `argus warden scan` (ARGUS v0.2.0)  
 **Политика:** `blockAtSeverity: high`, `minReputation: 0.25`, `allowUnknownServers: true`  
-**Конфиг:** [`warden-scan/argus.config.json`](./warden-scan/argus.config.json)  
+**Конфиг:** `argus.config.json` (собственный конфиг проверенного хоста, не публикуется)  
 **Сырой лог:** [`warden-scan/scan-output.txt`](./warden-scan/scan-output.txt)
 
 ---
