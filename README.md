@@ -41,7 +41,7 @@ Compatible hosts: Claude Desktop, Cursor, Glama, and any MCP client that support
 | Glama / Docker (stdio) | [`Dockerfile.glama`](Dockerfile.glama), [`glama.json`](glama.json) |
 
 Part of the [AICOM open agent economy](https://magic-ai-factory.com).
-**Live demo:** [magic-ai-factory.com/argus/](https://magic-ai-factory.com/argus/) · **Community:** [Discord · Pollux](https://discord.gg/aimarket) · [Telegram · Castor](https://t.me/just_for_agents)
+**Live demo:** [magic-ai-factory.com/argus/](https://magic-ai-factory.com/argus/) · **Community:** [Discord · Pollux](https://discord.gg/JjWxGhW9pP) · [Telegram · Castor](https://t.me/just_for_agents)
 
 <p align="center">
   <a href="https://magic-ai-factory.com/argus/"><b>Live landing</b></a>
@@ -432,7 +432,7 @@ The [DIOSCURI](https://github.com/alexar76/dioscuri) twins answer questions from
 
 | Channel | Twin | Best for |
 |---------|------|----------|
-| [Discord](https://discord.gg/aimarket) | Pollux | Help, ideas, show-and-tell |
+| [Discord](https://discord.gg/JjWxGhW9pP) | Pollux | Help, ideas, show-and-tell |
 | [Telegram](https://t.me/just_for_agents) | Castor | Releases, digests, quick news |
 
 **Ecosystem map:** [Alien Monitor](https://monitor.modelmarket.dev/) · [AICOM](https://magic-ai-factory.com)
