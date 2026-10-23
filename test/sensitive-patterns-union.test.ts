@@ -24,3 +24,15 @@ describe("sensitive tool patterns", () => {
     }
   });
 });
+
+describe("which calls need the owner's approval", () => {
+  it("an MCP tool is matched by its exposed name and by the server's own name for it", async () => {
+    const { needsApproval } = await import("../src/core/agent.js");
+    const policy = { blockAtSeverity: "high" as const, sensitiveToolPatterns: ["delete_*"], allowUnknownServers: false, pinToolDefs: true } as any;
+    expect(needsApproval("fs__delete_file", { kind: "mcp", server: "fs" }, policy)).toBe(true);
+    expect(needsApproval("fs__read_file", { kind: "mcp", server: "fs" }, policy)).toBe(false);
+    expect(needsApproval("delete_note", { kind: "builtin" }, policy)).toBe(true);
+    // A built-in whose name merely contains "__" is never read as a server prefix.
+    expect(needsApproval("x__delete_file", { kind: "builtin" }, policy)).toBe(false);
+  });
+});

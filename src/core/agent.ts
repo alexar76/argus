@@ -1,4 +1,4 @@
-import type { Logger, MemoryStore, MeterSnapshot, Message, Tool, ToolCall, VerificationOutcome } from "../types.js";
+import type { Logger, MemoryStore, MeterSnapshot, Message, Tool, ToolCall, ToolSource, VerificationOutcome } from "../types.js";
 import type { ArgusConfig } from "../config.js";
 import type { ProviderRouter } from "../providers/router.js";
 import { Budget, BudgetExceededError } from "./budget.js";
@@ -213,6 +213,17 @@ const LESSONS_FOOTER = "</lessons-context>";
  * someone else's dime. Every step and tool call is metered; exceeding a ceiling
  * stops the run rather than overspending silently.
  */
+/**
+ * A call needs the owner's yes when its exposed name, or for an MCP tool the server's own name for it, matches a
+ * sensitive pattern. The MCP host checks the server's name (`delete_file`), this loop sees `fs__delete_file`: an
+ * anchored pattern such as `delete_*` matched only the host's, so the host refused a call nobody had been asked about.
+ */
+export function needsApproval(callName: string, source: ToolSource, policy: ArgusConfig["warden"]): boolean {
+  if (isSensitiveTool(callName, policy)) return true;
+  const prefix = source.kind === "mcp" ? `${source.server}__` : "";
+  return !!prefix && callName.startsWith(prefix) && isSensitiveTool(callName.slice(prefix.length), policy);
+}
+
 export class Agent {
   private readonly toolMap = new Map<string, Tool>();
 
@@ -420,7 +431,7 @@ export class Agent {
     usedTools.add(call.name);
 
     let approved = false;
-    if (isSensitiveTool(call.name, policy)) {
+    if (needsApproval(call.name, tool.source, policy)) {
       const server = tool.source.kind === "mcp" ? tool.source.server : undefined;
       approved = await approve({ tool: call.name, server, args: call.arguments });
       if (!approved) {
