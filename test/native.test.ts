@@ -142,6 +142,15 @@ describe("web_fetch SSRF guard", () => {
     expect(r.ok).toBe(false);
     expect(r.content).toMatch(/blocked|private|internal/i);
   });
+  it.each([
+    '::ffff:127.0.0.1', '::ffff:7f00:1', '0:0:0:0:0:ffff:a00:1',
+    '64:ff9b::a00:1', '2002:7f00:1::1', '2001:db8::1',
+  ])("blocks IPv6 aliases of non-public destinations: %s", async address => {
+    const webFetch = buildBuiltinTools({ memory: fakeMemory, log }).find(t => t.def.name === "web_fetch")!;
+    const result = await webFetch.run({ url: `http://[${address}]:9/` }, ctx);
+    expect(result.ok).toBe(false);
+    expect(result.content).toMatch(/blocked private\/internal/);
+  });
   it("rejects non-http(s) schemes", async () => {
     const webFetch = buildBuiltinTools({ memory: fakeMemory, log }).find((t) => t.def.name === "web_fetch")!;
     const r = await webFetch.run({ url: "file:///etc/passwd" }, ctx);

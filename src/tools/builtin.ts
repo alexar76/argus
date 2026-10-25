@@ -4,6 +4,7 @@ import type { LookupAddress, LookupAllOptions, LookupOptions } from "node:dns";
 import { request as httpRequest, type IncomingMessage } from "node:http";
 import { request as httpsRequest, type RequestOptions } from "node:https";
 import { isIP } from "node:net";
+import { isNonPublicAddress } from "./public-address.js";
 import type { Logger, MemoryStore, Tool } from "../types.js";
 import type { EgressGuard } from "@aimarket/warden";
 
@@ -13,6 +14,8 @@ export interface BuiltinDeps {
   /** Optional outbound allowlist for web_fetch. When present, egress is gated. */
   egress?: EgressGuard;
 }
+
+export const WEB_FETCH_MAX_BYTES = 2_000_000;
 
 /**
  * Trusted, built-in tools. Unlike MCP tools (hostile-by-default, vetted by
@@ -64,6 +67,7 @@ function webFetch({ log, egress }: BuiltinDeps): Tool {
           await assertPublicUrl(url);
           res = await guardedFetch(url, { signal: ctrl.signal });
           if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
+            if (hop === 3) return { ok: false, content: "too many redirects" };
             url = new URL(res.headers.get("location")!, url).toString();
             continue;
           }
@@ -90,7 +94,7 @@ async function assertPublicUrl(raw: string): Promise<void> {
   const host = u.hostname.replace(/^\[|\]$/g, "");
   const ips: string[] = isIP(host) ? [host] : (await lookup(host, { all: true })).map((r) => r.address);
   if (ips.length === 0) throw new Error(`cannot resolve ${host}`);
-  for (const ip of ips) if (isPrivateIp(ip)) throw new Error(`blocked private/internal address (${host} → ${ip})`);
+  for (const ip of ips) if (isNonPublicAddress(ip)) throw new Error(`blocked private/internal address (${host} → ${ip})`);
 }
 
 /** Minimal Response-shaped view over a node:http(s) reply — only what web_fetch reads. */
@@ -105,7 +109,7 @@ interface GuardedResponse {
  * A dns.lookup-compatible resolver that Node invokes at ACTUAL TCP-connect time
  * (the socket layer calls it when the connection is opened, not before). It
  * re-resolves the host and rejects any private/loopback/link-local/metadata
- * address via the same {@link isPrivateIp} logic as the pre-fetch check — closing
+ * address via the same {@link isNonPublicAddress} logic as the pre-fetch check — closing
  * the DNS-rebinding TOCTOU window that a pre-check alone leaves open, because a
  * DNS answer that flips to a private IP after the pre-check is still caught here.
  */
@@ -118,7 +122,7 @@ function guardedLookup(
   dnsLookupCb(hostname, allOpts, (err, addresses) => {
     if (err) return callback(err, "", 0);
     for (const a of addresses) {
-      if (isPrivateIp(a.address)) {
+      if (isNonPublicAddress(a.address)) {
         const blocked: NodeJS.ErrnoException = new Error(`blocked private/internal address at connect (${hostname} → ${a.address})`);
         blocked.code = "ESSRFBLOCKED";
         return callback(blocked, "", 0);
@@ -154,7 +158,23 @@ function guardedFetch(rawUrl: string, opts: { signal: AbortSignal }): Promise<Gu
     const handler = (res: IncomingMessage): void => {
       const status = res.statusCode ?? 0;
       const chunks: Buffer[] = [];
-      res.on("data", (c: Buffer) => chunks.push(c));
+      let total = 0;
+      res.on("error", reject);
+      res.on("aborted", () => reject(new Error("web_fetch response aborted")));
+      const tooLarge = () => {
+        const error = new Error(`web_fetch response exceeds ${WEB_FETCH_MAX_BYTES} bytes`);
+        reject(error);
+        res.destroy(error);
+      };
+      if (Number(res.headers['content-length']) > WEB_FETCH_MAX_BYTES) {
+        tooLarge();
+        return;
+      }
+      res.on("data", (c: Buffer) => {
+        total += c.length;
+        if (total > WEB_FETCH_MAX_BYTES) { tooLarge(); return; }
+        chunks.push(c);
+      });
       res.on("end", () => {
         const body = Buffer.concat(chunks).toString("utf8");
         resolve({
@@ -169,106 +189,11 @@ function guardedFetch(rawUrl: string, opts: { signal: AbortSignal }): Promise<Gu
           text: async () => body,
         });
       });
-      res.on("error", reject);
     };
     const req = u.protocol === "https:" ? httpsRequest(u, options, handler) : httpRequest(u, options, handler);
     req.on("error", reject);
     req.end();
   });
-}
-
-/**
- * Returns true when `ip` is a private, loopback, link-local, or otherwise
- * non-public address (both IPv4 and IPv6). Covers the full RFC 6890 special-
- * purpose registry plus cloud-metadata (169.254.169.254), CGNAT, and NAT64.
- *
- * M5 fix: replaced fragile string-prefix IPv6 checks with numeric range
- * comparisons that cover all documented special-use blocks, including
- * IPv4-mapped addresses whose embedded IPv4 is private.
- */
-function isPrivateIp(ip: string): boolean {
-  const v = isIP(ip);
-  if (v === 4) return isPrivateIPv4(ip);
-  if (v === 6) return isPrivateIPv6(ip);
-  return true; // unparseable — block
-}
-
-function isPrivateIPv4(ip: string): boolean {
-  const p = ip.split(".").map(Number);
-  const [a, b] = [p[0] ?? 0, p[1] ?? 0];
-  return (
-    a === 10 ||                           // 10.0.0.0/8
-    a === 127 ||                          // 127.0.0.0/8 loopback
-    a === 0 ||                            // 0.0.0.0/8 "this network"
-    (a === 172 && b >= 16 && b <= 31) ||  // 172.16.0.0/12
-    (a === 192 && b === 168) ||           // 192.168.0.0/16
-    (a === 169 && b === 254) ||           // 169.254.0.0/16 link-local + cloud metadata
-    (a === 100 && b >= 64 && b <= 127) || // 100.64.0.0/10 CGNAT
-    a >= 224                              // multicast / reserved (224.0.0.0/4 + 240.0.0.0/4)
-  );
-}
-
-function isPrivateIPv6(ip: string): boolean {
-  const low = ip.toLowerCase();
-
-  // Unspecified + loopback
-  if (low === "::" || low === "::1") return true;
-
-  // IPv4-mapped (::ffff:x.x.x.x) — check the embedded IPv4 address.
-  // Format: ::ffff:1.2.3.4 or ::ffff:0102:0304
-  const v4Mapped = low.match(/^::ffff:(?<v4>\d+\.\d+\.\d+\.\d+)$/);
-  if (v4Mapped?.groups?.v4) return isPrivateIPv4(v4Mapped.groups.v4);
-
-  // IPv4-compatible (deprecated but still seen): ::1.2.3.4
-  const v4Compat = low.match(/^::(?<v4>\d+\.\d+\.\d+\.\d+)$/);
-  if (v4Compat?.groups?.v4) return isPrivateIPv4(v4Compat.groups.v4);
-
-  // Expand :: shorthand for prefix matching (best-effort; covers common forms).
-  const expanded = expandIPv6(low);
-
-  // Unique Local Address: fc00::/7 (runs fc00::/8 and fd00::/8)
-  if (expanded.startsWith("fc") || expanded.startsWith("fd")) return true;
-
-  // Link-local: fe80::/10
-  if (/^fe[89ab]./.test(expanded)) return true;
-
-  // Documentation: 2001:db8::/32
-  if (expanded.startsWith("2001:0db8") || expanded.startsWith("2001:db8")) return true;
-
-  // NAT64 well-known prefix: 64:ff9b::/96
-  if (expanded.startsWith("0064:ff9b")) return true;
-
-  // 6to4 anycast: 192.88.99.0/24 → 2002:c058:6300::/40 (approximate block)
-  // Terredo: 2001::/32
-  if (expanded.startsWith("2001:0000")) return true;
-
-  // Benchmarking: 2001:2::/48
-  if (expanded.startsWith("2001:0002")) return true;
-
-  // Multicast: ff00::/8
-  if (expanded.startsWith("ff")) return true;
-
-  return false;
-}
-
-/**
- * Expand :: shorthand in an IPv6 address to a full 8-group colon-separated
- * form so prefix tests work reliably. Returns the original on parse failure.
- */
-function expandIPv6(addr: string): string {
-  if (addr.includes("::")) {
-    const parts = addr.split("::");
-    if (parts.length > 2) return addr;
-    const left = parts[0] ? parts[0].split(":") : [];
-    const right = parts[1] ? parts[1].split(":") : [];
-    const missing = 8 - left.length - right.length;
-    if (missing < 0) return addr;
-    const mid = Array<string>(missing).fill("0000");
-    const groups = [...left, ...mid, ...right];
-    return groups.map((g) => g.padStart(4, "0")).join(":");
-  }
-  // No shorthand — still normalise to 4-char groups for prefix matching.
-  return addr.split(":").map((g) => g.padStart(4, "0")).join(":");
 }
 
 function recallMemory({ memory }: BuiltinDeps): Tool {
