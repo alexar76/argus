@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 /**
  * A2A 1.0 client for an AIMarket hub — ARGUS finding and buying capabilities over the
  * standard agent protocol (aimarket-hub docs/a2a.md) instead of the hub's native REST.
@@ -124,7 +125,7 @@ export class A2AClient {
       credentials["X-AIMarket-Mandate"] = digest;
       credentials["X-AIMarket-A2A-Proof"] = signature;
     }
-    const res = await (this.o.fetch ?? fetch)(this.endpoint, {
+    const res = await fetchNoRedirect(this.endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +135,7 @@ export class A2AClient {
       },
       body,
       signal: AbortSignal.timeout(this.o.timeoutMs ?? DEFAULT_TIMEOUT_MS),
-    });
+    }, this.o.fetch);
     const text = await res.text();
     if (text.length > MAX_ANSWER_BYTES) throw new A2AError(-32603, `answer exceeds ${MAX_ANSWER_BYTES} bytes`, "INVALID_RESPONSE");
     let answer: any;

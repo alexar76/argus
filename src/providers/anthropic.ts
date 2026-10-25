@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import type { LLMRequest, LLMResponse, Message, Provider, ProviderKind, StopReason, ToolCall } from "../types.js";
 
 export interface AnthropicOptions {
@@ -62,7 +63,7 @@ export class AnthropicProvider implements Provider {
     const signal = req.signal ?? ctrl.signal;
     let res: Response;
     try {
-      res = await fetch(`${this.baseUrl}/v1/messages`, {
+      res = await fetchNoRedirect(`${this.baseUrl}/v1/messages`, {
         method: "POST",
         headers: {
           "content-type": "application/json",

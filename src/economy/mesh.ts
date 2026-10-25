@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import type { EconomyProvider, Logger, SellableCapability } from "../types.js";
 
 /** Max bytes for a mesh API response. */
@@ -114,7 +115,7 @@ export class MeshProvider implements EconomyProvider {
     try {
       const headers: Record<string, string> = { "content-type": "application/json" };
       if (this.authToken) headers["authorization"] = `Bearer ${this.authToken}`;
-      const res = await fetch(`${this.base}${path}`, {
+      const res = await fetchNoRedirect(`${this.base}${path}`, {
         method: "POST",
         headers,
         body: JSON.stringify(body),

@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import type { LLMRequest, LLMResponse, Message, Provider, ProviderKind, StopReason, ToolCall } from "../types.js";
 
 export interface OpenAICompatOptions {
@@ -52,7 +53,7 @@ export class OpenAICompatProvider implements Provider {
     const signal = req.signal ?? ctrl.signal;
     let res: Response;
     try {
-      res = await fetch(`${this.baseUrl}/chat/completions`, {
+      res = await fetchNoRedirect(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers,
         body: JSON.stringify(body),

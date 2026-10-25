@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import { formatEther } from "viem";
 import type { Logger, Tool } from "../types.js";
 import type { ChainContext } from "../ecosystem/networks.js";
@@ -70,7 +71,7 @@ async function fetchHubEntitlement(wallet: string): Promise<HubEntitlement> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12_000);
   try {
-    const response = await fetch(`${lotteryHubUrl()}/ai-market/v2/lottery/work-seat-entitlement`, {
+    const response = await fetchNoRedirect(`${lotteryHubUrl()}/ai-market/v2/lottery/work-seat-entitlement`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -105,7 +106,7 @@ async function fetchWorkSeat(agent: string, roundId: bigint): Promise<{
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 12_000);
   try {
-    const r = await fetch(`${relayerUrl()}/work-seat`, {
+    const r = await fetchNoRedirect(`${relayerUrl()}/work-seat`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ agent, round_id: Number(roundId), entitlement }),

@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import type { Logger, MeterSnapshot } from "../types.js";
@@ -189,7 +190,7 @@ export class TelegramBot {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      const res = await fetch(`${API}/bot${this.o.token}/${method}`, {
+      const res = await fetchNoRedirect(`${API}/bot${this.o.token}/${method}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(params),

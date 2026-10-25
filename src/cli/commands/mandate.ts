@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../../credential-fetch.js";
 import { writeFileSync } from "node:fs";
 import type { ArgusConfig } from "../../config.js";
 import { AgentKey, issueMandate, mandateDigest, MandateCredential, requestProof, PROOF_HEADER } from "../../economy/aimarket-mandate.js";
@@ -38,7 +39,7 @@ export async function cmdMandate(config: ArgusConfig, args: Args): Promise<numbe
 
     if (sub === "status") {
       const path = `/ai-market/v2/mandates/${mandate.digest}`;
-      const res = await fetch(`${hub}${path}`, {
+      const res = await fetchNoRedirect(`${hub}${path}`, {
         headers: { [PROOF_HEADER]: requestProof(mandate.key, { hubOrigin: hub, leafDigest: mandate.digest, body: "", method: "GET", path }) },
       });
       const body: any = await res.json().catch(() => ({}));
@@ -84,7 +85,7 @@ export async function cmdMandate(config: ArgusConfig, args: Args): Promise<numbe
         validDays: num("days") ?? 7,
         parent: mandate.document,
       });
-      const res = await fetch(`${hub}/ai-market/v2/mandates`, {
+      const res = await fetchNoRedirect(`${hub}/ai-market/v2/mandates`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(child),

@@ -310,3 +310,20 @@ describe("hire tools surface the pay-on-verified outcome", () => {
     expect(invocations[0]?.opts?.intent).toBe("summarize a paper");
   });
 });
+
+describe("paid invoke transport failure", () => {
+  it.each([false, true])("never replays a possibly charged POST (verified=%s), including older installed SDKs", async (verified) => {
+    let charges = 0;
+    vi.stubGlobal("fetch", vi.fn(async (input: unknown) => {
+      const url = String(input);
+      if (url.endsWith("/ai-market/v2/channel/open")) return json(CHANNEL, 201);
+      if (url.endsWith("/ai-market/v2/invoke")) {
+        charges++;
+        throw new TypeError("fetch failed after the seller charged the buyer");
+      }
+      throw new Error(`unexpected URL ${url}`);
+    }));
+    await expect(consumer(verified).invoke("cap.paid@v1", { private: "input" })).rejects.toThrow();
+    expect(charges).toBe(1);
+  });
+});

@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import type { Logger } from "../types.js";
 import type { MonitorFeedConfig, MonitorHeartbeatPayload, MonitorRunPayload } from "./types.js";
 import { MONITOR_LIMITS } from "./sanitize.js";
@@ -70,7 +71,7 @@ export async function pushRunToMonitor(
   const timer = setTimeout(() => controller.abort(), PUSH_TIMEOUT_MS);
 
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetchNoRedirect(endpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -111,7 +112,7 @@ export async function pushHeartbeatToMonitor(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), PUSH_TIMEOUT_MS);
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetchNoRedirect(endpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

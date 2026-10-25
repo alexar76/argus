@@ -1,3 +1,4 @@
+import { fetchNoRedirect } from "../credential-fetch.js";
 import type { DiscoveredCapability, EconomyConsumer, InvokeOutcome, Logger, VerificationOutcome } from "../types.js";
 import type { MandateCredential } from "./aimarket-mandate.js";
 
@@ -128,6 +129,10 @@ export class AimarketConsumer implements EconomyConsumer {
       walletKey: this.o.walletKey,
       affiliate: this.o.affiliate,
       verifyTee: this.o.verifyTee,
+      // A lost response can already have charged the buyer. Older installed
+      // SDKs also need this setting; only explicit owner retries are safe.
+      maxRetries: 0,
+      fetch: (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => this.fetchWithVerify(input, init),
     };
     if (this.o.verifyOutputs) {
       // wait=true holds the invoke response server-side up to VERIFY_WAIT_TIMEOUT_S; the
@@ -154,14 +159,14 @@ export class AimarketConsumer implements EconomyConsumer {
         init = { ...init, body: JSON.stringify(body) };
       }
     }
-    return fetch(input, init);
+    return fetchNoRedirect(input, init);
   }
 
   async discover(intent: string, budgetUsd: number, limit = 5): Promise<DiscoveredCapability[]> {
     const params = new URLSearchParams({ intent, limit: String(limit) });
     if (budgetUsd != null) params.set("budget", String(budgetUsd));
     if (this.o.minHubTrust > 0) params.set("min_trust", String(this.o.minHubTrust));
-    const res = await fetch(`${this.o.hubUrl}/ai-market/v2/search?${params.toString()}`, {
+    const res = await fetchNoRedirect(`${this.o.hubUrl}/ai-market/v2/search?${params.toString()}`, {
       headers: { "X-AIMarket-Affiliate": this.o.affiliate },
     });
     if (!res.ok) throw new Error(`hub search HTTP ${res.status}: ${await readErrorBody(res)}`);
@@ -277,7 +282,7 @@ export class AimarketConsumer implements EconomyConsumer {
       input: (input ?? {}) as Record<string, unknown>,
     });
     const started = Date.now();
-    const res = await fetch(`${this.o.hubUrl}/ai-market/v2/invoke`, {
+    const res = await fetchNoRedirect(`${this.o.hubUrl}/ai-market/v2/invoke`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -371,7 +376,7 @@ export class AimarketConsumer implements EconomyConsumer {
       await this.sleep(delayMs);
       delayMs = Math.min(delayMs * 2, VERIFY_POLL_CAP_MS);
       try {
-        const res = await fetch(`${this.o.hubUrl}/ai-market/v2/verification/${encodeURIComponent(nonce)}`, {
+        const res = await fetchNoRedirect(`${this.o.hubUrl}/ai-market/v2/verification/${encodeURIComponent(nonce)}`, {
           headers: { "X-AIMarket-Affiliate": this.o.affiliate },
         });
         if (!res.ok) {
