@@ -15,6 +15,7 @@ WORKDIR /app
 
 # Install deps first for better layer caching. package-lock.json is present in this repo.
 COPY package.json package-lock.json ./
+COPY vendor ./vendor
 RUN npm install --omit=optional
 
 # Bring in the TypeScript sources and compile.
@@ -29,6 +30,7 @@ ENV NODE_ENV=production
 
 # Production deps only — no dev toolchain, no out-of-context optional SDK.
 COPY package.json package-lock.json ./
+COPY vendor ./vendor
 RUN npm install --omit=dev --omit=optional
 
 # Compiled output + the example config (used as a fallback / reference; the real

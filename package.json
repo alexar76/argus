@@ -2,7 +2,7 @@
   "name": "@alexar76/argus3",
   "version": "0.3.3",
   "mcpName": "io.github.alexar76/argus3",
-  "description": "ARGUS-3 — WARDEN MCP firewall blocks poisoned servers before any tool runs. Frugal personal AI agent; wallet and on-chain economy optional; crypto OFF by default.",
+  "description": "ARGUS-3 \u2014 WARDEN MCP firewall blocks poisoned servers before any tool runs. Frugal personal AI agent; wallet and on-chain economy optional; crypto OFF by default.",
   "type": "module",
   "license": "MIT",
   "author": "AICOM (alexar76)",
@@ -24,7 +24,8 @@
     "web",
     "argus.config.example.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "vendor"
   ],
   "engines": {
     "node": ">=20"
@@ -61,10 +62,11 @@
     "@aimarket/warden": "0.8.2",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@noble/post-quantum": "^0.6.1",
-    "@x402/evm": "2.28.0",
+    "@x402/evm": "2.28.0+aimarket.zod4.1",
     "@x402/fetch": "2.28.0",
     "viem": "^2.21.55",
-    "zod": "4.6.6"
+    "zod": "4.6.7",
+    "@x402/core": "2.28.0+aimarket.zod4.1"
   },
   "peerDependencies": {
     "@aimarket/agent": "^0.1.0"
@@ -81,5 +83,10 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^4.1.12"
-  }
+  },
+  "bundleDependencies": [
+    "@x402/evm",
+    "@x402/fetch",
+    "@x402/core"
+  ]
 }
