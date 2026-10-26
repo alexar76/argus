@@ -78,11 +78,11 @@
   },
   "devDependencies": {
     "@aimarket/agent": "^0.1.0",
-    "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^4.1.12",
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.12"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
   },
   "bundleDependencies": [
     "@x402/evm",
