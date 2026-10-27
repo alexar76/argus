@@ -14,6 +14,12 @@
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@alexar76/argus3",
       "version": "0.3.3",
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
       "transport": {
         "type": "stdio"
       }
