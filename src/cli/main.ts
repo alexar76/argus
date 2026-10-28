@@ -2,7 +2,7 @@ import { loadConfig } from "../config.js";
 import { loadWorkspaceEnv } from "../env-file.js";
 import { createLogger } from "../logger.js";
 import { runSetupWizard } from "../setup/wizard.js";
-import { parse } from "./args.js";
+import { launchCommand, parse } from "./args.js";
 import { printHelp } from "./help.js";
 import { cmdAsk, cmdChat } from "./commands/agent.js";
 import { cmdTelegram, cmdServe, cmdMcp, cmdFlex } from "./commands/channels.js";
@@ -24,7 +24,7 @@ export async function main(argv: string[]): Promise<number> {
   createLogger("argus");
   const { config, path } = loadConfig(typeof args.flags.config === "string" ? args.flags.config : undefined);
 
-  switch (args.cmd) {
+  switch (launchCommand(args, argv, { stdin: process.stdin.isTTY, stdout: process.stdout.isTTY })) {
     case "setup":
       return runSetupWizard();
     case "keystore":

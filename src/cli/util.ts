@@ -5,7 +5,7 @@ import { resolve, dirname } from "node:path";
 import type { ApprovalRequest } from "../core/agent.js";
 import type { MeterSnapshot } from "../types.js";
 
-export const VERSION = "0.3.3";
+export const VERSION = "0.3.4";
 
 /**
  * Restricted file-write helper — only allows writes to cwd or stateDir.

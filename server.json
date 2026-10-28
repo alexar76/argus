@@ -7,7 +7,7 @@
     "url": "https://github.com/alexar76/argus",
     "source": "github"
   },
-  "version": "0.3.3",
+  "version": "0.3.4",
   "packages": [
     {
       "registryType": "npm",

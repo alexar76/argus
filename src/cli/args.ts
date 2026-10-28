@@ -22,3 +22,14 @@ export function parse(argv: string[]): Args {
   }
   return { cmd, rest, flags };
 }
+
+/**
+ * The command to run. A launch with no arguments at all whose stdin and stdout are both pipes
+ * is an MCP client starting the package (the registry's default `npx -y @alexar76/argus3` line,
+ * directories and conformance harnesses, many of which drop `packageArguments`): it gets the MCP
+ * server instead of help text on its JSON-RPC channel. A person at a terminal still gets the help.
+ */
+export function launchCommand(args: Args, argv: string[], tty: { stdin?: boolean; stdout?: boolean }): string {
+  if (argv.length <= 2 && !tty.stdin && !tty.stdout) return "mcp";
+  return args.cmd;
+}

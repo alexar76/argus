@@ -1,6 +1,6 @@
 {
   "name": "@alexar76/argus3",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "mcpName": "io.github.alexar76/argus3",
   "description": "ARGUS-3 \u2014 WARDEN MCP firewall blocks poisoned servers before any tool runs. Frugal personal AI agent; wallet and on-chain economy optional; crypto OFF by default.",
   "type": "module",

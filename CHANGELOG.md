@@ -2,7 +2,17 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
-## 0.3.3 — unreleased
+## 0.3.4 — unreleased
+
+- **`npx -y @alexar76/argus3` with no arguments starts the MCP server when it is launched over pipes.** The
+  MCP registry entry carries `mcp` as a package argument, but clients, directories and conformance harnesses
+  that drop `packageArguments` ran the bare package and got the help text on their JSON-RPC channel: the
+  mcp-conformance study (2026-09, 0.2.4) and our own HISTOR (0.3.3: "exited", stdout the usage text) recorded
+  no handshake. With no arguments and
+  neither stdin nor stdout a terminal, `argus` now runs `argus mcp`; at a terminal it still prints the help,
+  and an explicit command or flag is never overridden.
+
+## 0.3.3 — 2026-10-11
 
 - **Process sandbox for stdio MCP servers** (`mcp.sandbox`, per server `sandbox`). WARDEN decides whether a
   server connects; nothing contained the process, which ran as the user and could read `~/.argus` (keystore,
