@@ -59,17 +59,17 @@
     "access": "public"
   },
   "dependencies": {
-    "@aimarket/warden": "0.8.2",
+    "@aimarket/warden": "0.22.2",
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "@noble/post-quantum": "^0.6.1",
-    "@x402/evm": "2.28.0+aimarket.zod4.1",
-    "@x402/fetch": "2.28.0",
+    "@noble/post-quantum": "^0.7.1",
+    "@x402/evm": "2.29.0+aimarket.zod4.1",
+    "@x402/fetch": "2.29.0",
     "viem": "^2.21.55",
     "zod": "4.6.7",
-    "@x402/core": "2.28.0+aimarket.zod4.1"
+    "@x402/core": "2.29.0+aimarket.zod4.1"
   },
   "peerDependencies": {
-    "@aimarket/agent": "^0.1.0"
+    "@aimarket/agent": "^0.3.0"
   },
   "peerDependenciesMeta": {
     "@aimarket/agent": {
@@ -77,7 +77,7 @@
     }
   },
   "devDependencies": {
-    "@aimarket/agent": "^0.1.0",
+    "@aimarket/agent": "^0.3.0",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.5",
     "tsx": "^4.19.2",
