@@ -4,10 +4,11 @@
 # ARGUS — wallet-native, security-hardened reference agent for the AICOM economy.
 # Multi-stage build: compile TypeScript in `build`, run a lean prod image in `runtime`.
 #
-# NOTE: @aimarket/agent is an OPTIONAL dependency pointing at file:../aimarket-sdks/typescript,
-# which lives OUTSIDE this build context. We install with --omit=optional in both stages so
-# npm never tries to resolve that path. The economy module dynamic-imports the SDK and
-# degrades gracefully when it is absent, so the default container runs with economy OFF.
+# NOTE: @aimarket/agent is an optional PEER dependency, resolved from the npm registry by the
+# lockfile. The economy module dynamic-imports the SDK and degrades gracefully when it is absent.
+# The build stage uses `npm ci` with optional packages: TypeScript 7's compiler is a
+# platform-specific optional package (@typescript/typescript-linux-x64 …), so --omit=optional
+# there leaves no compiler and `npm run build` fails.
 
 # ---- Stage 1: build (compile src/ -> dist/) -------------------------------------------------
 FROM node:22.23.4-slim AS build
@@ -16,7 +17,7 @@ WORKDIR /app
 # Install deps first for better layer caching. package-lock.json is present in this repo.
 COPY package.json package-lock.json ./
 COPY vendor ./vendor
-RUN npm install --omit=optional
+RUN npm ci
 
 # Bring in the TypeScript sources and compile.
 COPY tsconfig.json ./

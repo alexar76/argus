@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY vendor ./vendor
-RUN npm install --omit=optional
+RUN npm ci  # with optional packages: TypeScript 7 ships its compiler as a platform-specific optional package
 
 COPY tsconfig.json ./
 COPY src ./src
