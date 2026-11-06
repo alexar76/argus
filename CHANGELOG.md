@@ -4,6 +4,17 @@ All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-ward
 
 ## 0.3.4 — unreleased
 
+- **A server WARDEN blocks is no longer silent.** ARGUS keeps running without a blocked MCP server's tools,
+  and until now nothing said so: in November 2026 our own hub sat blocked for days on every ARGUS (its tool
+  definitions changed) while each container reported healthy. `GET /health` now carries
+  `mcp: {connected, blocked, failed}` (counts only; `status` stays `"ok"` for Alien Monitor), and `GET /status`
+  lists each server by id with its source and WARDEN codes. A block is logged at error level, at startup and when
+  a connected server's tools change under it, and when Telegram is on the owner gets a message: one at startup,
+  then at most one per server per hour. It names configured servers with their WARDEN codes, counts servers from a
+  remote catalog without naming them (their ids are the catalog's text), and offers
+  `argus warden pins approve <id>` only for a configured server blocked by a pin problem. A note waits until the
+  bot has an owner. Owner notes (the eSIM QR and activation code too) now count as delivered only when Telegram
+  accepted them; a failed send used to be logged and reported as delivered.
 - **`npx -y @alexar76/argus3` with no arguments starts the MCP server when it is launched over pipes.** The
   MCP registry entry carries `mcp` as a package argument, but clients, directories and conformance harnesses
   that drop `packageArguments` ran the bare package and got the help text on their JSON-RPC channel: the

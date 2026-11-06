@@ -20,6 +20,33 @@ export interface McpClient {
   close(): Promise<void>;
 }
 
+/**
+ * What became of one MCP server ARGUS was told to use. Carries only the server's id (cleaned)
+ * and WARDEN finding codes, never text the server sent, because it reaches the owner's chat
+ * and `/status`.
+ */
+export interface McpServerState {
+  id: string;
+  /** "config" for a server in mcp.servers; "catalog" for one a remote catalog listed (its id is remote text). */
+  source: "config" | "catalog";
+  /** "failed": not reachable, refused to launch, or its tool list could not be read. */
+  state: "connected" | "blocked" | "failed";
+  /** The blocking WARDEN codes for "blocked" (e.g. TOOL_DEF_DRIFT); empty otherwise. */
+  reasons: string[];
+  since: string;
+}
+
+/** A server id fit for a log line or a chat message: catalog-discovered ids are remote text. */
+export function safeServerId(id: string): string {
+  return (String(id).replace(/[^A-Za-z0-9._-]/g, "?").slice(0, 64)) || "?";
+}
+
+function blockingCodes(verdict: WardenVerdict): string[] {
+  const blocking = (verdict.findings ?? []).filter((f) => !f.advisory);
+  const codes = (blocking.length ? blocking : verdict.findings ?? []).map((f) => String(f.code));
+  return [...new Set(codes.map((c) => (/^[A-Z0-9_]{1,48}$/.test(c) ? c : "OTHER")))].slice(0, 4);
+}
+
 interface Connection {
   server: McpServerRef;
   client: McpClient;
@@ -38,6 +65,9 @@ interface Connection {
  */
 export class McpHost {
   private readonly conns = new Map<string, Connection>();
+  private readonly states = new Map<string, McpServerState>();
+  /** Called when a server becomes blocked (not again while it stays blocked for the same reasons). */
+  onBlocked?: (state: McpServerState) => void;
 
   constructor(
     private readonly warden: Warden,
@@ -48,8 +78,42 @@ export class McpHost {
     private readonly sandbox?: SandboxContext,
   ) {}
 
+  /**
+   * Every server this host was asked to connect, and how that went. A blocked server stays
+   * blocked until someone approves it and ARGUS restarts, and ARGUS goes on running without
+   * its tools. In November 2026 our own hub sat blocked like that for days on every ARGUS,
+   * each of them reporting healthy, so the state is kept here for /health and the owner.
+   */
+  serverStates(): McpServerState[] {
+    return [...this.states.values()].map((s) => ({ ...s, reasons: [...s.reasons] }));
+  }
+
+  private mark(server: McpServerRef, state: McpServerState["state"], reasons: string[] = []): void {
+    const id = safeServerId(server.id);
+    const prev = this.states.get(id);
+    const same = prev && prev.state === state && prev.reasons.join() === reasons.join();
+    const next: McpServerState = { id, source: server.catalog ? "catalog" : "config", state, reasons,
+      since: same ? prev.since : new Date().toISOString() };
+    this.states.set(id, next);
+    if (state === "blocked" && !same && this.onBlocked) {
+      try { this.onBlocked({ ...next, reasons: [...reasons] }); } catch { /* a listener never breaks a connection */ }
+    }
+  }
+
   /** Connect + vet a server. Returns the verdict; throws if WARDEN blocks it. */
   async connect(server: McpServerRef): Promise<WardenVerdict> {
+    try {
+      const verdict = await this.open(server);
+      this.mark(server, "connected");
+      return verdict;
+    } catch (err) {
+      if (err instanceof WardenBlockedError) this.mark(server, "blocked", blockingCodes(err.verdict));
+      else this.mark(server, "failed");
+      throw err;
+    }
+  }
+
+  private async open(server: McpServerRef): Promise<WardenVerdict> {
     server = structuredClone(server);
     const launch = await this.warden.vetLaunch(server);
     if (!launch.allow) throw new WardenBlockedError(server, launch);
@@ -128,13 +192,25 @@ export class McpHost {
     conn.quarantined = true;
     const generation = conn.generation;
     const work = (async () => {
-      const tools = await this.listTools(conn.client);
+      let tools: ToolDef[];
+      try {
+        tools = await this.listTools(conn.client);
+      } catch (err) {
+        // A server that stops answering after connect. connect() marks its own failures.
+        if (this.conns.get(conn.server.id) === conn) this.mark(conn.server, "failed");
+        throw err;
+      }
       const verdict = await this.warden.vet(conn.server, tools);
       if (generation !== conn.generation) throw new Error("Tools changed during verification; retry after review");
       conn.verdict = verdict;
-      if (!verdict.allow) throw new WardenBlockedError(conn.server, verdict);
+      if (!verdict.allow) {
+        // A connected server whose tools changed under it lands here, not in connect().
+        if (this.conns.get(conn.server.id) === conn) this.mark(conn.server, "blocked", blockingCodes(verdict));
+        throw new WardenBlockedError(conn.server, verdict);
+      }
       conn.tools = tools;
       conn.quarantined = false;
+      if (this.conns.get(conn.server.id) === conn) this.mark(conn.server, "connected");
     })();
     conn.refresh = work;
     try { await work; }
@@ -238,6 +314,7 @@ export class McpHost {
   async closeAll(): Promise<void> {
     const connections = [...this.conns.values()];
     this.conns.clear();
+    this.states.clear();
     for (const c of connections) { c.quarantined = true; await c.client.close().catch(() => {}); }
   }
 }

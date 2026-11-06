@@ -104,6 +104,7 @@ export async function cmdServe(config: ArgusConfig): Promise<number> {
       tlsCert: config.http.tlsCert,
       tlsKey: config.http.tlsKey,
       maxConcurrent: config.http.maxConcurrent,
+      mcpStatus: () => rt.mcpStates(),
       info: {
         version: VERSION,
         model: config.models.core.ref,

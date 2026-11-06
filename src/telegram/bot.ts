@@ -5,7 +5,7 @@ import type { Logger, MeterSnapshot } from "../types.js";
 import type { Agent, ApprovalRequest, ChatTurn } from "../core/agent.js";
 import type { ArenaStats } from "../arena/arena.js";
 import { renderAsciiCard } from "../arena/card.js";
-import { setOwnerSink, type OwnerNote } from "../channels/owner-notify.js";
+import { retryOwnerNotes, setOwnerSink, type OwnerNote } from "../channels/owner-notify.js";
 
 export interface TelegramBotOptions {
   token: string;
@@ -118,6 +118,7 @@ export class TelegramBot {
         this.saveOwner(uid);
         this.o.log.info(`owner claimed: ${uid} (@${msg.from?.username ?? "?"})`);
         await this.send(chatId, `🛡️ ARGUS is now locked to you (id ${uid}). All other Telegram users are rejected.\nSend a task and I'll answer.`);
+        retryOwnerNotes();
       } else {
         await this.send(chatId, "Send /start to claim this ARGUS bot (first user only).");
       }
@@ -206,9 +207,13 @@ export class TelegramBot {
 
   /** Send text, chunked to Telegram's per-message limit. Plain text (no markdown) for robustness. */
   private async send(chatId: number, text: string): Promise<void> {
+    await this.sendText(chatId, text).catch((e) => this.o.log.warn(`sendMessage: ${e}`));
+  }
+
+  /** Like send(), but a failure reaches the caller: a note to the owner must not count as delivered when it was not. */
+  private async sendText(chatId: number, text: string): Promise<void> {
     for (let i = 0; i < text.length; i += MAX_MSG) {
-      const chunk = text.slice(i, i + MAX_MSG);
-      await this.api("sendMessage", { chat_id: chatId, text: chunk }).catch((e) => this.o.log.warn(`sendMessage: ${e}`));
+      await this.api("sendMessage", { chat_id: chatId, text: text.slice(i, i + MAX_MSG) });
     }
   }
 
@@ -217,9 +222,9 @@ export class TelegramBot {
     if (this.ownerId == null) throw new Error("no owner yet");
     if (note.photoUrl) {
       await this.api("sendPhoto", { chat_id: this.ownerId, photo: note.photoUrl, caption: note.text.slice(0, 1000) })
-        .catch(() => this.send(this.ownerId!, `${note.text}\n${note.photoUrl}`));
+        .catch(() => this.sendText(this.ownerId!, `${note.text}\n${note.photoUrl}`));
     } else {
-      await this.send(this.ownerId, note.text);
+      await this.sendText(this.ownerId, note.text);
     }
     if (note.copyable) {
       const esc = note.copyable.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

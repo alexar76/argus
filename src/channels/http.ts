@@ -6,6 +6,7 @@ import { timingSafeEqual, type KeyObject } from "node:crypto";
 import type { Logger } from "../types.js";
 import type { Agent, ApproveFn } from "../core/agent.js";
 import { buildServingReceipt, sha256Hex, newServingKey } from "../provider/index.js";
+import type { McpServerState } from "../mcp/host.js";
 
 /** Anything that can produce Agent Arena stats (the Arena class). */
 export interface ArenaLike {
@@ -40,6 +41,19 @@ export interface HttpChannelOptions {
   approve?: ApproveFn;
   /** When set, serves the Agent Arena web UI at /arena and JSON at /arena/stats. */
   arena?: ArenaLike;
+  /** The MCP servers ARGUS was asked to use and what became of each (Runtime.mcpStates). */
+  mcpStatus?: () => McpServerState[];
+}
+
+/**
+ * Counts only, for the open /health: which servers an operator uses is their business, and a
+ * catalog-discovered id is remote text. `status` stays "ok" (Alien Monitor reads anything else
+ * as an error); a blocked server shows here and in the owner's chat instead.
+ */
+function mcpCounts(states: McpServerState[]): Record<McpServerState["state"], number> {
+  const out = { connected: 0, blocked: 0, failed: 0 };
+  for (const s of states) out[s.state] += 1;
+  return out;
 }
 
 /**
@@ -120,6 +134,7 @@ export class HttpChannel {
         economy: this.o.info.economy,
         mode: this.o.info.mode,
         uptimeSec: Math.round((Date.now() - this.startedAt) / 1000),
+        ...(this.o.mcpStatus ? { mcp: mcpCounts(this.o.mcpStatus()) } : {}),
       });
       return;
     }
@@ -142,6 +157,7 @@ export class HttpChannel {
       if (this.o.info.chainNetwork) body.chainNetwork = this.o.info.chainNetwork;
       if (this.o.info.chainId != null) body.chainId = this.o.info.chainId;
       if (this.o.info.walletExplorer) body.walletExplorer = this.o.info.walletExplorer;
+      if (this.o.mcpStatus) body.mcp = this.o.mcpStatus();
       json(res, 200, body);
       return;
     }

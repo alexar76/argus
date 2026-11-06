@@ -7,7 +7,8 @@ import { createInjectionClassifier } from "./memory/classifier.js";
 import { LumenOracle } from "./economy/lumen.js";
 import { EgressGuard, ThreatFeed, Warden } from "@aimarket/warden";
 import { ProviderRouter } from "./providers/router.js";
-import { McpHost, WardenBlockedError } from "./mcp/host.js";
+import { McpHost, WardenBlockedError, type McpServerState } from "./mcp/host.js";
+import { notifyOwnerWhenReady } from "./channels/owner-notify.js";
 import { CatalogConnector } from "./mcp/catalog.js";
 import { buildBuiltinTools } from "./tools/builtin.js";
 import { buildEcosystemTools } from "./tools/ecosystem.js";
@@ -41,6 +42,8 @@ export class Runtime {
   private _wallet: Wallet | null = null;
   /** MCP WARDEN blocks since last monitor push — scoped to this runtime instance. */
   readonly wardenBlocks = new WardenBlockBuffer();
+  /** When the owner was last told that a server got blocked while running (see connectMcp). */
+  private readonly blockNotedAt = new Map<string, number>();
   readonly monitorFeed: MonitorFeed;
   /** The loaded threat feed, for a reviewer Warden that shares it (argus warden pins). */
   readonly threatFeed: ThreatFeed;
@@ -190,7 +193,30 @@ export class Runtime {
         } else this.log.warn(`could not connect "${s.name}": ${(err as Error).message}`);
       }
     }
+    const refused = this.host.serverStates().filter((st) => st.state === "blocked");
+    if (refused.length) this.reportBlocked(refused);
+    // From here on, a server whose tools change under it is reported as it happens. At startup one
+    // message covers them all.
+    this.host.onBlocked = (st) => {
+      // A tool list that flaps would otherwise message the owner on every flip; the log keeps them all.
+      const last = this.blockNotedAt.get(st.id) ?? 0;
+      const quiet = Date.now() - last < BLOCK_NOTE_QUIET_MS;
+      if (!quiet) this.blockNotedAt.set(st.id, Date.now());
+      this.reportBlocked([st], !quiet);
+    };
     return { connected, blocked };
+  }
+
+  /** Error log, and the owner once the Telegram channel is up; without a channel the log line is all there is. */
+  private reportBlocked(states: McpServerState[], tellOwner = true): void {
+    this.log.error(`WARDEN blocked ${states.length} MCP server(s); running without their tools: ` +
+      states.map((st) => `${st.id}${st.source === "catalog" ? " (catalog)" : ""} (${st.reasons.join(", ") || "policy"})`).join("; "));
+    if (tellOwner) notifyOwnerWhenReady({ text: blockedServersNote(states) });
+  }
+
+  /** Every MCP server this runtime was asked to use, and whether it got to. */
+  mcpStates(): McpServerState[] {
+    return this.host.serverStates();
   }
 
   async buildAgent(approve?: ApproveFn): Promise<Agent> {
@@ -274,4 +300,32 @@ export class Runtime {
   async dispose(): Promise<void> {
     await this.host.closeAll();
   }
+}
+
+const BLOCK_NOTE_QUIET_MS = 60 * 60 * 1000;
+
+/** Codes that `argus warden pins approve` resolves, when every other gate passes. */
+const APPROVABLE = new Set(["TOOL_DEF_DRIFT", "PIN_FORMAT_UPGRADE_REQUIRED", "SERVER_IDENTITY_DRIFT"]);
+
+/**
+ * The owner's message about servers WARDEN refused. Configured servers are named, with their WARDEN
+ * codes; servers a remote catalog listed are only counted, because their ids are text the catalog
+ * chose. The approve command is offered only where it applies: a configured server, an id that needed
+ * no cleaning, and a pin problem as the reason.
+ */
+export function blockedServersNote(states: McpServerState[]): string {
+  const own = states.filter((s) => s.source === "config");
+  const listed = states.length - own.length;
+  const lines = [`WARDEN blocked ${states.length} MCP server(s). ARGUS is running without their tools.`];
+  for (const s of own) lines.push(`• ${s.id}: ${s.reasons.join(", ") || "blocked by policy"}`);
+  if (listed) lines.push(`• ${listed} server(s) from a remote catalog`);
+  const approvable = own.filter((s) => !s.id.includes("?") && s.reasons.length > 0 && s.reasons.every((r) => APPROVABLE.has(r)));
+  if (approvable.length) {
+    lines.push(
+      "Their approved tool definitions or launch settings changed. Review and re-approve at a terminal on this host, then restart ARGUS:",
+      ...approvable.map((s) => `argus warden pins approve ${s.id}`),
+    );
+  }
+  if (approvable.length < states.length) lines.push("For the others, see the findings with: argus warden scan");
+  return lines.join("\n");
 }

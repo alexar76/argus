@@ -69,7 +69,7 @@ el canal decide *quién puede preguntar*, WARDEN decide *qué puede ejecutarse*.
 |---|---|---|---|---|---|
 | **CLI** | SHIPPED | Usuario local (aprobación interactiva en terminal) | none | dev / scripts / cron | n/a |
 | **Telegram** | SHIPPED | Owner-lock, trust-on-first-use — el primer `/start` reclama el bot (`ARGUS_TELEGRAM_OWNER_ID` anula), persisted; sensitive tools requieren `/yes` en chat | bot token | asistente móvil personal | high |
-| **HTTP API** | SHIPPED *(this release)* | `GET /health` y `GET /status` abiertos (sin secreto); `POST /ask` requiere `Bearer ARGUS_HTTP_TOKEN`; sensitive tools default-deny | none (built-in `node:http`) | automatización, frontends web, health monitoring; sustrato para voice/web | high — `/health` es cómo ARGUS aparece como nodo para Alien Monitor 👽 |
+| **HTTP API** | SHIPPED *(this release)* | `GET /health` abierto (sin secreto); `GET /status` y `POST /ask` requieren `Bearer ARGUS_HTTP_TOKEN`; sensitive tools default-deny | none (built-in `node:http`) | automatización, frontends web, health monitoring; sustrato para voice/web | high — `/health` es cómo ARGUS aparece como nodo para Alien Monitor 👽 |
 | **MCP-server** | SHIPPED *(this release)* | Local / stdio; expone tools `argus_ask` y `argus_status`; sensitive tools default-deny | MCP client (Claude Desktop, Cursor, otros agentes) | ser **usado como herramienta** por otros agentes / IDEs; rol economy provider | highest — así ARGUS vende su capability en el mesh / hub 🛒 |
 | **Discord** | PLANNED | Owner-lock por Discord user id | bot token | comunidades / personal | high |
 | **Slack** | PLANNED | Owner-lock por Slack user id (Socket Mode) | app token | trabajo / equipos | high |
@@ -98,7 +98,7 @@ de framework). Se divide limpiamente en un **plano de observabilidad abierto** y
 | Method & path | Auth | Propósito |
 |---|---|---|
 | `GET /health` | open (no secret) | liveness + node identity — monitor visibility hook |
-| `GET /status` | open (no secret) | richer state (budget meter, economy on/off, configured channels) |
+| `GET /status` | `Bearer ARGUS_HTTP_TOKEN` | estado ampliado: wallet y cadena, y cada servidor MCP por id con su estado |
 | `POST /ask` | `Bearer ARGUS_HTTP_TOKEN` | ejecutar una tarea por el agent core |
 
 `GET /health` devuelve un JSON compacto y estable:
@@ -110,9 +110,13 @@ de framework). Se divide limpiamente en un **plano de observabilidad abierto** y
   "version": "0.1.0",
   "model": "claude-sonnet",
   "economy": "off",
-  "uptimeSec": 1042
+  "mode": "live",
+  "uptimeSec": 1042,
+  "mcp": { "connected": 1, "blocked": 1, "failed": 0 }
 }
 ```
+
+`mcp` cuenta los servidores MCP que ARGUS debe usar: conectados, bloqueados por WARDEN o fallidos (inalcanzable, arranque rechazado o lista de herramientas ilegible). ARGUS sigue funcionando sin las herramientas de un servidor bloqueado, así que `status` sigue en `"ok"`. Un servidor bloqueado al arrancar sigue bloqueado hasta que alguien lo vuelva a aprobar (`argus warden pins approve <id>`) y ARGUS se reinicie; uno cuyas herramientas cambiaron estando conectado vuelve a usarse cuando coinciden con lo aprobado. `/status` nombra cada servidor con sus códigos de WARDEN. Con Telegram activo, el propietario recibe un mensaje al arrancar y cuando un servidor en marcha se bloquea (como mucho una vez por hora y servidor).
 
 `POST /ask` toma `{"task": "..."}` y devuelve la respuesta junto al budget
 meter y el outcome del run:
