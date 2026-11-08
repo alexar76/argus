@@ -7,13 +7,13 @@
     "url": "https://github.com/alexar76/argus",
     "source": "github"
   },
-  "version": "0.3.4",
+  "version": "0.3.5",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@alexar76/argus3",
-      "version": "0.3.3",
+      "version": "0.3.5",
       "packageArguments": [
         {
           "type": "positional",

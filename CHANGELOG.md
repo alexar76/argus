@@ -2,7 +2,7 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
-## 0.3.4 — unreleased
+## 0.3.5 — 2026-11-08
 
 - **A server WARDEN blocks is no longer silent.** ARGUS keeps running without a blocked MCP server's tools,
   and until now nothing said so: in November 2026 our own hub sat blocked for days on every ARGUS (its tool
@@ -15,6 +15,14 @@ All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-ward
   `argus warden pins approve <id>` only for a configured server blocked by a pin problem. A note waits until the
   bot has an owner. Owner notes (the eSIM QR and activation code too) now count as delivered only when Telegram
   accepted them; a failed send used to be logged and reported as delivered.
+- The ecosystem knowledge ARGUS answers from lists the GAIA stations and products added on 2026-11-04 (tide, river,
+  marine and flood gauges among them).
+- The Docker image builds from this repository again: TypeScript 7 ships its compiler as an optional platform
+  package, and the build stage installed with `--omit=optional`. It now runs `npm ci` (repository only, not in the
+  npm package).
+
+## 0.3.4 — 2026-11-03
+
 - **`npx -y @alexar76/argus3` with no arguments starts the MCP server when it is launched over pipes.** The
   MCP registry entry carries `mcp` as a package argument, but clients, directories and conformance harnesses
   that drop `packageArguments` ran the bare package and got the help text on their JSON-RPC channel: the
