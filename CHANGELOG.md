@@ -2,6 +2,15 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
+## 0.3.6 — 2026-11-10
+
+- **Depends on `@aimarket/warden` 0.24.0, up from 0.8.2.** The 0.8.2 dependency dated from 2026-10-02.
+  - Every install of ARGUS also pulled that WARDEN, so 0.8.2 was still fetched about 55 times a week.
+  - Typecheck and tests are unchanged on 0.24.0: 405 passed, 13 skipped, the same as on 0.8.2.
+  - Pins stored by 0.8.2 verify under 0.24.0 (`scripts/warden-pin-compat-check.mjs`, 2026-11-10): a plain tool set and
+    one with `title`, `annotations` and `outputSchema` pass with no pinning finding, and a changed description still
+    gives `TOOL_DEF_DRIFT`. Running containers keep their approvals.
+
 ## 0.3.5 — 2026-11-08
 
 - **A server WARDEN blocks is no longer silent.** ARGUS keeps running without a blocked MCP server's tools,
