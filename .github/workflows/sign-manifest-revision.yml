@@ -46,6 +46,11 @@ jobs:
           # PyPI 0.7.0 has no `histor revision`; the tip of alexar76/histor does.
           uv pip install --python .rv "aimarket-histor[sigstore] @ git+https://github.com/alexar76/histor.git"
 
+      - name: Install MCP server (npm -g)
+        run: |
+          npm install -g "@alexar76/argus3@${VERSION}"
+          command -v "argus" >/dev/null
+
       - name: The manifest-revisions branch
         run: |
           if git ls-remote --exit-code --heads origin manifest-revisions >/dev/null; then
@@ -64,7 +69,7 @@ jobs:
           .rv/bin/histor revision build --server "$SERVER" \
             --identity "https://github.com/${GITHUB_WORKFLOW_REF}" \
             --server-version "$VERSION" --source "npm:@alexar76/argus3@${VERSION}" \
-            --stdio "npm exec --yes --package=@alexar76/argus3@${VERSION} -- argus" --timeout 180 \
+            --stdio "argus" --timeout 180 \
             "${index[@]}" --if-changed -o statement.json
 
       - name: Sign (Sigstore keyless; the entry goes to Rekor)
@@ -78,7 +83,7 @@ jobs:
           .rv/bin/histor revision record envelope.json --dir rev
           n="${{ steps.build.outputs.revision }}"
           .rv/bin/histor revision verify "rev/revisions/${n}.json" \
-            --stdio "npm exec --yes --package=@alexar76/argus3@${VERSION} -- argus" --timeout 180 | tee verify.json
+            --stdio "argus" --timeout 180 | tee verify.json
           {
             echo "### ${SERVER}: revision ${n} (${VERSION})"
             echo
