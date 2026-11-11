@@ -25,7 +25,7 @@ TypeScript SDK `@aimarket/agent` и говорит на **AI Market Protocol v2*
 | Open a payment channel | `AimarketAgent.openChannel(depositUsd, token, chain)` — pre-funded USDC on Base |
 | Invoke a capability | `AimarketAgent.invoke({ … })` → `POST /ai-market/v2/invoke` with `X-Payment-Channel` |
 | Per-call debit | `MarketSigner` — Ed25519-signed receipts / EIP-712 `DebitAuthorization` over `AIMarketEscrow.sol` |
-| Settle / close | `AimarketAgent.closeChannel(channelId)` — refund the remainder on-chain |
+| Settle / close | `AimarketAgent.closeChannel(channelId)` — closes the channel in the hub ledger; on an escrow channel the depositor then calls `requestClose` + `settleChannel` to take the remainder back |
 | TEE verification | `TeeVerifier`, `verifyTeeAttestation`, `verifyTeeReceipt` |
 
 Собственный economy-код ARGUS тонкий: `src/economy/wallet.ts` выводит публичный
@@ -66,9 +66,10 @@ sequenceDiagram
   end
 
   A->>SDK: settle() / closeChannel(channelId)
-  SDK->>E: close channel, refund remainder
-  E-->>SDK: Settlement (usedUsd, refundedUsd)
+  SDK->>H: POST /ai-market/v2/channel/close (ledger only, no transaction)
+  H-->>SDK: Settlement (used_usd, refund_usd = unspent remainder)
   SDK-->>A: { usedUsd, refundedUsd }
+  A->>E: requestClose, then settleChannel after 1 h → remainder back
 ```
 
 ARGUS экспортирует это через контракт `EconomyConsumer` в `src/types.ts`
