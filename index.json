@@ -1,0 +1,15 @@
+{
+ "format": "histor.manifest-revisions/v1",
+ "server": "io.github.alexar76/argus3",
+ "revisions": [
+  {
+   "revision": 1,
+   "manifestDigest": "sha256:8b89d0c55d265b685fad1466debb537bd0035b5bc6362115715c5e6aefc883b0",
+   "serverVersion": "0.3.6",
+   "createdAt": "2026-11-11T07:37:19Z",
+   "signer": "https://github.com/alexar76/argus/.github/workflows/sign-manifest-revision.yml@refs/heads/main",
+   "logIndex": "3805498869",
+   "envelope": "revisions/1.json"
+  }
+ ]
+}
