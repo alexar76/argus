@@ -64,7 +64,7 @@ jobs:
           .rv/bin/histor revision build --server "$SERVER" \
             --identity "https://github.com/${GITHUB_WORKFLOW_REF}" \
             --server-version "$VERSION" --source "npm:@alexar76/argus3@${VERSION}" \
-            --stdio "npx -y @alexar76/argus3@${VERSION}" --timeout 180 \
+            --stdio "npx --yes --package=@alexar76/argus3@${VERSION} argus" --timeout 180 \
             "${index[@]}" --if-changed -o statement.json
 
       - name: Sign (Sigstore keyless; the entry goes to Rekor)
@@ -78,7 +78,7 @@ jobs:
           .rv/bin/histor revision record envelope.json --dir rev
           n="${{ steps.build.outputs.revision }}"
           .rv/bin/histor revision verify "rev/revisions/${n}.json" \
-            --stdio "npx -y @alexar76/argus3@${VERSION}" --timeout 180 | tee verify.json
+            --stdio "npx --yes --package=@alexar76/argus3@${VERSION} argus" --timeout 180 | tee verify.json
           {
             echo "### ${SERVER}: revision ${n} (${VERSION})"
             echo
