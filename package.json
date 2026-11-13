@@ -59,21 +59,21 @@
     "access": "public"
   },
   "dependencies": {
-    "@aimarket/warden": "0.24.0",
+    "@aimarket/warden": "0.25.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "@noble/post-quantum": "^0.6.1",
-    "@x402/evm": "2.28.0+aimarket.zod4.1",
-    "@x402/fetch": "2.28.0",
+    "@noble/post-quantum": "^0.7.1",
+    "@x402/evm": "2.30.0+aimarket.zod4.1",
+    "@x402/fetch": "2.30.0",
     "imapflow": "2.11.0",
     "mailparser": "3.14.3",
     "nodemailer": "10.5.0",
-    "playwright-core": "1.64.1",
+    "playwright-core": "1.65.0",
     "viem": "^2.21.55",
     "zod": "4.6.7",
-    "@x402/core": "2.28.0+aimarket.zod4.1"
+    "@x402/core": "2.30.0+aimarket.zod4.1"
   },
   "peerDependencies": {
-    "@aimarket/agent": "^0.1.0"
+    "@aimarket/agent": "^0.4.0"
   },
   "peerDependenciesMeta": {
     "@aimarket/agent": {
@@ -81,7 +81,7 @@
     }
   },
   "devDependencies": {
-    "@aimarket/agent": "^0.1.0",
+    "@aimarket/agent": "^0.4.0",
     "@types/mailparser": "3.9.0",
     "@types/node": "^26.6.5",
     "@types/nodemailer": "8.0.2",
