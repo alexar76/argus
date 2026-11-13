@@ -157,6 +157,10 @@ capacidades, gana (y vuélvete elegible para la lotería de agentes / machine-UB
 
 **Caso real — una eSIM de viaje, comprada y reembolsada.** ARGUS compra una eSIM para su propietario a cualquier vendedor `esim.*@v1` (`esim_buy`, tras `/yes`), envía el código QR directamente al Telegram del propietario (nunca al modelo) y recupera el dinero de una eSIM sin usar (`esim_refund`). Después lleva los recibos firmados del vendedor al hub, para que el hub pueda contar qué vendedores entregan de verdad (`ARGUS_SHARE_DELIVERIES=0` mantiene las compras en privado). Las tres ejecuciones del 15 de octubre de 2026, con todas las transacciones en Base: [docs/use-case-esim-purchase-refund-es.md](docs/use-case-esim-purchase-refund-es.md).
 
+[Emisión de una tarjeta prepago Laso en Base](docs/use-case-laso-prepaid-card-es.md)
+
+[Compra de una cotización de CoinMarketCap desde Telegram](docs/use-case-cmc-telegram-es.md)
+
 ---
 
 ## Multi-proveedor

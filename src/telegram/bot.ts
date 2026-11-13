@@ -1,11 +1,17 @@
 import { fetchNoRedirect } from "../credential-fetch.js";
+import { randomBytes } from "node:crypto";
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import type { Logger, MeterSnapshot } from "../types.js";
 import type { Agent, ApprovalRequest, ChatTurn } from "../core/agent.js";
+import { MAX_EXACT_APPROVAL_LENGTH, renderApprovalArgs, requiresExactApproval } from "../core/approval-preview.js";
 import type { ArenaStats } from "../arena/arena.js";
 import { renderAsciiCard } from "../arena/card.js";
 import { retryOwnerNotes, setOwnerSink, type OwnerNote } from "../channels/owner-notify.js";
+import { MailService } from "../mail/index.js";
+import type { ProviderRouter } from "../providers/router.js";
+import { isMailCommand, TelegramMail, type MailKeyboard } from "./mail.js";
+import { purchaseCommand, isPurchaseInputPrompt, isPurchaseLink, TelegramDocumentRejected, TelegramPurchase, type TelegramPurchaseChannel, type TelegramPurchaseIntent } from "./purchase.js";
 
 export interface TelegramBotOptions {
   token: string;
@@ -16,11 +22,15 @@ export interface TelegramBotOptions {
   ownerId?: number;
   /** Agent Arena — enables the /flex command. */
   arena?: { stats(): Promise<ArenaStats> };
+  mail?: Pick<MailService, "settings" | "setPermissions" | "list" | "read" | "send">;
+  mailModels?: ProviderRouter;
+  purchase?: (channel: TelegramPurchaseChannel, intent: TelegramPurchaseIntent) => Promise<void>;
 }
 
 interface TgUser { id: number; username?: string; first_name?: string }
-interface TgMessage { message_id: number; from?: TgUser; chat: { id: number }; text?: string }
-interface TgUpdate { update_id: number; message?: TgMessage; edited_message?: TgMessage }
+interface TgMessage { message_id: number; from?: TgUser; chat: { id: number; type: string }; text?: string; reply_to_message?: { message_id: number; text?: string } }
+interface TgCallback { id: string; from: TgUser; message?: TgMessage; data?: string }
+interface TgUpdate { update_id: number; message?: TgMessage; callback_query?: TgCallback }
 
 const API = "https://api.telegram.org";
 const MAX_MSG = 4000;
@@ -39,31 +49,45 @@ const MAX_CHAT_TURNS = 8;
 export class TelegramBot {
   private offset = 0;
   private ownerId: number | null;
+  private verifiedOwnerChat: number | null = null;
   private busy = false;
-  private pendingApproval: ((ok: boolean) => void) | null = null;
+  private purchase: TelegramPurchase | undefined;
+  private pendingApproval: { resolve: (ok: boolean) => void; token?: string; timeout: ReturnType<typeof setTimeout> } | null = null;
   private stopped = false;
   private readonly ownerFile: string;
+  private readonly mail: TelegramMail;
   /** Per-chat prior turns so short follow-ups ("да", "проверь") keep context. */
   private readonly chatHistory = new Map<number, ChatTurn[]>();
 
   constructor(private readonly o: TelegramBotOptions) {
     this.ownerFile = join(o.stateDir, "telegram-owner.json");
+    if (o.ownerId !== undefined && !isUserId(o.ownerId)) throw new Error("Telegram owner must be a positive user ID");
     this.ownerId = o.ownerId ?? this.loadOwner();
+    this.mail = new TelegramMail(o.mail ?? new MailService(o.stateDir), o.mailModels);
   }
 
   /** Approval callback to wire into the Agent for sensitive tools. */
   approver = async (req: ApprovalRequest): Promise<boolean> => {
-    if (this.ownerId == null) return false;
+    if (this.ownerId == null || this.pendingApproval || this.purchase || this.stopped) return false;
     const where = req.server ? ` (server ${req.server})` : "";
-    await this.send(this.ownerId, `⚠ Approve sensitive tool "${req.tool}"${where}?\nargs: ${truncate(JSON.stringify(req.args), 300)}\nReply /yes or /no.`);
+    const exact = requiresExactApproval(req.tool);
+    const raw = renderApprovalArgs(req.args);
+    if (exact && raw.length > MAX_EXACT_APPROVAL_LENGTH) return false;
+    const token = exact ? randomBytes(12).toString("hex") : undefined;
+    try {
+      const message = `⚠ Approve sensitive tool "${req.tool}"${where}?\nargs: ${exact ? raw : truncate(raw, 300)}`;
+      const ownerChat = await this.privateOwnerChat();
+      await this.sendText(ownerChat, token ? message : `${message}\nReply /yes or /no.`, token ? {
+        disableLinkPreview: true,
+        keyboard: [[["Approve this action", `appr:${token}:yes`], ["Decline", `appr:${token}:no`]]],
+      } : undefined);
+    } catch {
+      return false;
+    }
+    if (this.stopped) return false;
     return new Promise<boolean>((resolve) => {
-      this.pendingApproval = resolve;
-      setTimeout(() => {
-        if (this.pendingApproval === resolve) {
-          this.pendingApproval = null;
-          resolve(false);
-        }
-      }, 120_000);
+      const timeout = setTimeout(() => this.resolveApproval(false), 120_000);
+      this.pendingApproval = { resolve, token, timeout };
     });
   };
 
@@ -78,7 +102,7 @@ export class TelegramBot {
     while (!this.stopped) {
       let updates: TgUpdate[] = [];
       try {
-        updates = await this.api("getUpdates", { offset: this.offset, timeout: 50, allowed_updates: ["message"] }, 60_000);
+        updates = await this.api("getUpdates", { offset: this.offset, timeout: 50, allowed_updates: ["message", "callback_query"] }, 60_000);
       } catch (err) {
         this.o.log.warn(`getUpdates: ${(err as Error).message}`);
         await sleep(2000);
@@ -86,10 +110,11 @@ export class TelegramBot {
       }
       for (const u of updates) {
         this.offset = Math.max(this.offset, u.update_id + 1);
-        const msg = u.message ?? u.edited_message;
+        const msg = u.message;
         // Not awaited: a task that waits for /yes needs this loop to keep reading, or the approval
         // can never arrive and times out as a "no". One task at a time is kept by `busy`.
         if (msg?.text) void this.onMessage(msg).catch((e) => this.o.log.error(`onMessage: ${e}`));
+        if (u.callback_query) void this.onCallback(u.callback_query).catch(() => this.o.log.warn("Telegram callback failed"));
       }
     }
   }
@@ -97,12 +122,11 @@ export class TelegramBot {
   stop(): void {
     this.stopped = true;
     setOwnerSink(null);
+    this.mail.clear();
+    this.purchase?.cancel();
     // Resolve any pending sensitive-tool approval so the promise doesn't hang
     // and the agent loop can exit cleanly (M3 fix).
-    if (this.pendingApproval) {
-      this.pendingApproval(false);
-      this.pendingApproval = null;
-    }
+    this.resolveApproval(false);
   }
 
   private async onMessage(msg: TgMessage): Promise<void> {
@@ -110,17 +134,19 @@ export class TelegramBot {
     const chatId = msg.chat.id;
     const text = (msg.text ?? "").trim();
     if (uid == null) return;
+    const privateChat = msg.chat.type === "private" && chatId === uid;
 
     // ── Owner gating (baked in) ──────────────────────────────────────────────
     if (this.ownerId == null) {
-      if (/^\/?start$/i.test(text)) {
+      if (privateChat && /^\/?start$/i.test(text)) {
         this.ownerId = uid;
+        this.verifiedOwnerChat = chatId;
         this.saveOwner(uid);
         this.o.log.info(`owner claimed: ${uid} (@${msg.from?.username ?? "?"})`);
-        await this.send(chatId, `🛡️ ARGUS is now locked to you (id ${uid}). All other Telegram users are rejected.\nSend a task and I'll answer.`);
+        await this.send(chatId, `🛡️ ARGUS is now locked to you (id ${uid}). All other Telegram users are rejected.\nSend a task, or open /mail.`);
         retryOwnerNotes();
       } else {
-        await this.send(chatId, "Send /start to claim this ARGUS bot (first user only).");
+        await this.send(chatId, "Send /start in a private chat to claim this ARGUS bot (first user only).");
       }
       return;
     }
@@ -129,18 +155,43 @@ export class TelegramBot {
       await this.send(chatId, "⛔ This ARGUS instance is locked to its owner.");
       return;
     }
+    if (privateChat) this.verifiedOwnerChat = chatId;
 
     // ── Owner path ───────────────────────────────────────────────────────────
+    const purchaseIntent = purchaseCommand(text);
+    if (!privateChat && /^\/(?:buy|recover)_itch@[a-z0-9_]{5,32}$/i.test(text)) return this.send(chatId, "Open the private ARGUS chat to use purchases.");
+    if (this.purchase || purchaseIntent || isPurchaseInputPrompt(msg.reply_to_message?.text) || isPurchaseLink(text)) {
+      if (!privateChat) return this.send(chatId, "Open the private ARGUS chat to use purchases.");
+      if (this.purchase) {
+        if (purchaseIntent) return this.send(chatId, "A purchase is already in progress.");
+        return this.purchase.handleMessage(text, msg.reply_to_message?.message_id).catch(() => {
+          this.o.log.warn("Telegram purchase reply failed");
+        });
+      }
+      if (isPurchaseInputPrompt(msg.reply_to_message?.text)) return this.send(chatId, "That purchase prompt has expired.");
+      if (isPurchaseLink(text)) return this.send(chatId, "Open /recover_itch and reply directly to the private recovery prompt.");
+      if (!purchaseIntent) return;
+      if (this.o.ownerId === undefined || !this.o.purchase || this.stopped) return this.send(chatId, "Purchases are unavailable in this ARGUS instance.");
+      if (this.busy || this.pendingApproval) return this.send(chatId, "ARGUS is busy with another task.");
+      return this.runPurchase(chatId, this.o.purchase, purchaseIntent, /^(?:купи|получи) /iu.test(text));
+    }
     // Approval replies take priority so /yes resolves a pending gate mid-task.
     if (this.pendingApproval) {
+      if (!privateChat) return void (await this.send(chatId, "Open the private ARGUS chat to review the pending approval."));
+      if (this.pendingApproval.token) return void (await this.send(chatId, "Review the pending action and use its approval buttons."));
       if (/^(y|yes|да|\/yes|approve|ok)$/i.test(text)) return this.resolveApproval(true);
       if (/^(n|no|нет|\/no|deny|cancel)$/i.test(text)) return this.resolveApproval(false);
       await this.send(chatId, "Awaiting approval — reply /yes or /no.");
       return;
     }
     if (/^\/(start|help)$/i.test(text)) {
-      await this.send(chatId, "🛡️ ARGUS — your owner-locked agent.\nSend a task. /flex for your 🎮 Agent Arena card. /status for state. Sensitive tools ask for /yes first.");
+      const purchaseHelp = privateChat && this.o.ownerId !== undefined && this.o.purchase ? "\n/buy_itch to purchase the icon pack. /recover_itch to deliver an existing purchase." : "";
+      await this.send(chatId, `🛡️ ARGUS — your owner-locked agent.\nSend a task. /mail for inbox and mail setup. /flex for your 🎮 Agent Arena card. /status for state. Sensitive tools ask for /yes first.${purchaseHelp}`);
       return;
+    }
+    if (isMailCommand(text)) {
+      if (!privateChat) return void (await this.send(chatId, "Open the private ARGUS chat to use mail."));
+      return this.mail.command(text, (message, keyboard) => this.sendText(chatId, message, { keyboard, disableLinkPreview: true }));
     }
     if (/^\/flex$/i.test(text)) {
       if (!this.o.arena) return void (await this.send(chatId, "Arena not available."));
@@ -174,6 +225,61 @@ export class TelegramBot {
     }
   }
 
+  private async onCallback(query: TgCallback): Promise<void> {
+    const chat = query.message?.chat;
+    const authorized = query.from.id === this.ownerId && chat?.type === "private" && chat.id === query.from.id;
+    await this.api("answerCallbackQuery", {
+      callback_query_id: query.id,
+      ...(authorized ? {} : { text: "Open the private ARGUS chat to use this action." }),
+    }).catch(() => undefined);
+    if (!authorized || !query.data) return;
+    this.verifiedOwnerChat = chat.id;
+    if (query.data.startsWith("purchase:")) {
+      if (query.message) await this.purchase?.handleCallback(query.data, query.message.message_id);
+      return;
+    }
+    if (this.purchase) return;
+    const approval = /^appr:([a-f0-9]{24}):(yes|no)$/.exec(query.data);
+    if (approval && this.pendingApproval?.token === approval[1]) return this.resolveApproval(approval[2] === "yes");
+    if (query.data.startsWith("mail:")) {
+      await this.mail.action(query.data, (message, keyboard) => this.sendText(chat.id, message, { keyboard, disableLinkPreview: true }));
+    }
+  }
+
+  private async runPurchase(chatId: number, run: NonNullable<TelegramBotOptions["purchase"]>, intent: TelegramPurchaseIntent, russian: boolean): Promise<void> {
+    const purchase = new TelegramPurchase({
+      prompt: async (text, replyMarkup) => {
+        const message = await this.api("sendMessage", {
+          chat_id: chatId,
+          text,
+          reply_markup: replyMarkup,
+          link_preview_options: { is_disabled: true },
+        });
+        if (!isUserId(message?.message_id)) throw new Error("Invalid Telegram prompt response");
+        return message.message_id;
+      },
+      send: (text) => this.sendText(chatId, text, { disableLinkPreview: true }),
+      upload: async (filename, bytes) => {
+        const form = new FormData();
+        form.set("chat_id", String(chatId));
+        form.set("document", new Blob([new Uint8Array(bytes)], { type: "application/zip" }), filename);
+        await this.api("sendDocument", form, 30_000);
+      },
+    }, russian);
+    this.purchase = purchase;
+    this.busy = true;
+    try {
+      await run(purchase, intent);
+    } catch {
+      this.o.log.warn("Telegram purchase workflow failed");
+      if (!purchase.signal.aborted) await this.send(chatId, "ARGUS could not finish the purchase workflow. Check your receipt and card activity before starting another purchase.");
+    } finally {
+      purchase.cancel();
+      this.purchase = undefined;
+      this.busy = false;
+    }
+  }
+
   private appendHistory(chatId: number, ...turns: ChatTurn[]): void {
     const hist = [...(this.chatHistory.get(chatId) ?? []), ...turns];
     while (hist.length > MAX_CHAT_TURNS * 2) hist.shift();
@@ -181,23 +287,28 @@ export class TelegramBot {
   }
 
   private resolveApproval(ok: boolean): void {
-    const r = this.pendingApproval;
+    const pending = this.pendingApproval;
     this.pendingApproval = null;
-    r?.(ok);
+    if (!pending) return;
+    clearTimeout(pending.timeout);
+    pending.resolve(ok);
   }
 
   // ── Telegram API ───────────────────────────────────────────────────────────
-  private async api(method: string, params: Record<string, unknown>, timeoutMs = 15_000): Promise<any> {
+  private async api(method: string, params: Record<string, unknown> | FormData, timeoutMs = 15_000): Promise<any> {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
+      const multipart = params instanceof FormData;
       const res = await fetchNoRedirect(`${API}/bot${this.o.token}/${method}`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(params),
+        headers: multipart ? undefined : { "content-type": "application/json" },
+        body: multipart ? params : JSON.stringify(params),
         signal: ctrl.signal,
       });
       const json: any = await res.json();
+      if (method === "sendDocument" && json.ok === false && json.error_code === res.status
+        && [400, 403, 429].includes(res.status)) throw new TelegramDocumentRejected();
       if (!json.ok) throw new Error(json.description ?? `telegram ${method} failed`);
       return json.result;
     } finally {
@@ -211,25 +322,42 @@ export class TelegramBot {
   }
 
   /** Like send(), but a failure reaches the caller: a note to the owner must not count as delivered when it was not. */
-  private async sendText(chatId: number, text: string): Promise<void> {
+  private async sendText(chatId: number, text: string, options?: { keyboard?: MailKeyboard; disableLinkPreview?: boolean }): Promise<void> {
     for (let i = 0; i < text.length; i += MAX_MSG) {
-      await this.api("sendMessage", { chat_id: chatId, text: text.slice(i, i + MAX_MSG) });
+      const keyboard = options?.keyboard;
+      const replyMarkup = keyboard && i + MAX_MSG >= text.length
+        ? { reply_markup: { inline_keyboard: keyboard.map((row) => row.map(([label, command]) => ({ text: label, callback_data: command }))) } }
+        : {};
+      const preview = options?.disableLinkPreview ? { link_preview_options: { is_disabled: true } } : {};
+      await this.api("sendMessage", { chat_id: chatId, text: text.slice(i, i + MAX_MSG), ...preview, ...replyMarkup });
     }
   }
 
   /** A tool's note to the owner: a photo by URL with the text as caption, then anything to copy, monospace. */
   private async toOwner(note: OwnerNote): Promise<void> {
-    if (this.ownerId == null) throw new Error("no owner yet");
+    const ownerChat = await this.privateOwnerChat();
     if (note.photoUrl) {
-      await this.api("sendPhoto", { chat_id: this.ownerId, photo: note.photoUrl, caption: note.text.slice(0, 1000) })
-        .catch(() => this.sendText(this.ownerId!, `${note.text}\n${note.photoUrl}`));
+      await this.api("sendPhoto", { chat_id: ownerChat, photo: note.photoUrl, caption: note.text.slice(0, 1000) })
+        .catch(() => this.sendText(ownerChat, `${note.text}\n${note.photoUrl}`, { disableLinkPreview: true }));
     } else {
-      await this.sendText(this.ownerId, note.text);
+      await this.sendText(ownerChat, note.text, { disableLinkPreview: true });
     }
     if (note.copyable) {
       const esc = note.copyable.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      await this.api("sendMessage", { chat_id: this.ownerId, text: `<code>${esc}</code>`, parse_mode: "HTML" });
+      await this.api("sendMessage", { chat_id: ownerChat, text: `<code>${esc}</code>`, parse_mode: "HTML", link_preview_options: { is_disabled: true } });
     }
+  }
+
+  private async privateOwnerChat(): Promise<number> {
+    const id = this.ownerId;
+    if (!isUserId(id)) throw new Error("No Telegram owner has been set");
+    if (this.verifiedOwnerChat === id) return id;
+    const chat: unknown = await this.api("getChat", { chat_id: id });
+    if (!chat || typeof chat !== "object" || !("type" in chat) || chat.type !== "private" || !("id" in chat) || chat.id !== id) {
+      throw new Error("The private Telegram owner chat is unavailable");
+    }
+    this.verifiedOwnerChat = id;
+    return id;
   }
 
   /** Send monospace (so the ASCII Flex Card stays aligned). */
@@ -244,7 +372,10 @@ export class TelegramBot {
 
   private loadOwner(): number | null {
     try {
-      if (existsSync(this.ownerFile)) return JSON.parse(readFileSync(this.ownerFile, "utf8")).ownerId ?? null;
+      if (existsSync(this.ownerFile)) {
+        const id: unknown = JSON.parse(readFileSync(this.ownerFile, "utf8")).ownerId;
+        if (isUserId(id)) return id;
+      }
     } catch {
       /* ignore */
     }
@@ -263,6 +394,9 @@ export class TelegramBot {
 
 function fmtMeter(m: MeterSnapshot): string {
   return `tok ${m.inputTokens}/${m.outputTokens} · ${m.steps} steps · ${m.toolCalls} tools · $${m.costUsd.toFixed(4)}`;
+}
+function isUserId(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 }
 function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n) + "…" : s;

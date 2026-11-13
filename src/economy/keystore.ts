@@ -344,18 +344,19 @@ interface EncryptedBlob {
   tag: string;
 }
 
+type EncryptedTokenPurpose = "telegram-token" | "mail-account";
+
 /**
- * Encrypt a secret string (e.g. Telegram token) under the keystore passphrase.
- * Uses the same scrypt parameters as the wallet keystore so the passphrase
- * does double duty — one human secret protects both the wallet AND the bot token.
+ * Encrypt a secret string under the keystore passphrase. Bind each ciphertext
+ * to its purpose so a copied file cannot be opened as another credential.
  */
-export function encryptToken(secret: string, passphrase: string): EncryptedBlob {
+export function encryptToken(secret: string, passphrase: string, purpose: EncryptedTokenPurpose = "telegram-token"): EncryptedBlob {
   if (!passphrase) throw new Error("a passphrase is required to encrypt the token");
   const salt = randomBytes(16);
   const key = scryptSync(passphrase, salt, KEYLEN, { N, r: R, p: P, maxmem: MAXMEM });
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const aad = Buffer.from(`argus-telegram-token:v1:${salt.toString("hex")}:${iv.toString("hex")}`, "utf8");
+  const aad = Buffer.from(`argus-${purpose}:v1:${salt.toString("hex")}:${iv.toString("hex")}`, "utf8");
   cipher.setAAD(aad);
   const ct = Buffer.concat([cipher.update(secret, "utf8"), cipher.final()]);
   return {
@@ -371,8 +372,8 @@ export function encryptToken(secret: string, passphrase: string): EncryptedBlob 
   };
 }
 
-/** Decrypt a token blob produced by {@link encryptToken}. Throws on wrong passphrase. */
-export function decryptToken(blob: EncryptedBlob, passphrase: string): string {
+/** Decrypt a token blob produced by {@link encryptToken} for the same purpose. */
+export function decryptToken(blob: EncryptedBlob, passphrase: string, purpose: EncryptedTokenPurpose = "telegram-token"): string {
   const key = scryptSync(passphrase, Buffer.from(blob.salt, "hex"), KEYLEN, {
     N: blob.N,
     r: blob.r,
@@ -381,7 +382,7 @@ export function decryptToken(blob: EncryptedBlob, passphrase: string): string {
   });
   const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(blob.iv, "hex"));
   decipher.setAuthTag(Buffer.from(blob.tag, "hex"));
-  const aad = Buffer.from(`argus-telegram-token:v1:${blob.salt}:${blob.iv}`, "utf8");
+  const aad = Buffer.from(`argus-${purpose}:v1:${blob.salt}:${blob.iv}`, "utf8");
   decipher.setAAD(aad);
   const pt = Buffer.concat([decipher.update(Buffer.from(blob.ct, "hex")), decipher.final()]);
   return pt.toString("utf8");
@@ -408,7 +409,14 @@ export function resolveTelegramToken(stateDir: string, log?: Logger): string | u
     }
     try {
       const raw = JSON.parse(readFileSync(path, "utf8")) as EncryptedBlob;
-      return decryptToken(raw, pass);
+      const token = decryptToken(raw, pass);
+      // Match the format accepted by `argus telegram token-set`. Older mail
+      // vaults used this encryption purpose and contain structured plaintext.
+      if (!/^\d+:[A-Za-z0-9_-]{35,}$/.test(token)) {
+        log?.error("encrypted Telegram bot token has an invalid format");
+        return undefined;
+      }
+      return token;
     } catch {
       log?.error("telegram token decryption failed (wrong passphrase?) — Telegram stays OFF");
       return undefined;

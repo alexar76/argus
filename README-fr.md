@@ -72,6 +72,10 @@ Flux consommateur : `discover → openChannel (USDC/Base) → invoke → settle`
 
 **Cas réel — une eSIM de voyage, achetée puis remboursée.** ARGUS achète une eSIM pour son propriétaire chez n'importe quel vendeur `esim.*@v1` (`esim_buy`, après `/yes`), envoie le QR code directement sur le Telegram du propriétaire (jamais au modèle) et récupère l'argent d'une eSIM inutilisée (`esim_refund`). Il apporte ensuite les reçus signés du vendeur au hub, pour que le hub puisse compter quels vendeurs livrent vraiment (`ARGUS_SHARE_DELIVERIES=0` garde les achats privés). Les trois exécutions du 15 octobre 2026, avec toutes les transactions sur Base : [docs/use-case-esim-purchase-refund-fr.md](docs/use-case-esim-purchase-refund-fr.md).
 
+[Émission d’une carte prépayée Laso sur Base](docs/use-case-laso-prepaid-card-fr.md)
+
+[Achat d’une cotation CoinMarketCap depuis Telegram](docs/use-case-cmc-telegram-fr.md)
+
 ## Agent Arena
 
 XP, niveaux, séries quotidiennes, quêtes/badges, Flex Card, leaderboard opt-in. Métriques **réelles** depuis mémoire locale + **reçus** signés. Démo : [magic-ai-factory.com/arena](https://magic-ai-factory.com/arena). Design : [docs/arena.md](docs/arena.md).

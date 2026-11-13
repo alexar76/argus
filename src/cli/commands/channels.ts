@@ -2,6 +2,7 @@ import type { ArgusConfig } from "../../config.js";
 import { createLogger } from "../../logger.js";
 import { Runtime } from "../../runtime.js";
 import { TelegramBot } from "../../telegram/bot.js";
+import { configuredItchPurchase } from "../../checkout/itch-purchase.js";
 import { HttpChannel } from "../../channels/http.js";
 import { McpServerChannel } from "../../channels/mcp_server.js";
 import { Arena } from "../../arena/arena.js";
@@ -55,7 +56,10 @@ export async function cmdTelegram(config: ArgusConfig, args?: { rest: string[] }
   let bot: TelegramBot | undefined;
   const agent = await rt.buildAgent((req) => bot!.approver(req));
   const arena = new Arena(rt.memory, config, log.child("arena"), rt.economyEnabled);
-  bot = new TelegramBot({ token, agent, arena, stateDir: config.stateDir, ownerId, log: log.child("telegram") });
+  bot = new TelegramBot({
+    token, agent, arena, stateDir: config.stateDir, ownerId, log: log.child("telegram"), mailModels: rt.router,
+    purchase: configuredItchPurchase(config.stateDir, config.mode, rt.reportProviderActivity),
+  });
 
   const shutdown = () => {
     log.info("shutting down telegram bot…");
@@ -131,7 +135,10 @@ export async function cmdServe(config: ArgusConfig): Promise<number> {
   if (tgToken) {
     const ownerEnv = process.env.ARGUS_TELEGRAM_OWNER_ID?.trim();
     const ownerId = ownerEnv ? Number(ownerEnv) : config.telegram.ownerId;
-    const bot = new TelegramBot({ token: tgToken, agent, arena, stateDir: config.stateDir, ownerId, log: log.child("telegram") });
+    const bot = new TelegramBot({
+      token: tgToken, agent, arena, stateDir: config.stateDir, ownerId, log: log.child("telegram"), mailModels: rt.router,
+      purchase: configuredItchPurchase(config.stateDir, config.mode, rt.reportProviderActivity),
+    });
     stoppers.push(() => bot.stop());
     longRunning.push(bot.run());
   } else {

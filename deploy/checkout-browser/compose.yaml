@@ -1,0 +1,33 @@
+name: argus-checkout
+services:
+  browser:
+    image: argus-checkout-browser:playwright-1.64.1
+    container_name: argus-checkout-browser
+    init: true
+    restart: unless-stopped
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:argus-checkout-browser
+      - seccomp:./seccomp.json
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m,mode=1777
+    shm_size: 128m
+    mem_limit: 768m
+    pids_limit: 256
+    volumes:
+      - type: bind
+        source: ./private/browser-ws
+        target: /run/checkout/browser-ws
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      checkout:
+        aliases: [argus-checkout-browser]
+networks:
+  checkout:
+    name: argus_checkout
+    external: true

@@ -10,11 +10,39 @@ import {
   validateMonitorBaseUrl,
 } from "../src/monitor/feed.js";
 import { MonitorFeed } from "../src/monitor/heartbeat.js";
+import { createProviderActivityReporter } from "../src/monitor/provider-events.js";
 import { sanitizeMonitorText } from "../src/monitor/sanitize.js";
 import { WardenBlockBuffer } from "../src/monitor/warden-snapshots.js";
 import { createLogger } from "../src/logger.js";
 
 const log = createLogger("monitor-test", "error");
+
+it("sends only fixed provider event labels with scoped authorization and no redirects", () => {
+  const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 204 }));
+  vi.stubGlobal("fetch", fetchMock);
+  vi.stubEnv("ALIEN_PROVIDER_EVENTS_TOKEN", "scoped-monitor-token");
+  try {
+    const report = createProviderActivityReporter({ url: "https://monitor.modelmarket.dev/", token: "broad-token" }, log);
+    report(Object.assign(
+      { provider: "laso", operation: "card_checkout", status: "succeeded" } as const,
+      { card: "private card reference", receipt: "private receipt" },
+    ));
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe("https://monitor.modelmarket.dev/api/provider-events");
+    expect(init).toMatchObject({
+      method: "POST", redirect: "error",
+      headers: { Authorization: "Bearer scoped-monitor-token", "Content-Type": "application/json" },
+    });
+    expect(JSON.parse(String(init?.body))).toEqual({
+      event_id: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/),
+      provider: "laso", source: "argus", operation: "card_checkout", status: "succeeded",
+    });
+  } finally {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  }
+});
 
 function stubRun(over: Partial<RunResult> = {}): RunResult {
   return {

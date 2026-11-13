@@ -16,6 +16,7 @@ import { sealMandate, anchorWithAestus, type MandateSeal } from "../mandate/inde
 import type { SpendDecision } from "../spendcert/index.js";
 import type { VerifiedHire } from "../verifycert/index.js";
 import { inspectTask, wrapUntrustedTask } from "../aegis/promptFirewall.js";
+import { requiresExactApproval } from "./approval-preview.js";
 
 export interface ApprovalRequest {
   tool: string;
@@ -214,11 +215,12 @@ const LESSONS_FOOTER = "</lessons-context>";
  * stops the run rather than overspending silently.
  */
 /**
- * A call needs the owner's yes when its exposed name, or for an MCP tool the server's own name for it, matches a
+ * Exact built-in operations always require the owner's decision. A call also needs approval when its exposed name, or for an MCP tool the server's own name for it, matches a
  * sensitive pattern. The MCP host checks the server's name (`delete_file`), this loop sees `fs__delete_file`: an
  * anchored pattern such as `delete_*` matched only the host's, so the host refused a call nobody had been asked about.
  */
 export function needsApproval(callName: string, source: ToolSource, policy: ArgusConfig["warden"]): boolean {
+  if (source.kind === "builtin" && requiresExactApproval(callName)) return true;
   if (isSensitiveTool(callName, policy)) return true;
   const prefix = source.kind === "mcp" ? `${source.server}__` : "";
   return !!prefix && callName.startsWith(prefix) && isSensitiveTool(callName.slice(prefix.length), policy);

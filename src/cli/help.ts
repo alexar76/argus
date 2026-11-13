@@ -10,6 +10,13 @@ Usage:
   argus doctor                       show config, providers, economy status
   argus serve                        run channels (HTTP /health + Telegram) — for Docker/servers
   argus telegram                     run only the owner-locked Telegram bot
+  argus mail setup                   discover and connect a mailbox on the ARGUS host
+  argus mail setup --gmail-send-api  use Gmail API for OAuth mail delivery over HTTPS
+  argus mail setup --microsoft-client-id <id>  connect Outlook.com over Microsoft Graph
+  argus mail status                  show the mailbox connection and permissions
+  argus mail check-read <sender> <subject>  verify that one controlled test message is readable
+  argus mail check-otp <sender>      check codes-only access using a synthetic email
+  argus mail check-reply <sender> <subject>  review and confirm a test reply in a private terminal
   argus mcp                          expose ARGUS as an MCP server (stdio) for other agents/IDEs
   argus flex                         show your 🎮 Agent Arena card (web UI at /arena via serve)
   argus warden scan                  WARDEN-vet configured MCP servers
@@ -35,7 +42,7 @@ Flags:
   --frugalproof <f> (with ask) write a verifiable cost receipt (oracle-anchored if reachable)
   --conscience <f>  (with ask) write the FULL verifiable conscience — receipts + cost + consent chain + attestation in one bundle (re-check: argus verify)
   --verified        (with ask/chat) Pay-on-Verified: the hub escrows each paid invoke until Metis verdicts the output — pass captures the debit, fail refunds it (place AFTER the task text)
-  --yes             auto-approve sensitive tools (use with care)
+  --yes             auto-approve eligible sensitive tools (purchases still require a prompt)
   --verbose         debug logging
 
 ARGUS runs fully autonomously with no wallet. Set ARGUS_WALLET_KEY to connect to

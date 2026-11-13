@@ -12,6 +12,13 @@ import { notifyOwnerWhenReady } from "./channels/owner-notify.js";
 import { CatalogConnector } from "./mcp/catalog.js";
 import { buildBuiltinTools } from "./tools/builtin.js";
 import { buildEcosystemTools } from "./tools/ecosystem.js";
+import { buildExternalResearchTools } from "./tools/external-research.js";
+import { buildTravelBookingTools } from "./tools/travel-booking.js";
+import { buildLasoCardTools } from "./tools/laso.js";
+import { buildCoinMarketCapTool } from "./tools/cmc.js";
+import { createProviderActivityReporter, type ReportProviderActivity } from "./monitor/provider-events.js";
+import { externalBasePayment, externalBrowserbasePayment, externalTavilyPayment } from "./economy/external-payment.js";
+import { MailService } from "./mail/index.js";
 import { buildChainContext, shouldBuildChainContext, type ChainContext } from "./ecosystem/networks.js";
 import { Agent, type ApproveFn, type RunResult } from "./core/agent.js";
 import { AimarketConsumer } from "./economy/aimarket.js";
@@ -40,11 +47,13 @@ export class Runtime {
   readonly oracle: LumenOracle;
   readonly chain: ChainContext | null;
   private _wallet: Wallet | null = null;
+  private _externalWallet: Wallet | null = null;
   /** MCP WARDEN blocks since last monitor push — scoped to this runtime instance. */
   readonly wardenBlocks = new WardenBlockBuffer();
   /** When the owner was last told that a server got blocked while running (see connectMcp). */
   private readonly blockNotedAt = new Map<string, number>();
   readonly monitorFeed: MonitorFeed;
+  readonly reportProviderActivity: ReportProviderActivity;
   /** The loaded threat feed, for a reviewer Warden that shares it (argus warden pins). */
   readonly threatFeed: ThreatFeed;
 
@@ -60,6 +69,7 @@ export class Runtime {
     this.oracle = deps.oracle;
     this.chain = deps.chain;
     this.threatFeed = deps.threatFeed;
+    this.reportProviderActivity = createProviderActivityReporter(config.monitor, log.child("monitor"));
     this.monitorFeed = new MonitorFeed(config.monitor, log.child("monitor"), config.stateDir, {
       version: process.env.npm_package_version || "0.0.0",
       mode: config.mode,
@@ -219,6 +229,38 @@ export class Runtime {
     return this.host.serverStates();
   }
 
+  private assistantTools() {
+    const origin = process.env.ARGUS_BOOKING_PARTNER_ORIGIN?.trim();
+    const bookingToken = process.env.ARGUS_BOOKING_PARTNER_TOKEN?.trim();
+    const otpSender = process.env.ARGUS_BOOKING_OTP_SENDER?.trim();
+    const tools = buildTravelBookingTools(this.config.mode === "live" && origin && bookingToken && otpSender ? {
+      origin, token: bookingToken, otpSender, otpSubject: process.env.ARGUS_BOOKING_OTP_SUBJECT?.trim(),
+      mail: new MailService(this.config.stateDir),
+    } : undefined);
+    const key = process.env.ARGUS_EXTERNAL_X402_WALLET_KEY?.trim();
+    if (this.config.mode !== "live" || !this.config.cryptoEnabled || !key) return tools;
+    const wallet = this._externalWallet ??= new Wallet(key);
+    const walletKey = () => wallet.privateKey;
+    const pay = externalBasePayment(walletKey, fetch, this.chain?.publicClient);
+    const chuhchingPayTo = process.env.ARGUS_CHUHCHING_PAY_TO?.trim();
+    tools.push(...buildExternalResearchTools({
+      pay, chuhchingPayTo,
+      browserbasePay: process.env.ARGUS_BROWSERBASE_ENABLED === "1" ? externalBrowserbasePayment(walletKey) : undefined,
+      browserbaseFetchHosts: (process.env.ARGUS_BROWSERBASE_FETCH_HOSTS ?? "").split(",").map((host) => host.trim()).filter(Boolean),
+      tavilyPay: process.env.ARGUS_TAVILY_X402_ENABLED === "1" ? externalTavilyPayment(walletKey) : undefined,
+      reportProvider: this.reportProviderActivity,
+    }));
+    const cmcPayTo = process.env.ARGUS_CMC_PAY_TO?.trim();
+    if (cmcPayTo) tools.push(buildCoinMarketCapTool(pay, cmcPayTo, this.reportProviderActivity));
+    const merchant = process.env.ARGUS_LASO_MERCHANT?.trim();
+    if (merchant) tools.push(...buildLasoCardTools({
+      pay, merchant, walletKey, maxCents: Number(process.env.ARGUS_LASO_MAX_CENTS ?? "500"),
+      token: () => process.env.ARGUS_LASO_ID_TOKEN?.trim(),
+      reportProvider: this.reportProviderActivity,
+    }));
+    return tools;
+  }
+
   async buildAgent(approve?: ApproveFn): Promise<Agent> {
     await this.connectMcp();
     const classifier = createInjectionClassifier({
@@ -262,6 +304,7 @@ export class Runtime {
     const tools = [
       ...buildBuiltinTools({ memory: this.memory, log: this.log, egress }),
       ...ecosystem,
+      ...this.assistantTools(),
       ...this.host.bridgedTools(),
     ];
     const monitor = this.config.monitor;

@@ -3,6 +3,7 @@ import { stdin, stdout } from "node:process";
 import { writeFileSync, realpathSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import type { ApprovalRequest } from "../core/agent.js";
+import { MAX_EXACT_APPROVAL_LENGTH, renderApprovalArgs, requiresExactApproval } from "../core/approval-preview.js";
 import type { MeterSnapshot } from "../types.js";
 
 export const VERSION = "0.3.6";
@@ -40,12 +41,16 @@ export function safeWrite(dest: string, data: string, stateDir: string): void {
 
 export function makeApprover(autoYes: boolean) {
   return async (req: ApprovalRequest): Promise<boolean> => {
-    if (autoYes) return true;
+    const exact = requiresExactApproval(req.tool);
+    if (autoYes && !exact) return true;
     if (!stdin.isTTY) return false;
+    const preview = exact ? renderApprovalArgs(req.args) : "";
+    if (preview.length > MAX_EXACT_APPROVAL_LENGTH) return false;
     const rl = createInterface({ input: stdin, output: stdout });
     try {
       const where = req.server ? ` (server ${req.server})` : "";
-      const ans = (await rl.question(`⚠ approve sensitive tool "${req.tool}"${where}? [y/N] `)).trim().toLowerCase();
+      const label = `⚠ approve sensitive tool "${req.tool}"${where}?`;
+      const ans = (await rl.question(exact ? `${label}\nargs: ${preview}\n[y/N] ` : `${label} [y/N] `)).trim().toLowerCase();
       return ans === "y" || ans === "yes";
     } finally {
       rl.close();

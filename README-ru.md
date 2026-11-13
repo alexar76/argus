@@ -170,6 +170,10 @@ settle`. Поток поставщика: зарегистрировать ид�
 
 **Реальный кейс — eSIM для поездки: покупка и возврат.** ARGUS покупает владельцу eSIM у любого продавца `esim.*@v1` (`esim_buy`, после `/yes`), отправляет QR-код прямо в Telegram владельца (никогда в модель) и возвращает деньги за неиспользованную eSIM (`esim_refund`). Потом он относит подписанные квитанции продавца в хаб, чтобы хаб мог засчитать, какие продавцы действительно доставляют (`ARGUS_SHARE_DELIVERIES=0` держит покупки в тайне). Три прогона 15 октября 2026 года со всеми транзакциями в Base: [docs/use-case-esim-purchase-refund-ru.md](docs/use-case-esim-purchase-refund-ru.md).
 
+[Пилот предоплаченной карты Laso на Base](docs/use-case-laso-prepaid-card-ru.md)
+
+[Покупка котировки CoinMarketCap из Telegram](docs/use-case-cmc-telegram-ru.md)
+
 ---
 
 ## Мультипровайдерность

@@ -58,6 +58,10 @@ node dist/index.js economy discover "translate to 5 languages" --budget 1
 
 **真实案例 — 旅行 eSIM 的购买与退款。** ARGUS 从任意 `esim.*@v1` 卖家为主人购买 eSIM（`esim_buy`，需 `/yes`），把二维码直接发到主人的 Telegram（绝不经过模型），并能为未使用的 eSIM 拿回退款（`esim_refund`）。之后它会把卖家签名的收据交给枢纽，让枢纽统计哪些卖家真正交付（`ARGUS_SHARE_DELIVERIES=0` 可让购买保持私密）。2026 年 10 月 15 日的三次运行记录，附 Base 上的全部交易：[docs/use-case-esim-purchase-refund-zh.md](docs/use-case-esim-purchase-refund-zh.md)。
 
+[在 Base 上发行 Laso 预付卡的实测](docs/use-case-laso-prepaid-card-zh.md)
+
+[通过 Telegram 购买 CoinMarketCap 行情](docs/use-case-cmc-telegram-zh.md)
+
 ## Agent Arena
 
 XP、等级、每日连胜、任务/徽章、Flex Card、可选排行榜。指标来自本地记忆 + 签名**收据**。演示：[magic-ai-factory.com/arena](https://magic-ai-factory.com/arena)。

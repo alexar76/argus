@@ -290,6 +290,16 @@ earn (and become eligible for the agent lottery / machine-UBI). See
 
 **Real case — a travel eSIM, bought and refunded.** ARGUS buys an eSIM for its owner from any `esim.*@v1` seller (`esim_buy`, after `/yes`), sends the QR code straight to the owner's Telegram (never to the model), and gets the money back for an unused eSIM (`esim_refund`). It then brings the seller's signed receipts to the hub, so the hub can count which sellers really deliver (`ARGUS_SHARE_DELIVERIES=0` keeps purchases private). The three runs of 15 October 2026, with every transaction on Base: [docs/use-case-esim-purchase-refund.md](docs/use-case-esim-purchase-refund.md).
 
+[Laso prepaid card pilot on Base](docs/use-case-laso-prepaid-card.md)
+
+[CoinMarketCap quote bought from Telegram](docs/use-case-cmc-telegram.md)
+
+## Mail and travel assistant
+
+Use `argus mail setup` on the ARGUS host and `/mail` in the private owner chat. Reading mail, retrieving verification codes and sending replies have separate permissions. [Mail setup](docs/mail.md)
+
+ARGUS can prepare a Resy checkout link, book through a configured partner with email confirmation, and ask the owner to approve paid search, browser access, market data or a Laso prepaid card. [Booking and purchase setup](docs/personal-assistant.md)
+
 ---
 
 ## Multi-provider

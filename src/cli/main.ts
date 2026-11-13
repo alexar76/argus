@@ -16,6 +16,7 @@ import { cmdPassport } from "./commands/passport.js";
 import { cmdBroker } from "./commands/broker.js";
 import { cmdMandate } from "./commands/mandate.js";
 import { cmdA2A } from "./commands/a2a.js";
+import { cmdMail } from "./commands/mail.js";
 
 export async function main(argv: string[]): Promise<number> {
   loadWorkspaceEnv();
@@ -60,6 +61,8 @@ export async function main(argv: string[]): Promise<number> {
       return cmdMandate(config, args);
     case "a2a":
       return cmdA2A(config, args);
+    case "mail":
+      return cmdMail(config, args);
     case "help":
     default:
       printHelp();
