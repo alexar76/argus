@@ -9,6 +9,8 @@ const INPUTS = {
   billing_state: "the card's billing state or region",
   billing_postal: "the card's billing postal code",
   billing_country: "the card's two-letter billing country code",
+  passenger_first_name: "the passenger's first name",
+  passenger_last_name: "the passenger's last name",
   purchase_link: "the private itch.io download link from your receipt",
 } as const;
 const RUSSIAN_INPUTS: Record<keyof typeof INPUTS, string> = {
@@ -19,16 +21,21 @@ const RUSSIAN_INPUTS: Record<keyof typeof INPUTS, string> = {
   billing_state: "регион в платёжном адресе карты",
   billing_postal: "почтовый индекс в платёжном адресе карты",
   billing_country: "двухбуквенный код страны платёжного адреса карты",
+  passenger_first_name: "имя пассажира",
+  passenger_last_name: "фамилию пассажира",
   purchase_link: "закрытую ссылку itch.io на скачивание из квитанции",
 };
 const INPUT_PREFIX = "Purchase details · Reply with ";
 const RUSSIAN_INPUT_PREFIX = "Данные покупки · Пришлите в ответ ";
 const MAX_CENTS = 500;
-const MAX_ZIP_BYTES = 10 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 const INPUT_TIMEOUT_MS = 120_000;
+export const HUDSON_LINK_ITEM_URL = "https://www.ridehudsonlink.com/travel-options/palisades-center-lot-j-west-nyack-ny/depot-plz-train-station-tarrytown-ny";
+export const HUDSON_LINK_TICKET_CENTS = 275;
 
 export type TelegramPurchaseInput = keyof typeof INPUTS;
 export type TelegramPurchaseIntent = "buy" | "recover";
+export type TelegramPurchaseMerchant = "itch" | "hudson";
 
 export class TelegramDocumentRejected extends Error {
   constructor() {
@@ -44,6 +51,7 @@ export interface TelegramPurchaseApproval {
   itemUrl?: string;
   taxCents?: number;
   maxCents?: number;
+  passengerName?: string;
 }
 
 export interface TelegramPurchaseChannel {
@@ -59,7 +67,7 @@ export interface TelegramPurchaseChannel {
 type PurchaseTransport = {
   prompt(text: string, replyMarkup: object): Promise<number>;
   send(text: string): Promise<void>;
-  upload(filename: string, bytes: Uint8Array): Promise<void>;
+  upload(filename: string, bytes: Uint8Array, mimeType: "application/zip" | "application/pdf"): Promise<void>;
 };
 
 type PendingInput = {
@@ -77,6 +85,10 @@ type PendingApproval = {
 export function purchaseCommand(text: string): TelegramPurchaseIntent | undefined {
   if (/^(?:\/buy_itch|купи (?:иконки|иконци)|buy (?:the )?icons)$/iu.test(text)) return "buy";
   if (/^(?:\/recover_itch|получи иконки|recover (?:the )?icons)$/iu.test(text)) return "recover";
+}
+
+export function isHudsonPurchaseCommand(text: string): boolean {
+  return /^(?:\/buy_hudson|купи билет hudson link|buy (?:a )?hudson link ticket)$/iu.test(text);
 }
 
 export function isPurchaseInputPrompt(text: string | undefined): boolean {
@@ -103,7 +115,11 @@ export class TelegramPurchase implements TelegramPurchaseChannel {
   private approved = false;
   private documentStarted = false;
 
-  constructor(private readonly transport: PurchaseTransport, private readonly russian = false) {}
+  constructor(
+    private readonly transport: PurchaseTransport,
+    private readonly russian = false,
+    private readonly merchant: TelegramPurchaseMerchant = "itch",
+  ) {}
 
   cancel(): void {
     this.controller.abort();
@@ -117,6 +133,7 @@ export class TelegramPurchase implements TelegramPurchaseChannel {
 
   async requestInput(field: TelegramPurchaseInput): Promise<string | null> {
     if (this.signal.aborted || this.input || this.approval || this.requested.has(field) || !Object.hasOwn(INPUTS, field)) return null;
+    if (this.merchant === "hudson" ? field === "purchase_link" : field.startsWith("passenger_")) return null;
     if (field === "purchase_link" ? !this.approved : this.approvalRequested) return null;
     this.requested.add(field);
     const text = this.russian
@@ -142,12 +159,20 @@ export class TelegramPurchase implements TelegramPurchaseChannel {
   }
 
   async approve(input: TelegramPurchaseApproval): Promise<boolean> {
-    const text = approvalText(input, this.russian);
+    if (this.merchant === "hudson" && (input.merchant !== "Hudson Link" || input.itemUrl !== HUDSON_LINK_ITEM_URL
+      || !input.passengerName || input.totalCents !== HUDSON_LINK_TICKET_CENTS || input.maxCents !== HUDSON_LINK_TICKET_CENTS
+      || (input.taxCents !== undefined && input.taxCents !== 0))) return false;
+    if (input.passengerName !== undefined && (this.merchant !== "hudson" || !personName(input.passengerName))) return false;
+    const text = approvalText(input, this.russian, this.merchant);
     return text ? this.requestApproval(text, this.russian ? "Подтвердить покупку" : "Approve this purchase") : false;
   }
 
   async approveDelivery(title: string): Promise<boolean> {
     if (!approvalLabel(title)) return false;
+    if (this.merchant === "hudson") {
+      const prompt = this.russian ? `Отправить оплаченный билет повторно?\n${title}` : `Send the ticket from the existing purchase?\n${title}`;
+      return this.requestApproval(prompt, this.russian ? "Получить билет" : "Send the ticket");
+    }
     const text = this.russian
       ? `Получить файл по существующей покупке?\n${title}\nARGUS запросит закрытую ссылку из квитанции и пришлёт ZIP сюда. Оплаты не будет.`
       : `Deliver an existing purchase?\n${title}\nARGUS will ask for the private receipt link and send the ZIP here. No payment will be made.`;
@@ -219,11 +244,15 @@ export class TelegramPurchase implements TelegramPurchaseChannel {
   async sendDocument(filename: string, bytes: Uint8Array): Promise<void> {
     this.signal.throwIfAborted();
     if (!this.approved || this.documentStarted) throw new Error("Purchase document delivery is unavailable");
-    if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,114}\.zip$/i.test(filename) || bytes.length < 22 || bytes.length > MAX_ZIP_BYTES || !hasZipSignature(bytes)) {
+    if (this.merchant === "hudson") {
+      if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,114}\.pdf$/i.test(filename) || bytes.length > MAX_DOCUMENT_BYTES || !hasPdfSignature(bytes)) {
+        throw new Error("Invalid ticket PDF");
+      }
+    } else if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,114}\.zip$/i.test(filename) || bytes.length < 22 || bytes.length > MAX_DOCUMENT_BYTES || !hasZipSignature(bytes)) {
       throw new Error("Invalid purchase ZIP");
     }
     this.documentStarted = true;
-    await this.transport.upload(filename, bytes);
+    await this.transport.upload(filename, bytes, this.merchant === "hudson" ? "application/pdf" : "application/zip");
   }
 
   async notify(text: string): Promise<void> {
@@ -242,6 +271,7 @@ function purchaseInput(field: TelegramPurchaseInput, value: string): string | nu
     return value.length <= 1000 && !/[\s\p{Cc}\p{Cf}]/u.test(value) && isPurchaseLink(value) ? value : null;
   }
   if (!value || value.length > 254 || /[\p{Cc}\p{Cf}]/u.test(value) || possibleCardNumber(value)) return null;
+  if (field === "passenger_first_name" || field === "passenger_last_name") return personName(value) ? value : null;
   if (field === "billing_country") return /^[a-z]{2}$/i.test(value) ? value.toUpperCase() : null;
   if (["billing_name", "billing_city", "billing_state"].includes(field)) return /\p{L}/u.test(value) ? value : null;
   if (field === "billing_postal") return /^[a-z0-9][a-z0-9 -]{2,10}$/i.test(value) ? value : null;
@@ -253,13 +283,13 @@ function purchaseInput(field: TelegramPurchaseInput, value: string): string | nu
   }
 }
 
-function approvalText({ title, merchant, totalCents, receiptEmail, itemUrl, taxCents, maxCents = MAX_CENTS }: TelegramPurchaseApproval, russian: boolean): string | null {
+function approvalText({ title, merchant, totalCents, receiptEmail, itemUrl, taxCents, maxCents = MAX_CENTS, passengerName }: TelegramPurchaseApproval, russian: boolean, kind: TelegramPurchaseMerchant): string | null {
   if (!approvalLabel(title) || !approvalLabel(merchant)) return null;
   if (!Number.isInteger(totalCents) || !Number.isInteger(maxCents) || totalCents <= 0 || totalCents > maxCents || maxCents > MAX_CENTS) return null;
   if (taxCents !== undefined && (!Number.isInteger(taxCents) || taxCents < 0 || taxCents > totalCents)) return null;
   const email = purchaseInput("receipt_email", receiptEmail);
   if (!email) return null;
-  const url = itemUrl ? productUrl(itemUrl) : undefined;
+  const url = kind === "hudson" ? HUDSON_LINK_ITEM_URL : itemUrl ? productUrl(itemUrl) : undefined;
   if (itemUrl && !url) return null;
   const address = `${email.slice(0, 1)}…${email.slice(email.lastIndexOf("@"))}`;
   const usd = (cents: number) => `$${(cents / 100).toFixed(2)} USD`;
@@ -268,6 +298,7 @@ function approvalText({ title, merchant, totalCents, receiptEmail, itemUrl, taxC
     title,
     `${russian ? "Продавец" : "Merchant"} · ${merchant}`,
     ...(url ? [url] : []),
+    ...(passengerName ? [`${russian ? "Пассажир" : "Passenger"} · ${passengerName}`] : []),
     `${russian ? "Итого" : "Total"} · ${usd(totalCents)}`,
     ...(taxCents === undefined ? [] : [`${russian ? "В том числе налог" : "Included tax"} · ${usd(taxCents)}`]),
     `${russian ? "Лимит" : "Maximum"} · ${usd(maxCents)}`,
@@ -277,6 +308,10 @@ function approvalText({ title, merchant, totalCents, receiptEmail, itemUrl, taxC
 
 function approvalLabel(value: string): boolean {
   return Boolean(value.trim()) && value.length <= 160 && !/[\p{Cc}\p{Cf}]/u.test(value) && !possibleCardNumber(value);
+}
+
+function personName(value: string): boolean {
+  return value.length <= 100 && /^[\p{L}\p{M}]+(?:[ .’'-][\p{L}\p{M}]+)*\.?$/u.test(value);
 }
 
 function productUrl(value: string): string | undefined {
@@ -296,4 +331,11 @@ function itchUrl(url: URL): boolean {
 function hasZipSignature(bytes: Uint8Array): boolean {
   return bytes[0] === 0x50 && bytes[1] === 0x4b &&
     ((bytes[2] === 3 && bytes[3] === 4) || (bytes[2] === 5 && bytes[3] === 6));
+}
+
+function hasPdfSignature(bytes: Uint8Array): boolean {
+  if (bytes.length < 64) return false;
+  const head = Buffer.from(bytes.subarray(0, 12)).toString("latin1");
+  const tail = Buffer.from(bytes.subarray(-128)).toString("latin1");
+  return /^%PDF-(?:1\.[0-7]|2\.0)\r?\n/.test(head) && /(?:\r?\n)startxref\s+\d+\s+%%EOF\s*$/.test(tail);
 }

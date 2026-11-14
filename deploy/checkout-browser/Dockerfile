@@ -8,6 +8,7 @@ RUN echo '042e2cf32e9211503a435ad2c594eda3c848d4a508df15e51c6660bc6a8fe08a8f748f
     && rm /tmp/playwright-core.tgz
 
 COPY --chmod=0444 server.mjs smoke.mjs /app/
+COPY --chmod=0555 entrypoint.sh /app/entrypoint.sh
 ENV NODE_ENV=production HOME=/tmp
 USER 1000:1000
-ENTRYPOINT ["node", "/app/server.mjs"]
+ENTRYPOINT ["/app/entrypoint.sh"]

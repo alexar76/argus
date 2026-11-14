@@ -13,6 +13,8 @@ bash launch.sh start
 docker exec argus-checkout-browser node /app/smoke.mjs
 ```
 
+One-off guest checkout on Hudson Link can require Chromium's windowed mode. Run the canary and start the service with `ARGUS_CHECKOUT_HEADED=1` to use an isolated Xvfb display. The display has no TCP listener. The Chromium sandbox and checkout request allowlist still apply.
+
 The canary uses a networkless container. It checks Chromium's PID and network namespaces and renderer seccomp, rejects an incorrect WebSocket path, and renders a synthetic page through Playwright interception. For a read-only merchant check, feed `public-preflight.mjs` to `docker exec -i -w /app argus-checkout-browser node --input-type=module -`. That check uses GET and sends no customer details.
 
 Attach the owner-pinned ARGUS service to the external `argus_checkout` network in addition to its existing networks. Mount `/root/argus-checkout-browser/private/browser-ws` at `/run/checkout/browser-ws` read-only and set `ARGUS_ITCH_BROWSER_WS_FILE=/run/checkout/browser-ws`. The endpoint file is owned by UID 1000 and has mode `0600`. Keep the Laso session and receipt configuration in the ARGUS service.

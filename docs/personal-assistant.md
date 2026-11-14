@@ -41,7 +41,7 @@ Use a dedicated Base USDC wallet for these tools. Set `ARGUS_EXTERNAL_X402_WALLE
 
 The ModelMarket Hub retains its separate fixed-recipient policy. Tavily and Browserbase's request-specific deposit addresses are scoped to the two first-party adapters in ARGUS. The CMC test can run directly from the buyer's wallet. Public Hub registration requires seller consent and a configured recipient.
 
-[CoinMarketCap quote bought from Telegram](use-case-cmc-telegram.md) · [Laso prepaid card pilot on Base](use-case-laso-prepaid-card.md)
+[CoinMarketCap quote bought from Telegram](use-case-cmc-telegram.md) · [Laso prepaid card pilot on Base](use-case-laso-prepaid-card.md) · [Bandcamp checkout check with Laso](use-case-laso-bandcamp.md)
 
 ## Buy the itch.io icon pack from Telegram
 
@@ -69,3 +69,9 @@ Attested runs the opt-in flow with a configured receipt address and isolated Chr
 After a purchase in your own browser, send `/recover_itch` or “получи иконки” in the private bot chat. Confirm delivery and reply to the bot's prompt with the private link from the receipt. ARGUS checks the product, the paid total and the archive before sending the file. This command does not submit a payment. It can deliver the verified ZIP when the Laso session has expired, with debit reconciliation pending.
 
 To exercise the checkout from the `argus` directory, set `ARGUS_TEST_CHROMIUM_PATH` to your local Chromium executable and run `npm test -- test/itch-browser.test.ts test/itch-purchase.test.ts test/telegram-purchase.test.ts test/icon-zip.test.ts`. The browser fixture supplies all merchant and Stripe responses locally.
+
+## Hudson Link ticket from Telegram
+
+The private command `/buy_hudson` is available when `ARGUS_HUDSON_PURCHASE_ENABLED=1` and a dedicated windowed checkout browser is configured. It handles one adult single ride from Palisades Center Lot J in West Nyack to Depot Plaza in Tarrytown at exactly USD 2.75. Hudson Link shows a validity period of 365 days. The bot asks for the traveler’s name and shows the exact trip and total before the owner approves. [Fares and single-ride ticket delivery](https://www.ridehudsonlink.com/fares)
+
+The checkout uses the existing private Laso card and receipt address. The Laso directory currently lists Coach USA as `unknown`. A prior provider rejection stops the flow before payment. The bot records the attempt on disk before the order and blocks repeat charges after a lost response. It verifies the printable ticket, then reports the merchant receipt and the issuer debit separately if either is still pending. Hudson Link documents a separate email receipt. If the payment processor requests interactive verification, check the status before retrying. [Browser setup](../deploy/checkout-browser/README.md) · [Public preflight evidence](../../artifacts/argus-bus-preflight-2026-11-14/verified.json)

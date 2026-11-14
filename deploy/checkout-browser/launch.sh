@@ -28,6 +28,7 @@ case "$mode" in
       --shm-size 128m --tmpfs /tmp:rw,nosuid,nodev,size=128m,mode=1777 \
       --security-opt no-new-privileges:true --security-opt apparmor=argus-checkout-browser \
       --security-opt "seccomp=$(pwd)/seccomp.json" \
+      --env "ARGUS_CHECKOUT_HEADED=${ARGUS_CHECKOUT_HEADED:-0}" \
       --mount "type=bind,src=$secret,dst=/run/checkout/browser-ws,readonly" "$runtime_image" >/dev/null
     trap 'docker rm -f "$canary" >/dev/null' EXIT
     for _ in {1..20}; do

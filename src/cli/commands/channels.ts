@@ -3,6 +3,7 @@ import { createLogger } from "../../logger.js";
 import { Runtime } from "../../runtime.js";
 import { TelegramBot } from "../../telegram/bot.js";
 import { configuredItchPurchase } from "../../checkout/itch-purchase.js";
+import { configuredHudsonPurchase } from "../../checkout/hudson-purchase.js";
 import { HttpChannel } from "../../channels/http.js";
 import { McpServerChannel } from "../../channels/mcp_server.js";
 import { Arena } from "../../arena/arena.js";
@@ -59,6 +60,7 @@ export async function cmdTelegram(config: ArgusConfig, args?: { rest: string[] }
   bot = new TelegramBot({
     token, agent, arena, stateDir: config.stateDir, ownerId, log: log.child("telegram"), mailModels: rt.router,
     purchase: configuredItchPurchase(config.stateDir, config.mode, rt.reportProviderActivity),
+    hudsonPurchase: configuredHudsonPurchase(config.stateDir, config.mode, rt.reportProviderActivity),
   });
 
   const shutdown = () => {
@@ -138,6 +140,7 @@ export async function cmdServe(config: ArgusConfig): Promise<number> {
     const bot = new TelegramBot({
       token: tgToken, agent, arena, stateDir: config.stateDir, ownerId, log: log.child("telegram"), mailModels: rt.router,
       purchase: configuredItchPurchase(config.stateDir, config.mode, rt.reportProviderActivity),
+      hudsonPurchase: configuredHudsonPurchase(config.stateDir, config.mode, rt.reportProviderActivity),
     });
     stoppers.push(() => bot.stop());
     longRunning.push(bot.run());

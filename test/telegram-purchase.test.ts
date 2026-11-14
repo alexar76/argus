@@ -5,6 +5,7 @@ import { join } from "node:path";
 import type { Agent } from "../src/core/agent.js";
 import { createLogger } from "../src/logger.js";
 import { TelegramBot, type TelegramBotOptions } from "../src/telegram/bot.js";
+import { HUDSON_LINK_ITEM_URL, HUDSON_LINK_TICKET_CENTS } from "../src/telegram/purchase.js";
 
 const OWNER = 42;
 const PRIVATE = { id: OWNER, type: "private" };
@@ -13,8 +14,9 @@ const PRODUCT = "https://aiimperium.itch.io/co-working-startup-office-icon-pack"
 const LINK = `${PRODUCT}/download/secret-token`;
 const EMAIL = "private-owner@example.com";
 const ZIP = Uint8Array.from([0x50, 0x4b, 5, 6, ...Array<number>(18).fill(0)]);
+const PDF = Buffer.from("%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\nxref\n0 0\ntrailer\n<< /Size 1 >>\nstartxref\n44\n%%EOF\n");
 
-function setup(purchase?: TelegramBotOptions["purchase"], options?: { stateDir: string; ownerId?: number }) {
+function setup(purchase?: TelegramBotOptions["purchase"], options?: Pick<TelegramBotOptions, "stateDir" | "ownerId" | "hudsonPurchase">) {
   const run = vi.fn();
   const log = createLogger("telegram-purchase-test", "error");
   const bot = new TelegramBot({ token: "test", agent: { run } as unknown as Agent, log, purchase, ...(options ?? { ownerId: OWNER, stateDir: "." }) });
@@ -101,6 +103,7 @@ describe("private Telegram purchase", () => {
     expect(uploads).toHaveLength(1);
     const form = uploads[0][1] as FormData;
     expect(form.get("chat_id")).toBe(String(OWNER));
+    expect(form.has("protect_content")).toBe(false);
     const document = form.get("document") as File;
     expect(document.name).toBe("icons.zip");
     expect(document.type).toBe("application/zip");
@@ -179,5 +182,90 @@ describe("private Telegram purchase", () => {
     } finally {
       rmSync(stateDir, { recursive: true, force: true });
     }
+  });
+
+  it("approves the pinned $2.75 Hudson Link route and uploads its PDF once to the private owner", async () => {
+    const itch = vi.fn(async () => {});
+    const approved = vi.fn();
+    const { api, callback, message, prompts, run } = setup(itch, {
+      stateDir: ".", ownerId: OWNER,
+      hudsonPurchase: async channel => {
+        const first = await channel.requestInput("passenger_first_name");
+        const last = await channel.requestInput("passenger_last_name");
+        expect(first).toBe("José");
+        expect(last).toBe("O’Connor");
+        const request = { title: "Palisades Center (Lot J) → Depot Plaza (Tarrytown)", merchant: "Hudson Link",
+          totalCents: HUDSON_LINK_TICKET_CENTS, maxCents: HUDSON_LINK_TICKET_CENTS, itemUrl: HUDSON_LINK_ITEM_URL,
+          receiptEmail: EMAIL, passengerName: `${first} ${last}` };
+        await expect(channel.approve({ ...request, itemUrl: `${HUDSON_LINK_ITEM_URL}?other=true` })).resolves.toBe(false);
+        await expect(channel.approve({ ...request, totalCents: 276 })).resolves.toBe(false);
+        await expect(channel.approve({ ...request, maxCents: 500 })).resolves.toBe(false);
+        await expect(channel.approve({ ...request, passengerName: undefined })).resolves.toBe(false);
+        expect(await channel.approve(request)).toBe(true);
+        approved();
+        await expect(channel.requestInput("purchase_link")).resolves.toBeNull();
+        await expect(channel.sendDocument("icons.zip", ZIP)).rejects.toThrow("Invalid ticket PDF");
+        await expect(channel.sendDocument("../ticket.pdf", PDF)).rejects.toThrow("Invalid ticket PDF");
+        await expect(channel.sendDocument("ticket.pdf", PDF.subarray(0, -7))).rejects.toThrow("Invalid ticket PDF");
+        await channel.sendDocument("hudson-link-ticket.pdf", PDF);
+        await expect(channel.sendDocument("hudson-link-ticket.pdf", PDF)).rejects.toThrow("unavailable");
+      },
+    });
+    await message("/buy_hudson", { chat: GROUP });
+    await message("/buy_hudson@argus_test_bot", { chat: GROUP });
+    await message("buy hudson link ticket", { user: 43, chat: { id: 43, type: "private" } });
+    expect(prompts()).toEqual([]);
+    const operation = message("купи билет Hudson Link");
+    await vi.waitFor(() => expect(prompts()).toHaveLength(1));
+    const first = prompts()[0];
+    expect(first.params.text).toContain("имя пассажира");
+    await message("Wrong", { reply: { message_id: first.id - 1 } });
+    await message("José2", { reply: { message_id: first.id } });
+    await message("José", { reply: { message_id: first.id }, chat: GROUP });
+    expect(prompts()).toHaveLength(1);
+    await message("José", { reply: { message_id: first.id } });
+    await vi.waitFor(() => expect(prompts()).toHaveLength(2));
+    const last = prompts()[1];
+    expect(last.params.text).toContain("фамилию пассажира");
+    await message("O’Connor", { reply: { message_id: last.id } });
+    await vi.waitFor(() => expect(prompts()).toHaveLength(3));
+    const approval = prompts()[2];
+    expect(approval.params.text).toContain(HUDSON_LINK_ITEM_URL);
+    expect(approval.params.text).toContain("Итого · $2.75 USD");
+    expect(approval.params.text).toContain("Лимит · $2.75 USD");
+    expect(approval.params.text).toContain("Пассажир · José O’Connor");
+    expect(approval.params.text).not.toContain(EMAIL);
+    const yes = approval.params.reply_markup.inline_keyboard![0][0].callback_data;
+    await message("/yes");
+    await message("/buy_itch");
+    await callback(yes, approval.id, GROUP);
+    await callback(yes, approval.id, PRIVATE, 43);
+    await callback(yes, approval.id - 1);
+    expect(approved).not.toHaveBeenCalled();
+    await Promise.all([callback(yes, approval.id), callback(yes, approval.id)]);
+    await operation;
+    expect(approved).toHaveBeenCalledOnce();
+    expect(itch).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
+    const uploads = api.mock.calls.filter(([method]) => method === "sendDocument");
+    expect(uploads).toHaveLength(1);
+    const form = uploads[0][1] as FormData;
+    expect(form.get("chat_id")).toBe(String(OWNER));
+    expect(form.get("protect_content")).toBe("true");
+    const document = form.get("document") as File;
+    expect(document.name).toBe("hudson-link-ticket.pdf");
+    expect(document.type).toBe("application/pdf");
+    expect(Buffer.from(await document.arrayBuffer())).toEqual(PDF);
+  });
+
+  it("keeps Hudson Link disabled in an itch-only bot", async () => {
+    const itch = vi.fn(async () => {});
+    const { api, message, run } = setup(itch);
+    await message("/help");
+    expect(JSON.stringify(api.mock.calls)).not.toContain("/buy_hudson");
+    await message("/buy_hudson");
+    expect(api.mock.lastCall?.[1]).toMatchObject({ text: "Purchases are unavailable in this ARGUS instance." });
+    expect(itch).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
   });
 });

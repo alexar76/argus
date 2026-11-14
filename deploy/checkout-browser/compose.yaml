@@ -17,6 +17,8 @@ services:
     shm_size: 128m
     mem_limit: 768m
     pids_limit: 256
+    environment:
+      ARGUS_CHECKOUT_HEADED: "${ARGUS_CHECKOUT_HEADED:-0}"
     volumes:
       - type: bind
         source: ./private/browser-ws

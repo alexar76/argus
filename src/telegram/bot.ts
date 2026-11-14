@@ -11,7 +11,7 @@ import { retryOwnerNotes, setOwnerSink, type OwnerNote } from "../channels/owner
 import { MailService } from "../mail/index.js";
 import type { ProviderRouter } from "../providers/router.js";
 import { isMailCommand, TelegramMail, type MailKeyboard } from "./mail.js";
-import { purchaseCommand, isPurchaseInputPrompt, isPurchaseLink, TelegramDocumentRejected, TelegramPurchase, type TelegramPurchaseChannel, type TelegramPurchaseIntent } from "./purchase.js";
+import { purchaseCommand, isHudsonPurchaseCommand, isPurchaseInputPrompt, isPurchaseLink, TelegramDocumentRejected, TelegramPurchase, type TelegramPurchaseChannel, type TelegramPurchaseIntent, type TelegramPurchaseMerchant } from "./purchase.js";
 
 export interface TelegramBotOptions {
   token: string;
@@ -25,6 +25,7 @@ export interface TelegramBotOptions {
   mail?: Pick<MailService, "settings" | "setPermissions" | "list" | "read" | "send">;
   mailModels?: ProviderRouter;
   purchase?: (channel: TelegramPurchaseChannel, intent: TelegramPurchaseIntent) => Promise<void>;
+  hudsonPurchase?: (channel: TelegramPurchaseChannel) => Promise<void>;
 }
 
 interface TgUser { id: number; username?: string; first_name?: string }
@@ -159,21 +160,24 @@ export class TelegramBot {
 
     // ── Owner path ───────────────────────────────────────────────────────────
     const purchaseIntent = purchaseCommand(text);
-    if (!privateChat && /^\/(?:buy|recover)_itch@[a-z0-9_]{5,32}$/i.test(text)) return this.send(chatId, "Open the private ARGUS chat to use purchases.");
-    if (this.purchase || purchaseIntent || isPurchaseInputPrompt(msg.reply_to_message?.text) || isPurchaseLink(text)) {
+    const hudson = isHudsonPurchaseCommand(text);
+    if (!privateChat && /^\/(?:(?:buy|recover)_itch|buy_hudson)@[a-z0-9_]{5,32}$/i.test(text)) return this.send(chatId, "Open the private ARGUS chat to use purchases.");
+    if (this.purchase || purchaseIntent || hudson || isPurchaseInputPrompt(msg.reply_to_message?.text) || isPurchaseLink(text)) {
       if (!privateChat) return this.send(chatId, "Open the private ARGUS chat to use purchases.");
       if (this.purchase) {
-        if (purchaseIntent) return this.send(chatId, "A purchase is already in progress.");
+        if (purchaseIntent || hudson) return this.send(chatId, "A purchase is already in progress.");
         return this.purchase.handleMessage(text, msg.reply_to_message?.message_id).catch(() => {
           this.o.log.warn("Telegram purchase reply failed");
         });
       }
       if (isPurchaseInputPrompt(msg.reply_to_message?.text)) return this.send(chatId, "That purchase prompt has expired.");
       if (isPurchaseLink(text)) return this.send(chatId, "Open /recover_itch and reply directly to the private recovery prompt.");
-      if (!purchaseIntent) return;
-      if (this.o.ownerId === undefined || !this.o.purchase || this.stopped) return this.send(chatId, "Purchases are unavailable in this ARGUS instance.");
+      const runner = hudson ? this.o.hudsonPurchase : this.o.purchase && purchaseIntent
+        ? (channel: TelegramPurchaseChannel) => this.o.purchase!(channel, purchaseIntent)
+        : undefined;
+      if (this.o.ownerId === undefined || !runner || this.stopped) return this.send(chatId, "Purchases are unavailable in this ARGUS instance.");
       if (this.busy || this.pendingApproval) return this.send(chatId, "ARGUS is busy with another task.");
-      return this.runPurchase(chatId, this.o.purchase, purchaseIntent, /^(?:купи|получи) /iu.test(text));
+      return this.runPurchase(chatId, runner, hudson ? "hudson" : "itch", /^(?:купи|получи) /iu.test(text));
     }
     // Approval replies take priority so /yes resolves a pending gate mid-task.
     if (this.pendingApproval) {
@@ -185,7 +189,10 @@ export class TelegramBot {
       return;
     }
     if (/^\/(start|help)$/i.test(text)) {
-      const purchaseHelp = privateChat && this.o.ownerId !== undefined && this.o.purchase ? "\n/buy_itch to purchase the icon pack. /recover_itch to deliver an existing purchase." : "";
+      const purchaseHelp = privateChat && this.o.ownerId !== undefined ? [
+        this.o.purchase ? "\n/buy_itch to purchase the icon pack. /recover_itch to deliver an existing purchase." : "",
+        this.o.hudsonPurchase ? "\n/buy_hudson to purchase one Hudson Link adult ticket." : "",
+      ].join("") : "";
       await this.send(chatId, `🛡️ ARGUS — your owner-locked agent.\nSend a task. /mail for inbox and mail setup. /flex for your 🎮 Agent Arena card. /status for state. Sensitive tools ask for /yes first.${purchaseHelp}`);
       return;
     }
@@ -246,7 +253,7 @@ export class TelegramBot {
     }
   }
 
-  private async runPurchase(chatId: number, run: NonNullable<TelegramBotOptions["purchase"]>, intent: TelegramPurchaseIntent, russian: boolean): Promise<void> {
+  private async runPurchase(chatId: number, run: NonNullable<TelegramBotOptions["hudsonPurchase"]>, merchant: TelegramPurchaseMerchant, russian: boolean): Promise<void> {
     const purchase = new TelegramPurchase({
       prompt: async (text, replyMarkup) => {
         const message = await this.api("sendMessage", {
@@ -259,17 +266,18 @@ export class TelegramBot {
         return message.message_id;
       },
       send: (text) => this.sendText(chatId, text, { disableLinkPreview: true }),
-      upload: async (filename, bytes) => {
+      upload: async (filename, bytes, mimeType) => {
         const form = new FormData();
         form.set("chat_id", String(chatId));
-        form.set("document", new Blob([new Uint8Array(bytes)], { type: "application/zip" }), filename);
+        form.set("document", new Blob([new Uint8Array(bytes)], { type: mimeType }), filename);
+        if (merchant === "hudson") form.set("protect_content", "true");
         await this.api("sendDocument", form, 30_000);
       },
-    }, russian);
+    }, russian, merchant);
     this.purchase = purchase;
     this.busy = true;
     try {
-      await run(purchase, intent);
+      await run(purchase);
     } catch {
       this.o.log.warn("Telegram purchase workflow failed");
       if (!purchase.signal.aborted) await this.send(chatId, "ARGUS could not finish the purchase workflow. Check your receipt and card activity before starting another purchase.");

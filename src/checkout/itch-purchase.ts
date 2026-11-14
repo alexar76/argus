@@ -54,7 +54,7 @@ const FIELDS = [
   ["city", "billing_city"], ["state", "billing_state"], ["postalCode", "billing_postal"],
 ] as const satisfies readonly [keyof ItchBilling, TelegramPurchaseInput][];
 
-function readPrivate(path: string, limit: number): string {
+export function readPrivateCheckoutFile(path: string, limit: number): string {
   const fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
   try {
     const st = fstatSync(fd);
@@ -76,7 +76,7 @@ function syncDirectory(path: string): void {
   }
 }
 
-function durableWrite(path: string, value: JournalRecord, exclusive: boolean): void {
+export function writeCheckoutRecord(path: string, value: object, exclusive: boolean): void {
   const pending = exclusive ? path : `${path}.${randomUUID()}.tmp`;
   try {
     const fd = openSync(pending, "wx", 0o600);
@@ -99,7 +99,7 @@ function durableWrite(path: string, value: JournalRecord, exclusive: boolean): v
 
 function readRecord(path: string, cardId: string): JournalRecord | undefined {
   try {
-    const row = JSON.parse(readPrivate(path, 4096)) as JournalRecord;
+    const row = JSON.parse(readPrivateCheckoutFile(path, 4096)) as JournalRecord;
     if (row.v !== 1 || row.cardId !== cardId || !validTotal(row.totalCents)) throw new Error("Invalid checkout state.");
     if (isManualRecord(row)) {
       if (typeof row.reconciled !== "boolean") throw new Error("Invalid checkout state.");
@@ -187,13 +187,13 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
           if (readRecord(path, deps.cardId)?.stage !== "manual_delivery_retryable") {
             return channel.notify("У этого набора уже есть запись о покупке или доставке. Повтори /recover_itch, чтобы проверить её статус.");
           }
-          durableWrite(path, pending, false);
+          writeCheckoutRecord(path, pending, false);
         } finally {
           closeSync(lock);
           unlinkSync(claim);
         }
       } else {
-        durableWrite(path, pending, true);
+        writeCheckoutRecord(path, pending, true);
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
@@ -202,10 +202,10 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
     }
     try {
       await channel.sendDocument(file.filename, file.bytes);
-      durableWrite(path, { ...pending, stage: "manual_delivered" }, false);
+      writeCheckoutRecord(path, { ...pending, stage: "manual_delivered" }, false);
     } catch (error) {
       if (error instanceof TelegramDocumentRejected) {
-        durableWrite(path, { ...pending, stage: "manual_delivery_retryable" }, false);
+        writeCheckoutRecord(path, { ...pending, stage: "manual_delivery_retryable" }, false);
         if (!channel.signal.aborted) await channel.notify("Telegram отклонил загрузку ZIP. Повтори /recover_itch, чтобы отправить файл ещё раз.");
       } else if (!channel.signal.aborted) {
         await channel.notify("Telegram не подтвердил доставку ZIP. Проверь файлы в чате или скачай ZIP по ссылке из чека itch.io.");
@@ -226,7 +226,7 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
     const verified = await reconcile(row, channel.signal);
     if (verified) reportReconciled(row);
     await channel.sendDocument(file.filename, file.bytes);
-    durableWrite(path, { ...row, stage: "delivered", reconciled: Boolean(verified) }, false);
+    writeCheckoutRecord(path, { ...row, stage: "delivered", reconciled: Boolean(verified) }, false);
     await channel.notify(verified
       ? `Готово. Чек itch.io на ${dollars(row.totalCents)} совпал со списанием Laso. Остаток ${dollars(verified.balanceCents)}. ZIP проверен и отправлен.`
       : `Чек itch.io на ${dollars(row.totalCents)} и ZIP проверены, файл отправлен. Laso ещё не подтвердил списание. Повтори «купи иконки» для сверки без новой оплаты.`);
@@ -251,7 +251,7 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
       if (previous.reconciled) return channel.notify("Проверенный ZIP уже отправлен в этот чат.");
       const verified = await findManualDebit(previous.totalCents, signal);
       if (!verified) return channel.notify("ZIP уже отправлен. Списание Laso пока не подтверждено.");
-      durableWrite(path, { ...previous, reconciled: true }, false);
+      writeCheckoutRecord(path, { ...previous, reconciled: true }, false);
       return channel.notify(`Сумма чека совпала с одним списанием Laso на ${dollars(previous.totalCents)}. Остаток ${dollars(verified.balanceCents)}.`);
     }
     if (previous?.stage === "delivered") {
@@ -259,7 +259,7 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
       const verified = await reconcile(previous, signal);
       if (!verified) return channel.notify("ZIP уже отправлен. Laso ещё не подтвердил списание по чеку.");
       reportReconciled(previous);
-      durableWrite(path, { ...previous, reconciled: true }, false);
+      writeCheckoutRecord(path, { ...previous, reconciled: true }, false);
       return channel.notify(`Списание Laso сверено с чеком на ${dollars(previous.totalCents)}. Остаток ${dollars(verified.balanceCents)}.`);
     }
     if (previous) {
@@ -331,11 +331,11 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
       };
       const file = await session.complete(payment.card, signal, async receipt => {
         if (!recorded || receipt.receiptCents !== totalCents) throw new Error("Unexpected paid receipt.");
-        durableWrite(path, { ...recorded, stage: "receipted" }, false);
+        writeCheckoutRecord(path, { ...recorded, stage: "receipted" }, false);
       }, () => {
         signal.throwIfAborted();
         mkdirSync(deps.stateDir, { recursive: true, mode: 0o700 });
-        durableWrite(path, pending, true);
+        writeCheckoutRecord(path, pending, true);
         recorded = pending;
         deps.reportProvider?.({ provider: "laso", operation: "card_checkout", status: "attempted" });
       });
@@ -374,7 +374,7 @@ export function configuredItchPurchase(
   let cardId: string | undefined;
   try {
     cardId = cardIdFile && isAbsolute(cardIdFile)
-      ? readPrivate(cardIdFile, 128).trim()
+      ? readPrivateCheckoutFile(cardIdFile, 128).trim()
       : cardIdFile ? undefined : process.env.ARGUS_ITCH_LASO_CARD_ID?.trim();
   } catch {
     return channel => channel.notify("Администратору нужно проверить файл карты Laso для покупки.");
@@ -395,12 +395,12 @@ export function configuredItchPurchase(
       id: cardId,
       reportProvider,
       walletKey: keyPath ? () => {
-        const key = readPrivate(keyPath, 128).trim();
+        const key = readPrivateCheckoutFile(keyPath, 128).trim();
         if (!/^0x[a-f0-9]{64}$/i.test(key)) throw new Error("Invalid dedicated Laso wallet key.");
         return key as `0x${string}`;
       } : undefined,
       token: sessionPath ? async () => {
-        const token = readPrivate(sessionPath, 8193).trim();
+        const token = readPrivateCheckoutFile(sessionPath, 8193).trim();
         if (!/^[A-Za-z0-9_.-]{1,8192}$/.test(token)) throw new Error("Invalid Laso checkout session.");
         return token;
       } : undefined,
@@ -408,14 +408,14 @@ export function configuredItchPurchase(
     return createItchPurchase({
       stateDir, cardId, executablePath, laso, reportProvider,
       browserWsEndpoint: browserWsFile ? () => {
-        const endpoint = readPrivate(browserWsFile, 256).trim();
+        const endpoint = readPrivateCheckoutFile(browserWsFile, 256).trim();
         if (!isCheckoutBrowserEndpoint(endpoint)) throw new Error("Invalid private checkout browser endpoint.");
         return endpoint;
       } : undefined,
       receiptEmail: () => {
         if (receiptEmailFile) {
           try {
-            const email = mailAddress(readPrivate(receiptEmailFile, 512).trim());
+            const email = mailAddress(readPrivateCheckoutFile(receiptEmailFile, 512).trim());
             return email;
           } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;

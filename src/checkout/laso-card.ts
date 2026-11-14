@@ -24,6 +24,7 @@ function text(value: unknown, max = 100): string {
 export interface CheckoutCardState {
   balanceCents: number;
   itchDebits: number[];
+  hudsonDebits?: number[];
   billing: ItchBilling;
   card?: ItchCard;
 }
@@ -70,18 +71,29 @@ export function createLasoCheckoutCard(options: {
     return record(await readProviderJson(response, 128_000));
   }
 
+  async function merchantAcceptance(names: readonly string[], signal: AbortSignal, onRequest?: () => void) {
+    const primary = names[0];
+    if (!primary) throw new Error("Missing Laso merchant name.");
+    const data = await call("/search-merchants", { q: primary, card_type: CARD_TYPE }, signal, false, onRequest);
+    const exact = new Set(names.map(name => name.toLowerCase()));
+    const statuses = (Array.isArray(data.merchants) ? data.merchants : []).flatMap(entry => {
+      const merchant = record(entry);
+      return exact.has(text(merchant.name).toLowerCase()) ? [merchant.status] : [];
+    });
+    if (statuses.includes("not_accepted")) return "not_accepted";
+    if (statuses.includes("accepted")) return "accepted";
+    return "unknown";
+  }
+
   return {
+    merchantAcceptance,
     async accepted(signal: AbortSignal): Promise<boolean> {
       let requested = false;
       let accepted = false;
       try {
-        const data = await call("/search-merchants", { q: "itch.io", card_type: CARD_TYPE }, signal, false, () => {
+        accepted = await merchantAcceptance(["itch.io"], signal, () => {
           requested = true;
-        });
-        accepted = Array.isArray(data.merchants) && data.merchants.some((entry) => {
-          const merchant = record(entry);
-          return text(merchant.name).toLowerCase() === "itch.io" && merchant.status === "accepted";
-        });
+        }) === "accepted";
         return accepted;
       } finally {
         if (requested && !signal.aborted) {
@@ -104,12 +116,17 @@ export function createLasoCheckoutCard(options: {
         city: text(address.city), state: text(address.state), postalCode: text(address.zip, 20),
         country: text(address.country, 2).toUpperCase(),
       };
-      const itchDebits = (Array.isArray(data.transactions) ? data.transactions : []).flatMap((entry) => {
+      const debits = (Array.isArray(data.transactions) ? data.transactions : []).flatMap((entry) => {
         const item = record(entry);
         const cents = cardCents(Math.abs(typeof item.amount === "number" ? item.amount : NaN));
-        return item.is_credit === false && cents && /\bitch[.\s]*io\b/i.test(text(item.description, 250)) ? [cents] : [];
+        return item.is_credit === false && cents ? [{ cents, description: text(item.description, 250) }] : [];
       });
-      if (!credentials) return { billing, balanceCents, itchDebits };
+      const itchDebits = debits.filter(item => /\bitch[.\s]*io\b/i.test(item.description)).map(item => item.cents);
+      const hudsonDebits = Array.isArray(data.transactions)
+        ? debits.filter(item => /\b(?:hudson[\s-]*link|coach[\s-]*usa|community[\s-]*coach|community[\s-]*transport[\s-]*lines)\b/i.test(item.description)).map(item => item.cents)
+        : undefined;
+      const state = { billing, balanceCents, itchDebits, hudsonDebits };
+      if (!credentials) return state;
       const card: ItchCard = {
         number: text(details.card_number, 24).replace(/[ -]/g, ""),
         expMonth: text(details.exp_month, 2).padStart(2, "0"),
@@ -120,7 +137,7 @@ export function createLasoCheckoutCard(options: {
         || !/^(?:20)?\d{2}$/.test(card.expYear) || !/^\d{3,4}$/.test(card.cvv)) {
         throw new Error("Laso checkout card credentials are unavailable.");
       }
-      return { billing, balanceCents, itchDebits, card };
+      return { ...state, card };
     },
     async refresh(signal: AbortSignal): Promise<void> {
       await call("/refresh-card-data", { card_id: options.id, card_type: CARD_TYPE }, signal, true);

@@ -6,15 +6,21 @@ import { chromium } from "playwright-core";
 
 const endpoint = (await readFile("/run/checkout/browser-ws", "utf8")).trim();
 const url = new URL(endpoint);
-if (!/^ws:\/\/argus-checkout-browser:47871\/[A-Za-z0-9_-]{32,128}$/.test(endpoint)) {
+if (!/^ws:\/\/argus-(?:checkout|hudson)-browser:47871\/[A-Za-z0-9_-]{32,128}$/.test(endpoint)) {
   throw new Error("Invalid private browser endpoint");
 }
 
 const expected = Buffer.from(url.pathname);
+const headed = process.env.ARGUS_CHECKOUT_HEADED === "1";
+const display = process.env.DISPLAY;
+const authority = process.env.XAUTHORITY;
+if (headed && (!display || !/^:\d+$/.test(display) || !authority || !authority.startsWith("/tmp/"))) {
+  throw new Error("Headed checkout requires an isolated Xvfb display");
+}
 const browserServer = await chromium.launchServer({
   host: "127.0.0.1",
   port: 0,
-  headless: true,
+  headless: !headed,
   channel: "chromium",
   chromiumSandbox: true,
   wsPath: url.pathname,
@@ -24,7 +30,8 @@ const browserServer = await chromium.launchServer({
     "--disable-quic",
     "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
   ],
-  env: { HOME: "/tmp", PATH: "/usr/bin:/bin", LANG: "C.UTF-8", TMPDIR: "/tmp" },
+  env: { HOME: "/tmp", PATH: "/usr/bin:/bin", LANG: "C.UTF-8", TMPDIR: "/tmp",
+    ...(headed ? { DISPLAY: display, XAUTHORITY: authority } : {}) },
 });
 const upstreamPort = Number(new URL(browserServer.wsEndpoint()).port);
 
