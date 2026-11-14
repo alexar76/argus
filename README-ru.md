@@ -174,6 +174,8 @@ settle`. Поток поставщика: зарегистрировать ид�
 
 [Проверка покупки на Bandcamp картой Laso](docs/use-case-laso-bandcamp-ru.md)
 
+[Билет Hudson Link из Telegram с оплатой картой Laso](docs/use-case-hudson-link-ru.md)
+
 [Покупка котировки CoinMarketCap из Telegram](docs/use-case-cmc-telegram-ru.md)
 
 ---

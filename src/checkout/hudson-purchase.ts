@@ -6,13 +6,14 @@ import { mailAddress } from "../mail/types.js";
 import type { ReportProviderActivity } from "../monitor/provider-events.js";
 import { HUDSON_LINK_ITEM_URL, HUDSON_LINK_TICKET_CENTS, TelegramDocumentRejected, type TelegramPurchaseChannel } from "../telegram/purchase.js";
 import { isHudsonBrowserEndpoint, openHudsonCheckout } from "./hudson-browser.js";
-import { readPrivateCheckoutFile, writeCheckoutRecord } from "./itch-purchase.js";
-import { createLasoCheckoutCard, type CheckoutCardState } from "./laso-card.js";
+import { readLasoCheckoutSession, readPrivateCheckoutFile, writeCheckoutRecord } from "./itch-purchase.js";
+import { LASO_CHECKOUT_RECONNECT, LasoCheckoutAuthError, createLasoCheckoutCard, type CheckoutCardState } from "./laso-card.js";
 
 const ticketCents = HUDSON_LINK_TICKET_CENTS;
 const title = "Hudson Link · West Nyack (Palisades Center Lot J) → Tarrytown (Depot Plaza) · 1 взрослый билет";
 const filename = "hudson-link-ticket.pdf";
 const maxPdfBytes = 2 * 1024 * 1024;
+const reconnectLaso = `${LASO_CHECKOUT_RECONNECT}, затем повтори /buy_hudson.`;
 
 interface PurchaseRecord {
   v: 1;
@@ -135,16 +136,22 @@ export function createHudsonPurchase(deps: Dependencies) {
       return;
     }
 
-    const merchantRows = await Promise.all([
-      deps.laso.merchantAcceptance(["Coach USA", "Coach USA Community"], signal),
-      deps.laso.merchantAcceptance(["Hudson Link"], signal),
-    ]).catch(() => undefined);
-    const acceptance = merchantRows?.includes("not_accepted") ? "not_accepted"
-      : merchantRows?.includes("accepted") ? "accepted" : merchantRows ? "unknown" : undefined;
-    if (!acceptance) return channel.notify("Не удалось проверить Laso. Проверь подключение карты и повтори /buy_hudson.");
-    if (acceptance === "not_accepted") return channel.notify("Laso пометил перевозчика как несовместимого с этой картой.");
-    const initial = await deps.laso.read(signal).catch(() => undefined);
-    if (!initial || initial.balanceCents < ticketCents || !initial.hudsonDebits) return channel.notify("Не удалось подтвердить достаточный остаток и историю карты Laso.");
+    let accepted: boolean | undefined;
+    let initial: CheckoutCardState;
+    const balanceUnavailable = "Не удалось подтвердить достаточный остаток и историю карты Laso.";
+    try {
+      const merchantRows = await Promise.all([
+        deps.laso.merchantAcceptance(["Coach USA", "Coach USA Community"], signal),
+        deps.laso.merchantAcceptance(["Hudson Link"], signal),
+      ]);
+      if (merchantRows.includes("not_accepted")) return channel.notify("Laso пометил перевозчика как несовместимого с этой картой.");
+      accepted = merchantRows.includes("accepted");
+      initial = await deps.laso.read(signal);
+    } catch (error) {
+      if (error instanceof LasoCheckoutAuthError) return channel.notify(reconnectLaso);
+      return channel.notify(accepted === undefined ? "Не удалось проверить Laso. Повтори /buy_hudson позже." : balanceUnavailable);
+    }
+    if (initial.balanceCents < ticketCents || !initial.hudsonDebits) return channel.notify(balanceUnavailable);
     if (debitCount(initial) > 0) return channel.notify("На Laso уже видна операция Hudson Link или Coach USA на $2,75. Сначала проверь предыдущий чек.");
     const configured = deps.receiptEmail();
     const email = configured ? mailAddress(configured) : await channel.requestReceiptEmail();
@@ -157,7 +164,7 @@ export function createHudsonPurchase(deps: Dependencies) {
       if (!firstName || !lastName) return;
       session = await open({ email, browserWsEndpoint: deps.browserWsEndpoint(), signal });
       if (session.totalCents !== ticketCents) return await channel.notify("Hudson Link изменил итог. Ожидалось $2,75.");
-      if (acceptance === "unknown") await channel.notify("Laso пока не подтвердил приём этой карты у Coach USA. Перевозчик показал итог $2,75.");
+      if (!accepted) await channel.notify("Laso пока не подтвердил приём этой карты у Coach USA. Перевозчик показал итог $2,75.");
       if (!await channel.approve({ title, merchant: "Hudson Link", itemUrl: HUDSON_LINK_ITEM_URL, passengerName: `${firstName} ${lastName}`,
         totalCents: ticketCents, maxCents: ticketCents, receiptEmail: email })) return;
       const ready = await deps.laso.read(signal, true);
@@ -186,6 +193,7 @@ export function createHudsonPurchase(deps: Dependencies) {
       await deliver(channel, receipted, pdf);
     } catch (error) {
       if (signal.aborted) return;
+      if (!submitted && error instanceof LasoCheckoutAuthError) return channel.notify(reconnectLaso);
       const code = error && typeof error === "object" && "code" in error ? error.code : undefined;
       await channel.notify(submitted
         ? "Платёж мог быть отправлен. Проверь чек Hudson Link и Laso. Повторное списание заблокировано."
@@ -207,13 +215,10 @@ export function configuredHudsonPurchase(stateDir: string, mode: string, report?
   };
   return async (channel: TelegramPurchaseChannel) => {
     const wsFile = file("ARGUS_HUDSON_BROWSER_WS_FILE");
-    const tokenFile = file("ARGUS_ITCH_LASO_SESSION_FILE");
+    const tokenFile = process.env.ARGUS_ITCH_LASO_SESSION_FILE?.trim();
+    if (!tokenFile || !isAbsolute(tokenFile)) return channel.notify(reconnectLaso);
     const id = readPrivateCheckoutFile(file("ARGUS_ITCH_LASO_CARD_ID_FILE"), 128).trim();
-    const laso = createLasoCheckoutCard({ id, token: async () => {
-      const token = readPrivateCheckoutFile(tokenFile, 8193).trim();
-      if (!/^[A-Za-z0-9_.-]{1,8192}$/.test(token)) throw new Error("Invalid Laso session");
-      return token;
-    } });
+    const laso = createLasoCheckoutCard({ id, token: async () => readLasoCheckoutSession(tokenFile) });
     return createHudsonPurchase({ stateDir, cardId: id, laso, report, browserWsEndpoint: () => {
       const endpoint = readPrivateCheckoutFile(wsFile, 256).trim();
       if (!isHudsonBrowserEndpoint(endpoint)) throw new Error("Invalid Hudson checkout browser endpoint");

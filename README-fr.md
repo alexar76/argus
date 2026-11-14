@@ -76,6 +76,8 @@ Flux consommateur : `discover → openChannel (USDC/Base) → invoke → settle`
 
 [Vérification d’un achat Bandcamp avec Laso](docs/use-case-laso-bandcamp-fr.md)
 
+[Billet Hudson Link depuis Telegram avec Laso](docs/use-case-hudson-link-fr.md)
+
 [Achat d’une cotation CoinMarketCap depuis Telegram](docs/use-case-cmc-telegram-fr.md)
 
 ## Agent Arena

@@ -4,12 +4,13 @@ import { dirname, isAbsolute, join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { MailService, mailAddress } from "../mail/index.js";
 import type { ReportProviderActivity } from "../monitor/provider-events.js";
-import { createLasoCheckoutCard, type CheckoutCardState } from "./laso-card.js";
+import { LASO_CHECKOUT_RECONNECT, LasoCheckoutAuthError, createLasoCheckoutCard, type CheckoutCardState } from "./laso-card.js";
 import { ITCH_PRODUCT, ItchCheckoutError, isCheckoutBrowserEndpoint, openItchCheckout, resumeItchDownload, type ItchBilling } from "./itch-browser.js";
 import { validateIconZip } from "./zip.js";
 import { TelegramDocumentRejected, type TelegramPurchaseChannel, type TelegramPurchaseInput, type TelegramPurchaseIntent } from "../telegram/purchase.js";
 
 type PurchaseRunner = (channel: TelegramPurchaseChannel, intent?: TelegramPurchaseIntent) => Promise<void>;
+const reconnectLaso = `${LASO_CHECKOUT_RECONNECT}, затем повтори /buy_itch.`;
 
 interface PurchaseRecord {
   v: 1;
@@ -65,6 +66,16 @@ export function readPrivateCheckoutFile(path: string, limit: number): string {
   } finally {
     closeSync(fd);
   }
+}
+
+export function readLasoCheckoutSession(path: string): string {
+  try {
+    const token = readPrivateCheckoutFile(path, 8193).trim();
+    if (/^[A-Za-z0-9_.-]{1,8192}$/.test(token)) return token;
+  } catch {
+    // Configuration errors are reported without the contents or path of the private file.
+  }
+  throw new LasoCheckoutAuthError();
 }
 
 function syncDirectory(path: string): void {
@@ -287,10 +298,17 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
     } catch { /* Ask for an address if no usable one is configured. */ }
     email ??= await channel.requestReceiptEmail();
     if (!email) return;
-    const accepted = await deps.laso.accepted(signal).catch(() => false);
-    if (!accepted) return channel.notify("Не удалось подтвердить в Laso, что itch.io принимает настроенную карту.");
-    const quoteCard = await deps.laso.read(signal).catch(() => undefined);
-    if (!quoteCard) return channel.notify("Не удалось открыть настроенную карту Laso. Для покупки нужна доступная карта, привязанная к этому боту.");
+    let accepted = false;
+    let quoteCard: CheckoutCardState;
+    try {
+      accepted = await deps.laso.accepted(signal);
+      if (!accepted) return channel.notify("Не удалось подтвердить в Laso, что itch.io принимает настроенную карту.");
+      quoteCard = await deps.laso.read(signal);
+    } catch (error) {
+      if (error instanceof LasoCheckoutAuthError) return channel.notify(reconnectLaso);
+      return channel.notify(accepted ? "Не удалось открыть настроенную карту Laso. Для покупки нужна доступная карта, привязанная к этому боту."
+        : "Не удалось подтвердить в Laso, что itch.io принимает настроенную карту.");
+    }
     if (quoteCard.itchDebits.length) {
       return channel.notify("У карты уже есть списание itch.io. Проверь предыдущий чек. Используй /recover_itch, чтобы получить ZIP по ссылке из чека.");
     }
@@ -346,6 +364,7 @@ export function createItchPurchase(deps: Dependencies): PurchaseRunner {
       if (recorded || (error instanceof ItchCheckoutError && error.submitted)) {
         return await channel.notify("Запрос оплаты уже отправлен. Проверь письмо itch.io. Если там есть чек, повтори «купи иконки», и я попрошу приватную ссылку для скачивания без повторной оплаты.");
       }
+      if (error instanceof LasoCheckoutAuthError) return await channel.notify(reconnectLaso);
       if (error instanceof ItchCheckoutError && error.code === "billing_mismatch") {
         return await channel.notify("itch.io не подтвердил страну или платёжный адрес этой карты. Проверь данные в Laso и сообщи подходящий способ оплаты.");
       }
@@ -399,11 +418,7 @@ export function configuredItchPurchase(
         if (!/^0x[a-f0-9]{64}$/i.test(key)) throw new Error("Invalid dedicated Laso wallet key.");
         return key as `0x${string}`;
       } : undefined,
-      token: sessionPath ? async () => {
-        const token = readPrivateCheckoutFile(sessionPath, 8193).trim();
-        if (!/^[A-Za-z0-9_.-]{1,8192}$/.test(token)) throw new Error("Invalid Laso checkout session.");
-        return token;
-      } : undefined,
+      token: sessionPath ? async () => readLasoCheckoutSession(sessionPath) : undefined,
     });
     return createItchPurchase({
       stateDir, cardId, executablePath, laso, reportProvider,

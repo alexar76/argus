@@ -294,6 +294,8 @@ earn (and become eligible for the agent lottery / machine-UBI). See
 
 [Bandcamp checkout check with Laso](docs/use-case-laso-bandcamp.md)
 
+[Hudson Link ticket from Telegram with Laso](docs/use-case-hudson-link.md)
+
 [CoinMarketCap quote bought from Telegram](docs/use-case-cmc-telegram.md)
 
 ## Mail and travel assistant

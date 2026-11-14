@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createItchPurchase } from "../src/checkout/itch-purchase.js";
-import { createLasoCheckoutCard } from "../src/checkout/laso-card.js";
+import { LasoCheckoutAuthError, createLasoCheckoutCard } from "../src/checkout/laso-card.js";
 import { ITCH_PRODUCT, ItchCheckoutError, type ItchCheckoutSession } from "../src/checkout/itch-browser.js";
 import { TelegramDocumentRejected, type TelegramPurchaseChannel } from "../src/telegram/purchase.js";
 
@@ -58,6 +58,25 @@ function setup() {
 afterEach(() => { for (const path of temps.splice(0)) rmSync(path, { recursive: true, force: true }); });
 
 describe("owner-approved itch.io purchase", () => {
+  it.each([401, 503])("distinguishes Laso HTTP %d without opening checkout", async status => {
+    const { channel, deps, session } = setup();
+    const request = vi.fn<typeof fetch>(async () => new Response("provider error", { status }));
+    const laso = createLasoCheckoutCard({ id: cardId, token: async () => "fixture", request });
+    await createItchPurchase({ ...deps, laso })(channel);
+    expect(channel.notify).toHaveBeenCalledExactlyOnceWith(expect.stringContaining(status === 401 ? "Сессия Laso истекла" : "Не удалось подтвердить в Laso"));
+    expect(deps.open).not.toHaveBeenCalled();
+    expect(session.complete).not.toHaveBeenCalled();
+  });
+
+  it("asks to reconnect if the Laso session expires after approval", async () => {
+    const { channel, deps, session } = setup();
+    deps.laso.read.mockReset().mockResolvedValueOnce(before).mockRejectedValueOnce(new LasoCheckoutAuthError());
+    await createItchPurchase(deps)(channel);
+    expect(channel.approve).toHaveBeenCalledOnce();
+    expect(channel.notify).toHaveBeenCalledExactlyOnceWith(expect.stringMatching(/Сессия Laso истекла.*\/buy_itch/));
+    expect(session.complete).not.toHaveBeenCalled();
+  });
+
   it("asks for missing email and billing, pins the total, charges once, reconciles and delivers the verified ZIP", async () => {
     const { channel, deps, session, stateFile } = setup();
     deps.laso.read.mockReset()

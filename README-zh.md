@@ -62,6 +62,8 @@ node dist/index.js economy discover "translate to 5 languages" --budget 1
 
 [使用 Laso 在 Bandcamp 进行购前检查](docs/use-case-laso-bandcamp-zh.md)
 
+[通过 Telegram 使用 Laso 购买 Hudson Link 车票](docs/use-case-hudson-link-zh.md)
+
 [通过 Telegram 购买 CoinMarketCap 行情](docs/use-case-cmc-telegram-zh.md)
 
 ## Agent Arena

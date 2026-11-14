@@ -161,6 +161,8 @@ capacidades, gana (y vuélvete elegible para la lotería de agentes / machine-UB
 
 [Comprobación de compra en Bandcamp con Laso](docs/use-case-laso-bandcamp-es.md)
 
+[Billete de Hudson Link desde Telegram con Laso](docs/use-case-hudson-link-es.md)
+
 [Compra de una cotización de CoinMarketCap desde Telegram](docs/use-case-cmc-telegram-es.md)
 
 ---

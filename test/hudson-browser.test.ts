@@ -45,11 +45,24 @@ function checkoutHtml(mode: string): string {
 <button onclick="document.querySelector('#card-number iframe').contentWindow.postMessage('tokenize','${flex}')">Continue with card</button>
 <div id="billing" hidden>
 <input name="billingAddressLine1"><input name="cityTown"><input name="postalCode"><input name="email">
-<button role="combobox" aria-label="Country">United States</button>
-<button role="combobox" aria-label="State/Province" onclick="states.hidden=false">Select</button><div id="states" hidden><button role="option" data-value="NY" onclick="states.hidden=true">New York</button></div>
+<button role="combobox" aria-label="Country" onclick="countries.hidden=false">Select</button><div id="countries" hidden></div>
+<button role="combobox" aria-label="State/Province" onclick="states.hidden=false">Select</button><div id="states" hidden></div>
+<label><input id="marketing" type="checkbox" checked>I want to receive updates &amp; promotional information from Hudson Link.</label>
 <label><input type="checkbox">I have read and agreed</label><button onclick="pay()">Pay $2.75</button>
 </div><script>
 async function load() {
+  const countries = await fetch('${api}/countries').then(r=>r.json());
+  const states = await fetch('${api}/countries/US/states').then(r=>r.json());
+  function addOption(list, value, name) {
+    const option = document.createElement('button');
+    option.setAttribute('role', 'option');
+    option.dataset.value = value;
+    option.textContent = name;
+    option.onclick = () => { list.previousElementSibling.textContent = name; list.hidden = true; };
+    list.append(option);
+  }
+  countries.forEach(item => addOption(document.querySelector('#countries'), item.code, item.name));
+  states.forEach(item => addOption(document.querySelector('#states'), item.code, item.name));
   await fetch('${api}/payment/context',{method:'POST',headers:{'content-type':'application/json'}}).then(r=>r.json());
   for (const [i,id] of ['card-number','security-code'].entries()) {
     const f=document.createElement('iframe');f.title='secure payment field';f.src='${frame}?kind='+i;document.getElementById(id).append(f);
@@ -57,7 +70,9 @@ async function load() {
 }
 window.addEventListener('message',e=>{if(e.origin==='${flex}'&&e.data==='token-ready')document.querySelector('#billing').hidden=false});
 async function pay(){
-  const a=await fetch('${api}/order',{method:'POST',headers:{'content-type':'application/json'},body:${JSON.stringify(JSON.stringify(body))}}).then(r=>r.json());
+  const order=${JSON.stringify(body)};
+  order.requestMetadata.marketingOptIn=document.querySelector('#marketing').checked;
+  const a=await fetch('${api}/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(order)}).then(r=>r.json());
   location.href='/tickets?order_id='+a.orderId;
 }
 load();</script>`;
@@ -87,6 +102,8 @@ function fixture(mode: "success" | "changed" | "unverified" | "conflict") {
           if (method === "GET" && url === product.url) return reply(`<a role="button" href="${target}">Select Travel Option</a>`);
           if (method === "GET" && url === target) return reply(targetHtml);
           if (method === "GET" && url === `${web}/checkout`) return reply(checkoutHtml(mode));
+          if (method === "GET" && url === `${api}/countries`) return reply(JSON.stringify([{ code: "US", name: "United States" }]), "application/json");
+          if (method === "GET" && url === `${api}/countries/US/states`) return reply(JSON.stringify([{ code: "NY", name: "New York" }]), "application/json");
           if (method === "POST" && url === `${api}/payment/context`) {
             const payload = Buffer.from(JSON.stringify({ flx: { origin: flex, path: "/flex/v2/tokens" } })).toString("base64url");
             return reply(JSON.stringify({ jwt: `eyHead.${payload}.Signature` }), "application/json");
@@ -126,7 +143,8 @@ browserTest.each(["success", "changed", "unverified", "conflict"] as const)("che
   const session = await openHudsonCheckout({ email, browserWsEndpoint: browserHost, signal: AbortSignal.timeout(12_000) });
   try {
     expect(session.totalCents).toBe(275);
-    const result = session.complete(card, billing, names, journal, AbortSignal.timeout(8_000));
+    const checkoutCard = mode === "success" ? { ...card, expYear: "30" } : card;
+    const result = session.complete(checkoutCard, billing, names, journal, AbortSignal.timeout(8_000));
     if (mode === "success" || mode === "unverified") {
       const ticket = await result;
       expect(ticket.filename).toBe(product.filename);

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { createHudsonPurchase } from "../src/checkout/hudson-purchase.js";
+import { LasoCheckoutAuthError } from "../src/checkout/laso-card.js";
 import type { TelegramPurchaseChannel } from "../src/telegram/purchase.js";
 
 const filename = "hudson-link-ticket.pdf";
@@ -41,6 +42,19 @@ function setup(stateDir: string, scenario: "approved" | "declined" | "lost_reply
 }
 
 describe("Hudson Link owner ticket runner", () => {
+  it.each(["merchant", "charge"] as const)("stops before submission when the Laso session expires at %s", async step => {
+    const dir = mkdtempSync(join(tmpdir(), "argus-hudson-test-"));
+    try {
+      const { channel, laso, complete, run } = setup(dir, "approved");
+      if (step === "merchant") laso.merchantAcceptance.mockRejectedValueOnce(new LasoCheckoutAuthError());
+      else laso.read.mockResolvedValueOnce(state).mockRejectedValueOnce(new LasoCheckoutAuthError());
+      await run(channel);
+      expect(channel.approve).toHaveBeenCalledTimes(step === "merchant" ? 0 : 1);
+      expect(complete).not.toHaveBeenCalled();
+      expect(channel.notify).toHaveBeenLastCalledWith(expect.stringMatching(/Сессия Laso истекла.*\/buy_hudson/));
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+
   it.each(["approved", "declined", "lost_reply"] as const)("gates the charge and keeps restarts safe for %s", async scenario => {
     const dir = mkdtempSync(join(tmpdir(), "argus-hudson-test-"));
     try {

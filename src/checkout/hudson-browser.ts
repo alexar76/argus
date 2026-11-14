@@ -135,6 +135,7 @@ function safeRead(url: URL, request: Request, gate: Gate): boolean {
   }
   if (origin === API) {
     return pathname === "/origin/NCKW/destination/TTWT/fare" && /^\?operatorCode=HSL&serviceUuid=0a8ec915&date=\d{4}-\d{2}-\d{2}$/.test(search)
+      || gate.checkout && !search && !request.isNavigationRequest() && (pathname === "/countries" || pathname === "/countries/US/states")
       || Boolean(gate.orderId && !search && pathname === `/order/${gate.orderId}`);
   }
   if (origin === LEGACY_API) return pathname === "/prod/fare/farerules" && search === "?from=we"
@@ -412,6 +413,8 @@ async function fillBilling(page: Page, billing: ItchBilling, email: string): Pro
   await page.locator('input[name="postalCode"]:visible').fill(billing.postalCode);
   const address = page.locator('input[name="email"]:visible');
   if (await address.count()) await address.fill(email);
+  const marketing = page.getByRole("checkbox", { name: /^I want to receive updates & promotional information from .+\.$/i });
+  if (await marketing.count()) await marketing.uncheck();
   await page.getByRole("checkbox", { name: /I have read and agreed/ }).check();
 }
 
@@ -500,7 +503,7 @@ export async function openHudsonCheckout(options: { email: string; browserWsEndp
         try {
           if (signal?.aborted || completionSignal?.aborted) throw new HudsonCheckoutError("cancelled");
           if (billing.country !== "US" || !/^[A-Z]{2}$/.test(billing.state) || !/^\d{13,19}$/.test(card.number)
-            || !/^\d{3,4}$/.test(card.cvv) || !/^(0[1-9]|1[0-2])$/.test(card.expMonth) || !/^20\d{2}$/.test(card.expYear)
+            || !/^\d{3,4}$/.test(card.cvv) || !/^(0[1-9]|1[0-2])$/.test(card.expMonth) || !/^(?:20)?\d{2}$/.test(card.expYear)
             || [traveler.firstName, traveler.lastName, billing.name, billing.street, billing.city, billing.postalCode]
               .some(value => !value.trim() || value.length > 140 || /\p{Cc}/u.test(value))) throw new HudsonCheckoutError("checkout_unavailable");
           await verification(page, gate);

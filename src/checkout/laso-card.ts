@@ -7,6 +7,12 @@ import type { ItchBilling, ItchCard } from "./itch-browser.js";
 
 const CARD_TYPE = "Non-Reloadable U.S.";
 
+export class LasoCheckoutAuthError extends Error {
+  constructor() { super("Laso checkout session expired or unavailable."); }
+}
+
+export const LASO_CHECKOUT_RECONNECT = "Сессия Laso истекла или недоступна. Попроси администратора обновить подключение карты";
+
 export function cardCents(value: unknown): number | undefined {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return;
   const cents = Math.round(value * 100);
@@ -66,6 +72,7 @@ export function createLasoCheckoutCard(options: {
     }
     if (!response.ok) {
       await response.body?.cancel();
+      if (response.status === 401) throw new LasoCheckoutAuthError();
       throw new Error("Laso checkout card is unavailable.");
     }
     return record(await readProviderJson(response, 128_000));
