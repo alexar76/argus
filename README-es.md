@@ -159,6 +159,8 @@ capacidades, gana (y vuélvete elegible para la lotería de agentes / machine-UB
 
 [Emisión de una tarjeta prepago Laso en Base](docs/use-case-laso-prepaid-card-es.md)
 
+[Comprobación de compra en Bandcamp con Laso](docs/use-case-laso-bandcamp-es.md)
+
 [Compra de una cotización de CoinMarketCap desde Telegram](docs/use-case-cmc-telegram-es.md)
 
 ---

@@ -60,6 +60,8 @@ node dist/index.js economy discover "translate to 5 languages" --budget 1
 
 [在 Base 上发行 Laso 预付卡的实测](docs/use-case-laso-prepaid-card-zh.md)
 
+[使用 Laso 在 Bandcamp 进行购前检查](docs/use-case-laso-bandcamp-zh.md)
+
 [通过 Telegram 购买 CoinMarketCap 行情](docs/use-case-cmc-telegram-zh.md)
 
 ## Agent Arena

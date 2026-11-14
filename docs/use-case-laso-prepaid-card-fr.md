@@ -79,4 +79,33 @@ Le code d’ARGUS inclut `/buy_itch` pour ce seul pack. La commande doit être a
 
 ARGUS consigne la tentative avant d’envoyer la demande de paiement unique. Si le résultat reste incertain, il peut récupérer le reçu et le ZIP sans nouveau paiement. Il vérifie l’intégrité de l’archive avant de l’envoyer dans la conversation privée, puis rapproche le montant du reçu du débit Laso et du solde restant.
 
-L’essai local a utilisé un navigateur avec des réponses simulées. Le bot Attested en production dispose désormais de Chromium isolé et d’une adresse e-mail pour recevoir le reçu. La boîte Gmail reste déconnectée. Lors de l’essai d’achat automatique, itch.io a redirigé le navigateur vers sa page d’accueil avant qu’ARGUS envoie la demande de paiement. La vérification suivante dans Laso a confirmé un solde disponible de 5 USD et zéro débit itch.io.
+Les tests locaux ont utilisé un navigateur avec des réponses simulées. Le bot Attested en production dispose de Chromium isolé et d’une adresse e-mail configurée pour recevoir le reçu.
+
+## Vérification du parcours d’achat le 13 novembre 2026
+
+Le navigateur habituel du propriétaire a ouvert la fiche du **Co-Working & Startup Office Icon Pack**, proposé à partir de **2,99 USD** avec une archive ZIP de **268 ko**. Après avoir choisi le paiement par carte, il a atteint l’écran **Billing address** (adresse de facturation). Lors de l’essai automatisé sur Attested, l’ouverture de `/checkout/<opaque>` a renvoyé le navigateur vers la page d’accueil d’itch.io avant l’affichage du formulaire de carte. La consultation de Laso avec une session renouvelée a confirmé **5 USD disponibles** et aucun débit itch.io. À ce stade, aucun débit, reçu d’achat ni téléchargement du ZIP n’avait été confirmé. [Fiche du produit](https://aiimperium.itch.io/co-working-startup-office-icon-pack) · [Trace de l’essai Attested](../../artifacts/argus-itch-live-2026-11-13/live-preflight-referer.ndjson)
+
+```mermaid
+flowchart TD
+    P["Fiche du pack · prix minimum 2,99 USD"] --> A["Essai automatique sur Attested · /buy_itch"]
+    P --> B["Navigateur du propriétaire · paiement par carte"]
+    A --> C["Redirection depuis le checkout vers l’accueil itch.io"]
+    C --> D["Arrêt avant toute autorisation de carte"]
+    B --> E["Adresse de facturation · étape atteinte"]
+    E -.-> F{"Le total avec taxes est-il de 5 USD au plus ?"}
+    F -->|Oui| G["Le propriétaire peut confirmer le paiement"]
+    F -->|Non| H["Arrêt avant paiement"]
+    G -.-> I["Après paiement réussi · reçu itch.io et lien privé"]
+    I --> J["/recover_itch dans Telegram · vérifie le reçu et envoie le ZIP"]
+```
+
+Les lignes en pointillés indiquent les étapes qui restaient à vérifier. Une fois l’achat effectué dans son navigateur, le propriétaire peut lancer `/recover_itch` dans sa conversation privée avec ARGUS, confirmer la récupération et répondre avec le lien privé figurant sur le reçu. [Guide de récupération](./personal-assistant.md#buy-the-itchio-icon-pack-from-telegram) · [Accéder à un achat itch.io](https://itch.io/docs/buying/already-bought)
+
+| Étape | Effet sur le paiement |
+| --- | --- |
+| Émission de la carte | Le règlement x402 de **5 USDC sur Base** a déjà financé la carte Laso. [Transaction Base](https://basescan.org/tx/0xc8bd81d9d1d39327736bc7b7a8f490658b50362aca8e295ee8cd655f20099c68) |
+| Calcul du total | Afficher le prix et les taxes ne déclenche ni autorisation de carte ni débit. |
+| Achat par carte | Si le propriétaire confirme, Stripe traite une demande d’autorisation en USD. Le débit figure dans l’activité de la carte Laso si le paiement aboutit. Il ne crée pas de transaction sur Base. |
+| Reçu et archive | La lecture du reçu, la vérification du ZIP et son envoi par Telegram ne déclenchent aucun paiement. |
+
+[Résultats de la nouvelle vérification](../../artifacts/argus-itch-live-2026-11-13/checkout-followup.json)

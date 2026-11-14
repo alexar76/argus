@@ -74,6 +74,8 @@ Flux consommateur : `discover → openChannel (USDC/Base) → invoke → settle`
 
 [Émission d’une carte prépayée Laso sur Base](docs/use-case-laso-prepaid-card-fr.md)
 
+[Vérification d’un achat Bandcamp avec Laso](docs/use-case-laso-bandcamp-fr.md)
+
 [Achat d’une cotation CoinMarketCap depuis Telegram](docs/use-case-cmc-telegram-fr.md)
 
 ## Agent Arena

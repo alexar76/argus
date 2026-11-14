@@ -79,4 +79,33 @@ El código de ARGUS incluye `/buy_itch` para este único paquete. Requiere activ
 
 ARGUS registra el intento antes de enviar el único cargo. Si el resultado queda pendiente, puede recuperar el recibo y el ZIP sin volver a pagar. Verifica la integridad del archivo antes de enviarlo al chat privado y coteja el importe del recibo con el cargo de Laso y el saldo restante.
 
-La prueba local usó un navegador con respuestas simuladas. El bot de producción de Attested ya tiene Chromium aislado y una dirección de correo para recibir el recibo. El buzón de Gmail sigue desconectado. En la prueba de compra automática, itch.io redirigió el navegador a su página de inicio antes de que ARGUS enviara la solicitud de pago. La consulta posterior a Laso confirmó un saldo disponible de 5 USD y cero cargos de itch.io.
+Las pruebas locales usaron un navegador con respuestas simuladas. El bot de producción de Attested dispone de Chromium aislado y de una dirección de correo configurada para recibir el recibo.
+
+## Verificación del proceso de compra el 13 de noviembre de 2026
+
+El navegador habitual del propietario abrió la ficha de **Co-Working & Startup Office Icon Pack**, con un precio mínimo de **2,99 USD** y un ZIP de **268 kB**. Tras seleccionar el pago con tarjeta, llegó a la pantalla **Billing address** (dirección de facturación). En la prueba automatizada de Attested, al abrir `/checkout/<opaque>` itch.io redirigió el navegador a su página de inicio antes de mostrar el formulario de tarjeta. Una consulta con una sesión renovada de Laso confirmó **5 USD disponibles** y ningún cargo de itch.io. En ese momento no se había confirmado ningún cargo, recibo de compra ni descarga del ZIP. [Ficha del producto](https://aiimperium.itch.io/co-working-startup-office-icon-pack) · [Registro de la prueba en Attested](../../artifacts/argus-itch-live-2026-11-13/live-preflight-referer.ndjson)
+
+```mermaid
+flowchart TD
+    P["Ficha del paquete · precio mínimo de 2,99 USD"] --> A["Prueba automatizada en Attested · /buy_itch"]
+    P --> B["Navegador del propietario · pago con tarjeta"]
+    A --> C["Redirección desde el checkout a la página de inicio de itch.io"]
+    C --> D["Se detiene antes de autorizar la tarjeta"]
+    B --> E["Dirección de facturación · paso alcanzado"]
+    E -.-> F{"¿El total con impuestos es de hasta 5 USD?"}
+    F -->|Sí| G["El propietario puede confirmar el pago"]
+    F -->|No| H["Se detiene antes del pago"]
+    G -.-> I["Tras un pago correcto · recibo de itch.io y enlace privado"]
+    I --> J["/recover_itch en Telegram · verifica el recibo y envía el ZIP"]
+```
+
+Las líneas discontinuas indican pasos pendientes de verificar. Una vez hecha la compra en el navegador, el propietario puede ejecutar `/recover_itch` en su chat privado con ARGUS, confirmar la recuperación y responder con el enlace privado del recibo. [Guía de recuperación](./personal-assistant.md#buy-the-itchio-icon-pack-from-telegram) · [Cómo acceder a una compra de itch.io](https://itch.io/docs/buying/already-bought)
+
+| Paso | Efecto en el pago |
+| --- | --- |
+| Emisión de la tarjeta | La liquidación x402 de **5 USDC en Base** ya financió la tarjeta Laso. [Transacción en Base](https://basescan.org/tx/0xc8bd81d9d1d39327736bc7b7a8f490658b50362aca8e295ee8cd655f20099c68) |
+| Cálculo del total | Mostrar el precio y los impuestos no genera una autorización de tarjeta ni un cargo. |
+| Compra con tarjeta | Si el propietario confirma, Stripe procesa una solicitud de autorización en USD. El cargo aparece en la actividad de la tarjeta Laso si el pago se completa. No se crea una transacción en Base. |
+| Recibo y archivo | Consultar el recibo, verificar el ZIP y enviarlo por Telegram no genera ningún pago. |
+
+[Registro de la nueva verificación](../../artifacts/argus-itch-live-2026-11-13/checkout-followup.json)

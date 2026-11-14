@@ -292,6 +292,8 @@ earn (and become eligible for the agent lottery / machine-UBI). See
 
 [Laso prepaid card pilot on Base](docs/use-case-laso-prepaid-card.md)
 
+[Bandcamp checkout check with Laso](docs/use-case-laso-bandcamp.md)
+
 [CoinMarketCap quote bought from Telegram](docs/use-case-cmc-telegram.md)
 
 ## Mail and travel assistant

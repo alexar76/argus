@@ -38,24 +38,37 @@ The first issuance attempt stopped before submission because the x402 SDK defaul
 
 ## Checkout and reconciliation
 
-The live itch.io checkout showed a $2.99 starting price, **Pay with Card**, and the file `Co_Working_Startup_Office_Icon_Pack.zip` at 268 kB. Laso's merchant lookup returned `accepted` for itch.io and this U.S. card type. The owner enters their email and card details in the browser and checks that the final total including tax is at most $5 before paying. [Asset listing](https://aiimperium.itch.io/co-working-startup-office-icon-pack) · [itch.io purchase flow](https://itch.io/docs/creators/how-buying-works)
+The itch.io purchase dialog showed a $2.99 starting price, **Pay with Card**, and `Co_Working_Startup_Office_Icon_Pack.zip` at 268 kB. Laso's merchant lookup returned `accepted` for itch.io and this U.S. card type. [Asset listing](https://aiimperium.itch.io/co-working-startup-office-icon-pack) · [itch.io purchase flow](https://itch.io/docs/creators/how-buying-works)
+
+On 13 November 2026, the owner’s browser reached **Billing address** after the configured receipt email was entered and **Pay with Card** was selected. On Attested, the ARGUS browser received a redirect from the checkout session to the itch.io homepage before Stripe opened. The redirect persisted with the merchant’s browser proof, CSRF field and session cookie present, and with the expected origin and referrer on the form POST. The exact reason for the redirect remains unconfirmed. The refreshed Laso session showed $5 available and no itch.io debit. [Checkout follow-up](../../artifacts/argus-itch-live-2026-11-13/checkout-followup.json)
 
 ```mermaid
 flowchart TD
-    Q["Read the $2.99 quote and card option"] --> A{"Final total at most $5?"}
-    A -->|Yes| P["Owner submits the card payment"]
-    A -->|No| S["Stop at checkout"]
-    P --> R["Check the merchant receipt and final total"]
-    P --> Z["Download and validate the ZIP"]
-    P --> C["Match the Laso debit and available balance"]
-    R --> V["Record the reconciled purchase"]
-    Z --> V
-    C --> V
+    Q["Open the $2.99 icon pack"] --> A["ARGUS on Attested"]
+    Q --> B["Owner's browser"]
+    A --> H["itch.io homepage before Stripe"]
+    B --> E["Enter receipt email and select Pay with Card"]
+    E --> F["Billing address · observed stopping point"]
+    F -.-> G{"Final total including tax at most $5?"}
+    G -->|Yes| P["Owner submits the card payment"]
+    G -->|No| S["Stop at checkout"]
+    P --> R["itch.io issues a receipt and download link"]
+    P --> C["Laso records the card debit in USD"]
+    R --> T["Owner runs /recover_itch in Telegram"]
+    T --> Z["ARGUS verifies the receipt and sends the ZIP"]
+    C --> V["Match the receipt total and Laso balance"]
 ```
 
-A card purchase creates a merchant receipt and an issuer-side card debit in USD. The purchase does not create a second Base transaction. Reconcile the exact receipt total against one matching Laso debit and the change from the $5 available balance. Verify that the advertised ZIP downloads and passes an archive integrity check. Keep the private download URL and card credentials out of the evidence. [Laso card activity](https://laso.finance/openapi.json)
+The dashed line leads to steps still pending at the time of the check.
 
-At the checkout handoff, Laso still showed `ready` with $5 and no matching itch.io debit. Receipt, ZIP delivery and card debit verification are pending.
+| Operation | What to verify |
+| --- | --- |
+| Card issuance | The **5 USDC on Base** paid for the card. The earlier table records its transaction and each funding step. |
+| Checkout preparation | The merchant prepares the USD total. The observed redirect happened before any card authorization. |
+| Card payment | After a successful charge, match the receipt total to one Laso debit in USD and reconcile the resulting available balance. This card transaction settles outside Base. |
+| ZIP delivery | In the private bot chat, send `/recover_itch`, approve delivery and reply to the prompt with the purchase link from the receipt. ARGUS verifies the item, paid total and archive before sending the ZIP to the same chat. Recovery uses the existing purchase. |
+
+[Laso card activity](https://laso.finance/openapi.json) · [itch.io purchase recovery](https://itch.io/docs/buying/already-bought) · [ARGUS checkout and recovery](personal-assistant.md#buy-the-itchio-icon-pack-from-telegram)
 
 ## Telegram purchase pilot
 

@@ -172,6 +172,8 @@ settle`. Поток поставщика: зарегистрировать ид�
 
 [Пилот предоплаченной карты Laso на Base](docs/use-case-laso-prepaid-card-ru.md)
 
+[Проверка покупки на Bandcamp картой Laso](docs/use-case-laso-bandcamp-ru.md)
+
 [Покупка котировки CoinMarketCap из Telegram](docs/use-case-cmc-telegram-ru.md)
 
 ---
