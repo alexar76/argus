@@ -1,4 +1,5 @@
 import { chromium, type APIResponse, type BrowserContext, type ElementHandle, type Frame, type Page, type Request, type Route } from "playwright-core";
+import { setTimeout as sleep } from "node:timers/promises";
 import type { ItchBilling, ItchCard } from "./itch-browser.js";
 
 const WEB = "https://www.ridehudsonlink.com";
@@ -40,14 +41,23 @@ export const HUDSON_PRODUCT = Object.freeze({
 const message = {
   offer_changed: "The exact Hudson Link adult fare or checkout total could not be verified.",
   checkout_unavailable: "Hudson Link did not present the verified guest card checkout.",
+  browser_interrupted: "The checkout browser disconnected while opening Hudson Link.",
+  merchant_unavailable: "Hudson Link or its payment provider could not load the checkout.",
   verification_required: "Hudson Link or its payment provider requires interactive verification.",
   payment_unconfirmed: "Hudson Link received the payment request, but the order outcome is unconfirmed. Reconcile before retrying.",
   delivery_unconfirmed: "The Hudson Link order was confirmed, but the printable ticket was not verified.",
   cancelled: "The Hudson Link checkout was cancelled.",
 } as const;
 
+type OpeningStage = "connect" | "offer" | "fare" | "cart" | "checkout" | "card_fields";
+type OpeningResponse = "offer" | "fare" | "checkout" | "capture" | "card_fields";
+
 export class HudsonCheckoutError extends Error {
-  constructor(readonly code: keyof typeof message, readonly submitted = false) {
+  constructor(
+    readonly code: keyof typeof message,
+    readonly submitted = false,
+    readonly opening?: { stage: OpeningStage; response?: OpeningResponse; status?: number },
+  ) {
     super(message[code]);
     this.name = "HudsonCheckoutError";
   }
@@ -56,7 +66,7 @@ export class HudsonCheckoutError extends Error {
 export interface HudsonCheckoutSession {
   totalCents: typeof HUDSON_PRODUCT.totalCents;
   complete(card: ItchCard, billing: ItchBilling, traveler: { firstName: string; lastName: string },
-    beforeSubmit: () => void | Promise<void>, signal?: AbortSignal): Promise<{
+    beforeSubmit: () => void | Promise<void>, signal?: AbortSignal, recordOrder?: (orderId: string) => void): Promise<{
       totalCents: typeof HUDSON_PRODUCT.totalCents;
       filename: typeof HUDSON_PRODUCT.filename;
       bytes: Uint8Array;
@@ -71,6 +81,7 @@ interface Purchase {
   cardholder: { expMonth: string; expYear: string; last4: string };
   beforeSubmit: () => void | Promise<void>;
   signal?: AbortSignal;
+  recordOrder?: (orderId: string) => void;
 }
 
 interface Gate {
@@ -86,6 +97,11 @@ interface Gate {
   receiptVerified: boolean;
   receiptConflict: boolean;
   deniedPayment: boolean;
+}
+
+interface Opening {
+  stage: OpeningStage;
+  failure?: { response: OpeningResponse; status: number };
 }
 
 export function isHudsonBrowserEndpoint(value: string): boolean {
@@ -158,7 +174,7 @@ function requestJson(request: Request): Record<string, unknown> | undefined {
   try { return jsonObject(JSON.parse(body)); } catch { return undefined; }
 }
 
-function ticketReference(value: unknown): string | undefined {
+export function hudsonTicketReference(value: unknown, requireUnused = true): string | undefined {
   const order = jsonObject(value);
   if (!Array.isArray(order?.tickets) || order.tickets.length !== 1 || Array.isArray(order.reservations) && order.reservations.length) return;
   const ticket = jsonObject(order.tickets[0]);
@@ -170,8 +186,8 @@ function ticketReference(value: unknown): string | undefined {
   const redemptions = jsonObject(ticket?.redemptions);
   if (origin?.id !== "NCKW" || destination?.id !== "TTWT" || operator?.code !== "HSL"
     || ticket?.type !== "ONE-WAY" || !/^ADULT$/i.test(String(ticket.passengerType))
-    || validity?.isExpired !== false || redemptions?.isFullyRedeemed !== false
-    || typeof barcode?.value !== "string" || barcode.value.length === 0
+    || (requireUnused && (validity?.isExpired !== false || redemptions?.isFullyRedeemed !== false
+      || typeof barcode?.value !== "string" || barcode.value.length === 0))
     || typeof ticket.id !== "string" || !ORDER_ID.test(ticket.id)) return;
   return ticket.id.substring(0, 8).toUpperCase();
 }
@@ -245,7 +261,17 @@ function rememberCapture(gate: Gate, response: unknown): void {
   } catch {}
 }
 
-async function intercept(route: Route, page: Page, gate: Gate, email: string): Promise<void> {
+function openingResponse(url: URL, method: string): OpeningResponse | undefined {
+  if (method === "POST" && url.href === CONTEXT) return "capture";
+  if (method !== "GET") return;
+  if (url.origin === FLEX && url.pathname.startsWith(FLEX_ASSETS)) return "card_fields";
+  if (url.origin !== WEB) return;
+  if (url.pathname === OFFER) return "offer";
+  if (url.pathname === PRODUCT || url.pathname.endsWith(`${PRODUCT}.json`)) return "fare";
+  if (url.pathname === "/checkout" || url.pathname.endsWith("/checkout.json")) return "checkout";
+}
+
+async function intercept(route: Route, page: Page, gate: Gate, email: string, opening?: Opening): Promise<void> {
   const request = route.request();
   const url = href(request.url());
   if (!url) return route.abort();
@@ -297,6 +323,10 @@ async function intercept(route: Route, page: Page, gate: Gate, email: string): P
     }
     const response = await route.fetch({ headers, maxRedirects: 0, maxRetries: 0, timeout: TIMEOUT });
     try {
+      if (opening && response.status() >= 300) {
+        const kind = openingResponse(url, method);
+        if (kind && !opening.failure) opening.failure = { response: kind, status: response.status() };
+      }
       if (response.status() >= 300 && response.status() < 400) return await route.abort();
       if (response.ok() && contextCapture) rememberCapture(gate, await response.json());
       if (response.ok() && tokenCapture) {
@@ -308,13 +338,14 @@ async function intercept(route: Route, page: Page, gate: Gate, email: string): P
         const data = await response.json();
         const id = jsonObject(data)?.orderId;
         if (typeof id === "string" && ORDER_ID.test(id)) {
+          gate.purchase?.recordOrder?.(id);
           gate.orderId = id;
           verifyReceipt(gate, data, id);
         }
       }
       if (response.ok() && method === "GET" && gate.orderId && url.href === `${ORDER}/${gate.orderId}`) {
         const data = await response.json();
-        gate.verifiedTicketReference = ticketReference(data);
+        gate.verifiedTicketReference = hudsonTicketReference(data);
         verifyReceipt(gate, data, gate.orderId);
       }
       await fulfill(route, response);
@@ -362,16 +393,20 @@ async function secureField(page: Page, wrapper: string, input: string): Promise<
   await frameLocator.waitFor({ state: "visible" });
   const frame = await (await frameLocator.elementHandle())?.contentFrame();
   if (!frame) throw new HudsonCheckoutError("checkout_unavailable");
-  const field = await frame.locator(input).elementHandle();
+  const locator = frame.locator(input);
+  await locator.waitFor({ state: "visible" });
+  const field = await locator.elementHandle();
   if (!field || !await field.isVisible() || !isVerifiedFieldFrame(page, frame)) {
     throw new HudsonCheckoutError("checkout_unavailable");
   }
   return { frame, field };
 }
 
-async function prepare(page: Page, gate: Gate, email: string): Promise<void> {
+async function prepare(page: Page, gate: Gate, email: string, opening: Opening): Promise<void> {
+  opening.stage = "offer";
   const response = await page.goto(HUDSON_PRODUCT.url, { waitUntil: "domcontentloaded" });
   if (response?.status() !== 200 || page.url() !== HUDSON_PRODUCT.url) throw new HudsonCheckoutError("checkout_unavailable");
+  opening.stage = "fare";
   await page.getByRole("button", { name: "Select Travel Option", exact: true }).first().click();
   const quantity = page.locator(`input[aria-label="${HUDSON_PRODUCT.productId}"]:visible`);
   await quantity.waitFor({ state: "visible" });
@@ -380,6 +415,7 @@ async function prepare(page: Page, gate: Gate, email: string): Promise<void> {
   }
   const row = quantity.locator("../../../..");
   if ((await row.innerText()).trim().replace(/\s+/g, " ") !== "Adult $2.75") throw new HudsonCheckoutError("offer_changed");
+  opening.stage = "cart";
   await row.getByTestId("add_to_cart").click();
   if (await quantity.inputValue() !== "1") throw new HudsonCheckoutError("offer_changed");
   await exactCart(page);
@@ -387,12 +423,14 @@ async function prepare(page: Page, gate: Gate, email: string): Promise<void> {
   await proceed.first().click();
   await total(page, "cart");
   await page.locator("input#email:visible").fill(email);
+  opening.stage = "checkout";
   gate.checkout = true;
   await proceed.last().click();
   await page.waitForURL(`${WEB}/checkout`);
   await total(page, "checkout");
   await verification(page, gate);
   await exactCart(page);
+  opening.stage = "card_fields";
   await secureField(page, "#card-number", "input#number");
   await secureField(page, "#security-code", "input#securityCode");
   if (!gate.tokenUrl) throw new HudsonCheckoutError("checkout_unavailable");
@@ -462,15 +500,38 @@ async function deliveredPdf(page: Page, gate: Gate, orderId: string): Promise<Bu
   return pdf;
 }
 
-export async function openHudsonCheckout(options: { email: string; browserWsEndpoint: string; signal?: AbortSignal }): Promise<HudsonCheckoutSession> {
+interface HudsonCheckoutOptions {
+  email: string;
+  browserWsEndpoint: string;
+  signal?: AbortSignal;
+}
+
+export async function openHudsonCheckout(options: HudsonCheckoutOptions): Promise<HudsonCheckoutSession> {
+  const deadline = AbortSignal.timeout(2 * TIMEOUT + 300);
+  const openingSignal = options.signal ? AbortSignal.any([options.signal, deadline]) : deadline;
+  try {
+    return await openHudsonCheckoutOnce(options, openingSignal);
+  } catch (error) {
+    if (!(error instanceof HudsonCheckoutError) || error.code !== "browser_interrupted" || openingSignal.aborted) throw error;
+    await sleep(300, undefined, { signal: openingSignal }).catch(() => { throw new HudsonCheckoutError("cancelled"); });
+    return openHudsonCheckoutOnce(options, openingSignal);
+  }
+}
+
+async function openHudsonCheckoutOnce(options: HudsonCheckoutOptions, openingSignal: AbortSignal): Promise<HudsonCheckoutSession> {
   const { email, browserWsEndpoint, signal } = options;
-  if (signal?.aborted) throw new HudsonCheckoutError("cancelled");
+  if (openingSignal.aborted) throw new HudsonCheckoutError("cancelled");
   if (!isHudsonBrowserEndpoint(browserWsEndpoint) || email.length > 254 || !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(email)) {
     throw new HudsonCheckoutError("checkout_unavailable");
   }
-  const browser = await chromium.connect(browserWsEndpoint, { timeout: TIMEOUT }).catch(() => {
-    throw new HudsonCheckoutError("checkout_unavailable");
+  let opening: Opening | undefined = { stage: "connect" };
+  const browser = await chromium.connect(browserWsEndpoint, { timeout: TIMEOUT }).catch((error: unknown) => {
+    const temporary = error instanceof Error && /\b(?:ECONNREFUSED|ECONNRESET|ETIMEDOUT)\b/.test(error.message);
+    throw new HudsonCheckoutError(temporary ? "browser_interrupted" : "checkout_unavailable", false, opening);
   });
+  let interrupted = false;
+  const interrupt = () => { interrupted = true; };
+  browser.on("disconnected", interrupt);
   let browserContext: BrowserContext | undefined;
   let closing: Promise<void> | undefined;
   const close = () => closing ??= (async () => {
@@ -479,24 +540,32 @@ export async function openHudsonCheckout(options: { email: string; browserWsEndp
     await browser.close().catch(() => {});
   })();
   const abort = () => { void close(); };
-  signal?.addEventListener("abort", abort, { once: true });
+  openingSignal.addEventListener("abort", abort, { once: true });
   const gate: Gate = { checkout: false, cardFields: false, tokenStarted: false, submitted: false,
     receiptVerified: false, receiptConflict: false, deniedPayment: false };
   try {
-    if (signal?.aborted) throw new HudsonCheckoutError("cancelled");
+    if (openingSignal.aborted) throw new HudsonCheckoutError("cancelled");
     const context = await browser.newContext({ serviceWorkers: "block", acceptDownloads: false, locale: "en-US" });
     browserContext = context;
     context.setDefaultTimeout(TIMEOUT);
     context.setDefaultNavigationTimeout(TIMEOUT);
     await context.routeWebSocket("**/*", socket => socket.close());
     const page = await context.newPage();
-    await context.route("**/*", route => intercept(route, page, gate, email).catch(() => {}));
-    await prepare(page, gate, email);
+    page.on("crash", interrupt);
+    await context.route("**/*", route => intercept(route, page, gate, email, opening).catch(() => {}));
+    await prepare(page, gate, email, opening);
+    if (openingSignal.aborted) throw new HudsonCheckoutError("cancelled");
+    opening = undefined;
+    openingSignal.removeEventListener("abort", abort);
+    browser.off("disconnected", interrupt);
+    page.off("crash", interrupt);
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) throw new HudsonCheckoutError("cancelled");
     let completed = false;
     return {
       totalCents: HUDSON_PRODUCT.totalCents,
       close: async () => { signal?.removeEventListener("abort", abort); await close(); },
-      async complete(card, billing, traveler, beforeSubmit, completionSignal) {
+      async complete(card, billing, traveler, beforeSubmit, completionSignal, recordOrder) {
         if (completed) throw new HudsonCheckoutError(gate.submitted ? "payment_unconfirmed" : "checkout_unavailable", gate.submitted);
         completed = true;
         completionSignal?.addEventListener("abort", abort, { once: true });
@@ -531,7 +600,7 @@ export async function openHudsonCheckout(options: { email: string; browserWsEndp
           const pay = page.getByRole("button", { name: /^Pay\s*\$2\.75$/i });
           await pay.waitFor({ state: "visible" });
           gate.purchase = { billing, traveler, cardholder: { expMonth: card.expMonth, expYear: card.expYear, last4: card.number.slice(-4) },
-            beforeSubmit, signal: completionSignal ?? signal };
+            beforeSubmit, recordOrder, signal: completionSignal ?? signal };
           await pay.click();
           await page.waitForURL(url => Boolean(gate.orderId && url.href === `${WEB}/tickets?order_id=${gate.orderId}`));
           if (!gate.orderId) throw new HudsonCheckoutError("payment_unconfirmed", gate.submitted);
@@ -552,9 +621,17 @@ export async function openHudsonCheckout(options: { email: string; browserWsEndp
       },
     };
   } catch (error) {
+    const disconnected = interrupted || !browser.isConnected();
+    const details = opening && { stage: opening.stage, ...opening.failure };
+    openingSignal.removeEventListener("abort", abort);
     signal?.removeEventListener("abort", abort);
+    browser.off("disconnected", interrupt);
     await close();
-    if (error instanceof HudsonCheckoutError) throw error;
-    throw new HudsonCheckoutError(signal?.aborted ? "cancelled" : "checkout_unavailable");
+    const code = error instanceof HudsonCheckoutError ? error.code : "checkout_unavailable";
+    if (signal?.aborted) throw new HudsonCheckoutError("cancelled", false, details);
+    if (code === "verification_required") throw new HudsonCheckoutError(code, false, details);
+    if (opening?.failure) throw new HudsonCheckoutError("merchant_unavailable", false, details);
+    if (code === "offer_changed") throw new HudsonCheckoutError(code, false, details);
+    throw new HudsonCheckoutError(disconnected && !openingSignal.aborted ? "browser_interrupted" : code, false, details);
   }
 }

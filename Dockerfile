@@ -29,10 +29,10 @@ FROM node:22.23.4-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Production deps only — no dev toolchain, no out-of-context optional SDK.
+# Production deps only. PDF.js uses an optional native package for its Node.js shim.
 COPY package.json package-lock.json ./
 COPY vendor ./vendor
-RUN npm install --omit=dev --omit=optional
+RUN npm install --omit=dev
 
 # Compiled output + the example config (used as a fallback / reference; the real
 # argus.config.json is mounted read-only at runtime, never baked into the image).

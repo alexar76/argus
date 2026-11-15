@@ -19,6 +19,15 @@ export function cardCents(value: unknown): number | undefined {
   if (Number.isSafeInteger(cents) && Math.abs(cents - value * 100) < 1e-6) return cents;
 }
 
+function transactionCents(value: unknown): number | undefined {
+  const decimal = typeof value === "number" ? String(value) : value;
+  if (typeof decimal !== "string") return;
+  const match = /^[+-]?(\d+)(?:\.(\d{1,2})0*)?$/.exec(decimal);
+  if (!match) return;
+  const cents = Number(match[1] + (match[2] ?? "").padEnd(2, "0"));
+  if (Number.isSafeInteger(cents)) return cents;
+}
+
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
@@ -31,6 +40,7 @@ export interface CheckoutCardState {
   balanceCents: number;
   itchDebits: number[];
   hudsonDebits?: number[];
+  last4?: string;
   billing: ItchBilling;
   card?: ItchCard;
 }
@@ -125,17 +135,19 @@ export function createLasoCheckoutCard(options: {
       };
       const debits = (Array.isArray(data.transactions) ? data.transactions : []).flatMap((entry) => {
         const item = record(entry);
-        const cents = cardCents(Math.abs(typeof item.amount === "number" ? item.amount : NaN));
+        const cents = transactionCents(item.amount);
         return item.is_credit === false && cents ? [{ cents, description: text(item.description, 250) }] : [];
       });
       const itchDebits = debits.filter(item => /\bitch[.\s]*io\b/i.test(item.description)).map(item => item.cents);
       const hudsonDebits = Array.isArray(data.transactions)
         ? debits.filter(item => /\b(?:hudson[\s-]*link|coach[\s-]*usa|community[\s-]*coach|community[\s-]*transport[\s-]*lines)\b/i.test(item.description)).map(item => item.cents)
         : undefined;
-      const state = { billing, balanceCents, itchDebits, hudsonDebits };
+      const number = text(details.card_number, 24).replace(/[ -]/g, "");
+      const last4 = /^\d{13,19}$/.test(number) ? number.slice(-4) : undefined;
+      const state = { billing, balanceCents, itchDebits, hudsonDebits, last4 };
       if (!credentials) return state;
       const card: ItchCard = {
-        number: text(details.card_number, 24).replace(/[ -]/g, ""),
+        number,
         expMonth: text(details.exp_month, 2).padStart(2, "0"),
         expYear: text(details.exp_year, 4),
         cvv: text(details.cvv, 4),

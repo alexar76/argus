@@ -78,10 +78,10 @@ async function pay(){
 load();</script>`;
 }
 
-function fixture(mode: "success" | "changed" | "unverified" | "conflict") {
+function fixture(mode: "success" | "changed" | "unverified" | "conflict" | "forbidden") {
   const journal = vi.fn();
   const sent: string[] = [];
-  vi.spyOn(chromium, "connect").mockImplementation(async () => {
+  const connect = vi.spyOn(chromium, "connect").mockImplementation(async () => {
     const running = await chromium.launch({ executablePath, chromiumSandbox: true });
     const create = running.newContext.bind(running);
     vi.spyOn(running, "newContext").mockImplementation(async options => {
@@ -99,7 +99,10 @@ function fixture(mode: "success" | "changed" | "unverified" | "conflict") {
               "access-control-allow-headers": "content-type" }), body: async () => Buffer.from(body), json: async () => JSON.parse(body),
             dispose: async () => {} }) as Awaited<ReturnType<typeof route.fetch>>;
           if (method === "OPTIONS") return reply("");
-          if (method === "GET" && url === product.url) return reply(`<a role="button" href="${target}">Select Travel Option</a>`);
+          if (method === "GET" && url === product.url) {
+            if (mode === "forbidden") return reply("Forbidden", "text/plain", 403);
+            return reply(`<a role="button" href="${target}">Select Travel Option</a>`);
+          }
           if (method === "GET" && url === target) return reply(targetHtml);
           if (method === "GET" && url === `${web}/checkout`) return reply(checkoutHtml(mode));
           if (method === "GET" && url === `${api}/countries`) return reply(JSON.stringify([{ code: "US", name: "United States" }]), "application/json");
@@ -133,15 +136,17 @@ function fixture(mode: "success" | "changed" | "unverified" | "conflict") {
     });
     return running;
   });
-  return { sent, journal };
+  return { sent, journal, connect };
 }
 
 afterEach(() => vi.restoreAllMocks());
 
 browserTest.each(["success", "changed", "unverified", "conflict"] as const)("checks a %s Hudson Link payment without real network access", async mode => {
-  const { sent, journal } = fixture(mode);
+  const { sent, journal, connect } = fixture(mode);
+  if (mode === "success") connect.mockRejectedValueOnce(new Error("ECONNRESET"));
   const session = await openHudsonCheckout({ email, browserWsEndpoint: browserHost, signal: AbortSignal.timeout(12_000) });
   try {
+    expect(connect).toHaveBeenCalledTimes(mode === "success" ? 2 : 1);
     expect(session.totalCents).toBe(275);
     const checkoutCard = mode === "success" ? { ...card, expYear: "30" } : card;
     const result = session.complete(checkoutCard, billing, names, journal, AbortSignal.timeout(8_000));
@@ -166,3 +171,13 @@ browserTest.each(["success", "changed", "unverified", "conflict"] as const)("che
     await session.close();
   }
 }, 20_000);
+
+browserTest("reports a merchant 403 without retrying or sending an order", async () => {
+  const { sent, journal, connect } = fixture("forbidden");
+  await expect(openHudsonCheckout({ email, browserWsEndpoint: browserHost })).rejects.toMatchObject({
+    code: "merchant_unavailable", opening: { stage: "offer", response: "offer", status: 403 },
+  });
+  expect(connect).toHaveBeenCalledOnce();
+  expect(journal).not.toHaveBeenCalled();
+  expect(sent).toEqual([]);
+});
