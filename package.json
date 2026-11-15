@@ -1,6 +1,6 @@
 {
   "name": "@alexar76/argus3",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "mcpName": "io.github.alexar76/argus3",
   "description": "ARGUS-3 \u2014 WARDEN MCP firewall blocks poisoned servers before any tool runs. Frugal personal AI agent; wallet and on-chain economy optional; crypto OFF by default.",
   "type": "module",
@@ -59,7 +59,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@aimarket/warden": "0.25.0",
+    "@aimarket/warden": "0.27.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@noble/post-quantum": "^0.7.1",
     "@x402/evm": "2.30.0+aimarket.zod4.1",

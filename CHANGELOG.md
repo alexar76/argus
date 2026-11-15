@@ -2,6 +2,29 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
+## 0.4.0 — 2026-11-15
+
+A minor release: since 0.3.6 ARGUS gained mail, purchases from Telegram and a new peer range, not only a new WARDEN.
+
+- **Depends on `@aimarket/warden` 0.27.0, up from 0.24.0.** Ruleset 20: an EVM opcode "mnemonic" is no longer read
+  as a seed-phrase request (warden#14), while a request for the user's mnemonic still blocks, and a static-scan
+  finding names the clause it fired on. Pins stored by 0.24.0 verify under 0.27.0 with no pinning finding, and a
+  changed description still gives `TOOL_DEF_DRIFT` (`scripts/warden-pin-compat-check.mjs`, 2026-11-15). The ARGUS
+  we run has used this WARDEN since 2026-11-15.
+- **Mail.** `argus mail setup` on the host and `/mail` in the private owner chat. Reading mail, retrieving
+  verification codes and sending replies are separate permissions; Outlook.com is incoming only. See `docs/mail.md`.
+- **Purchases from Telegram, each off until its operator turns it on.** A Hudson Link single-ride ticket
+  (`/buy_hudson`) and an itch.io checkout, both paid with a Laso prepaid card through a separate checkout browser.
+  They run only in live mode with `ARGUS_HUDSON_PURCHASE_ENABLED=1` or `ARGUS_ITCH_PURCHASE_ENABLED=1`, show the
+  total and wait for the owner's confirmation. The attempt is journalled before the order is submitted, so a
+  recheck reads the saved order instead of buying again; a Hudson Link ticket is checked against the merchant's PDF
+  receipt. See `docs/use-case-hudson-link.md` and `docs/personal-assistant.md`.
+- **Paid lookups the owner approves:** a CoinMarketCap quote bought over x402 from Telegram
+  (`docs/use-case-cmc-telegram.md`), paid search, browser access and market data. An approval shows what will be paid.
+- **Dependencies.** New: `imapflow`, `mailparser`, `nodemailer`, `pdfjs-dist` 5.6.205 and `playwright-core` 1.65.0
+  (it drives the checkout browser; ARGUS does not download a browser). `@x402/*` 2.30.0, `@noble/post-quantum`
+  ^0.7.1. **The `@aimarket/agent` peer range is now ^0.4.0 (was ^0.1.0).**
+
 ## 0.3.6 — 2026-11-10
 
 - **Depends on `@aimarket/warden` 0.24.0, up from 0.8.2.** The 0.8.2 dependency dated from 2026-10-02.
