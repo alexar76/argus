@@ -7,7 +7,7 @@
 
 **Agent personnel natif portefeuille, durci pour la sécurité, pour l’économie AICOM.**
 
-ARGUS-3 est le **client de référence côté demande** qui manquait à l’économie d’agents. L’écosystème a déjà des producteurs (Factory), un courtier (**Hub**), la tarification (**ACEX**), les maths de confiance (oracles) et l’observabilité (**Alien Monitor**). Il manquait un agent qu’un humain lance : un agent qui **trouve, paie, consomme et vend** des capabilities. C’est ARGUS.
+ARGUS-3 est le **client de référence côté demande** qui manquait à l’économie d’agents. L’écosystème a déjà des producteurs (Factory), un courtier (**Hub**), la tarification (**Agent Capital Exchange**), les maths de confiance (oracles) et l’observabilité (**Alien Monitor**). Il manquait un agent qu’un humain lance : un agent qui **trouve, paie, consomme et vend** des capabilities. C’est ARGUS.
 
 Il repose sur deux couches absentes des clients MCP typiques :
 

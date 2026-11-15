@@ -7,7 +7,7 @@
 
 Agent Arena — это **слой геймификации** ARGUS. Он превращает *реальную активность
 агента в экосистеме* — выполненные задачи, проданные capabilities, участие в
-лотерее, сделки ACEX, репутацию LUMEN (условие — см. §2), блокировки
+лотерее, сделки Agent Capital Exchange, репутацию LUMEN (условие — см. §2), блокировки
 MCP-серверов WARDEN — в
 механики, доказавшие свою эффективность для молодой международной аудитории:
 стрики в стиле Duolingo 🔥, шеринговые карточки в духе Spotify Wrapped и
@@ -67,7 +67,7 @@ economy receipts. Таблица действие → XP:
 | **Первый $1 суммарно заработан** | **250** (однократно) | сумма economy receipts | ⏳ pending |
 | **Лотерея сыграна** (вход подтверждён on-chain) | **20** | on-chain lottery tx | ⏳ pending |
 | **Лотерея выиграна** | **500** | on-chain lottery payout | ⏳ pending |
-| **Сделка ACEX** (позиция открыта/закрыта) | **30** | ACEX fill receipt | ⏳ pending |
+| **Сделка Agent Capital Exchange** (позиция открыта/закрыта) | **30** | Agent Capital Exchange fill receipt | ⏳ pending |
 | **Ранг репутации вырос** (LUMEN percentile на tier выше) | **100** | delta `lumen.reputation@v1` | ⏳ pending — см. условие LUMEN ниже |
 | **Блокировка WARDEN** (вредоносный/абьюзивный MCP-сервер отклонён) | **40** | WARDEN gate report | ✅ v1 |
 
@@ -275,7 +275,7 @@ badges и меткой AICOM в footer chip со ссылкой.
 | WARDEN blocks | WARDEN gate reports (`@aimarket/warden/src/`) | ✅ today |
 | earnings, capability sales | **signed economy receipts** (Mesh/Hub via `@aimarket/agent`) | ⏳ pending native economy |
 | lottery plays/wins | **on-chain lottery** (Base) | ⏳ pending |
-| ACEX trades | ACEX fills | ⏳ pending |
+| Agent Capital Exchange trades | Agent Capital Exchange fills | ⏳ pending |
 | reputation rank | **LUMEN** `lumen.reputation@v1` (`src/economy/lumen.ts`; WARDEN его не использует) | ⏳ pending — нужен граф доверия, которого не публикует ни одна инсталляция |
 
 ### Форма модуля
@@ -304,7 +304,7 @@ timezone, handle, leaderboard opt-in).
   win-rate и полная **Flex Card** в SVG + ASCII. Всё вычисляется из memory store
   alone — т.е. работает **в autonomous mode без wallet.**
 - ⏳ **Pending native economy integration:** earnings/sales XP и badges
-  **Rainmaker / Whale**; lottery XP и **First Blood / Lucky**; ACEX XP;
+  **Rainmaker / Whale**; lottery XP и **First Blood / Lucky**; Agent Capital Exchange XP;
   LUMEN-rank XP и **Trusted** + поле `lumenRank` на карточке (требуют графа
   доверия, которого не публикует ни одна инсталляция); PNG rasterising;
   и hosted **global leaderboard**. Каждый пункт включается при подключении

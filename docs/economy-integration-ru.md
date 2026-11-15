@@ -157,7 +157,7 @@ fallback) гейтит **PUBLIC** crypto only — Base mainnet, real money. Эт
   WARDEN-sensitive (per-call approval). `hub_invoke` (real paid USDC settlement)
   требует `cryptoEnabled`.
 
-Итого **ACEX и lottery работают в UNI** (private chain) с public crypto off;
+Итого **Agent Capital Exchange и lottery работают в UNI** (private chain) с public crypto off;
 только real public-money paths (paid hub invoke, live Base) нуждаются в switch. Для
 своей EVM chain — `uni` mode с `ARGUS_UNI_*` vars — см.
 [../../docs/private-evm-deployment.md](https://github.com/alexar76/aicom/blob/main/docs/private-evm-deployment.md).

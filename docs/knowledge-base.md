@@ -37,7 +37,7 @@ that matter most.
 ARGUS is a **wallet-native, security-hardened personal AI agent**, written in
 Node/TypeScript, that an ordinary person runs for themselves. It is the
 **demand-side reference client** the AICOM agent economy was missing: the ecosystem
-already had producers (the Factory 🏭), a broker (the Hub 🛒), pricing (ACEX 📈),
+already had producers (the Factory 🏭), a broker (the Hub 🛒), pricing (Agent Capital Exchange 📈),
 trust math (the LUMEN oracle 🔮) and observability (the Monitor 👽) — what it lacked
 was a first-class agent a person runs to **discover, pay for, consume, and sell**
 capabilities, and to **stay safe** while doing so.
@@ -203,7 +203,7 @@ flowchart LR
   - Full capability list: **[mcp-oracles-capabilities.md](./mcp-oracles-capabilities.md)**.
 - 🎰 **AI-Agent Oracle Lottery** — real agents play with their own wallets; the Hub
   tithes routing fees back as a machine-UBI. ARGUS can play when a wallet is connected.
-- 📈 **ACEX** — the capital market: Agent Listing Protocol, CapShares,
+- 📈 **Agent Capital Exchange** — the capital market: Agent Listing Protocol, CapShares,
   Proof-of-Audit, Pulse Terminal. Agents/capabilities are priced and financed here;
   ARGUS can trade when a wallet is connected.
 - 🌐 **AI Service Mesh** — the agent identity + wallet registry. ARGUS registers here
@@ -225,7 +225,7 @@ error.
 | **Call oracles** | `oracle_call` / `argus oracle <verb>` — all **17** AICOM oracles (Platon, Chronos, Lattice, Murmuration, Lumen, Colony, Turing, Percola, Fermat, Ablation, Landauer, Sortes, Gauss, Aestus, Betti, Kantor, Fourier). Free off-chain reads. | **No** |
 | **Discover & invoke paid Hub capabilities** | Search the Hub by intent + budget, open a USDC payment channel, invoke, and settle on-chain. Pay-per-call in **USDC on Base**. | **Yes** |
 | **Play the AI-Agent Oracle Lottery** | Buy tickets and play alongside other real agents; routing fees are tithed back as machine-UBI. Tickets cost **native ETH (0.000003 / ticket)**. | **Yes** |
-| **Trade on ACEX** | Buy/sell on the capital market (CapShares, listings) in **USDC**. ⚠️ **HIGH-risk — gated behind an explicit flag.** | **Yes** |
+| **Trade on Agent Capital Exchange** | Buy/sell on the capital market (CapShares, listings) in **USDC**. ⚠️ **HIGH-risk — gated behind an explicit flag.** | **Yes** |
 | **Register + sell capabilities in the Mesh** | `argus economy register` + `argus serve` / `argus mcp` — list on Hub, earn USDC per invoke. | **Yes** |
 | **Defend against malicious MCP servers** | The WARDEN firewall vets every third-party MCP server (static scan → threat feed → origin → pinning → sensitive-tool approval). | **No** — WARDEN works wallet-free |
 | **Run fully autonomously offline** | Best-in-class local, MCP-secured assistant with no AICOM network and no wallet. The economy layer is never even constructed. | **No** |
@@ -233,7 +233,7 @@ error.
 **Wallet-free** (works with no `ARGUS_WALLET_KEY`): oracle reads where free,
 capability discovery, local assistance, and WARDEN.
 **Wallet-required** (only with a connected wallet): paid Hub invokes, selling/listing
-in the Mesh, the lottery, and ACEX trading.
+in the Mesh, the lottery, and Agent Capital Exchange trading.
 
 > Consumer/provider flow details: **[economy-integration.md](./economy-integration.md)**.
 > The autonomy guarantee: **[autonomy.md](./autonomy.md)**.
@@ -292,9 +292,9 @@ internal security firewall.
 **Q: What can you buy / do in the ecosystem?**
 A: See the capabilities table in [§4](#4--what-argus-can-do-in-the-ecosystem). In
 short: call oracles (free reads), discover & invoke paid Hub capabilities (USDC on
-Base), play the oracle lottery (native ETH), trade on ACEX (USDC, HIGH-risk, flagged),
+Base), play the oracle lottery (native ETH), trade on Agent Capital Exchange (USDC, HIGH-risk, flagged),
 register and sell capabilities in the Mesh, and defend against malicious MCP servers.
-The lottery, ACEX, paid invokes, and selling need a connected wallet; oracle reads,
+The lottery, Agent Capital Exchange, paid invokes, and selling need a connected wallet; oracle reads,
 discovery, local assistance, and WARDEN work wallet-free.
 
 **Q: Is my seed phrase / wallet safe?**

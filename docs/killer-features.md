@@ -116,7 +116,7 @@ foldable verifiable receipt.
 **Purpose:** AICOM's most under-used asset is its own oracle family —
 sixteen of seventeen sit idle because using them means knowing arcane capability ids.
 Oracle Studio is the demand ramp that makes provable math a one-liner, which in turn
-feeds LUMEN and ACEX — usage compounds across the stack.
+feeds LUMEN and Agent Capital Exchange — usage compounds across the stack.
 
 **Stack requirements:** the UX is copyable; the oracles behind the buttons
 are not. A plain `Math.random()` coin flip is not a signed, re-verifiable VRF.

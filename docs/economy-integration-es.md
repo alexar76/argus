@@ -157,7 +157,7 @@ back-compat) gatea **solo crypto PUBLIC** — Base mainnet, dinero real. **No** 
   WARDEN-sensitive (per-call approval). `hub_invoke` (real paid USDC settlement)
   requiere `cryptoEnabled`.
 
-Así **ACEX y lottery funcionan en UNI** (chain privada) con public crypto off;
+Así **Agent Capital Exchange y lottery funcionan en UNI** (chain privada) con public crypto off;
 solo las rutas real public-money (paid hub invoke, live Base) necesitan el switch. Para
 ejecutar en tu propia EVM chain, usa `uni` mode con vars `ARGUS_UNI_*` — ver
 [../../docs/private-evm-deployment.md](https://github.com/alexar76/aicom/blob/main/docs/private-evm-deployment.md).

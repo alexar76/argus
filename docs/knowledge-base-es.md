@@ -42,7 +42,7 @@ ARGUS es un **agente de IA personal nativo de wallet y reforzado en seguridad**,
 escrito en Node/TypeScript, que una persona común ejecuta para sí misma. Es el
 **cliente de referencia del lado de la demanda** que le faltaba a la economía de
 agentes AICOM: el ecosistema ya tenía productores (la Factory 🏭), un bróker (el
-Hub 🛒), fijación de precios (ACEX 📈), matemática de confianza (el oráculo LUMEN 🔮)
+Hub 🛒), fijación de precios (Agent Capital Exchange 📈), matemática de confianza (el oráculo LUMEN 🔮)
 y observabilidad (el Monitor 👽) — lo que faltaba era un agente de primera clase que
 una persona ejecuta para **descubrir, pagar, consumir y vender** capacidades, y para
 **mantenerse a salvo** mientras lo hace.
@@ -214,7 +214,7 @@ flowchart LR
 - 🎰 **Lotería de Oráculo AI-Agent** — agentes reales juegan con sus propias wallets;
   el Hub diezma las comisiones de enrutamiento devolviéndolas como un machine-UBI.
   ARGUS puede jugar cuando hay una wallet conectada.
-- 📈 **ACEX** — el mercado de capitales: Agent Listing Protocol, CapShares,
+- 📈 **Agent Capital Exchange** — el mercado de capitales: Agent Listing Protocol, CapShares,
   Proof-of-Audit, Pulse Terminal. Aquí se fijan precio y se financian
   agentes/capacidades; ARGUS puede operar cuando hay una wallet conectada.
 - 🌐 **AI Service Mesh** — el registro de identidad + wallet de agentes. ARGUS se
@@ -238,7 +238,7 @@ disponibles — nunca son un error.
 | **Llamar oráculos** | `oracle_invoke` / aleatoriedad / reputación — servicios matemáticos verificables (aleatoriedad, VDF, consenso, reputación). Lecturas gratis. | **No** — las lecturas gratis funcionan sin wallet |
 | **Descubrir e invocar capacidades de pago del Hub** | Busca en el Hub por intención + presupuesto, abre un canal de pago USDC, invoca y liquida on-chain. Pago por llamada en **USDC sobre Base**. | **Sí** |
 | **Jugar la Lotería de Oráculo AI-Agent** | Compra tickets y juega junto a otros agentes reales; las comisiones de enrutamiento se diezman de vuelta como machine-UBI. Los tickets cuestan **ETH nativo (0.000003 / ticket)**. | **Sí** |
-| **Operar en ACEX** | Comprar/vender en el mercado de capitales (CapShares, listados) en **USDC**. ⚠️ **ALTO riesgo — protegido tras un flag explícito.** | **Sí** |
+| **Operar en Agent Capital Exchange** | Comprar/vender en el mercado de capitales (CapShares, listados) en **USDC**. ⚠️ **ALTO riesgo — protegido tras un flag explícito.** | **Sí** |
 | **Registrar + vender capacidades en la Mesh** | Registra identidad + wallet en la AI Service Mesh, lista capacidades y gana (y vuélvete elegible para la lotería / machine-UBI). | **Sí** |
 | **Defender contra servidores MCP maliciosos** | El firewall WARDEN examina cada servidor MCP de terceros (escaneo estático → feed de amenazas → origin → fijado → aprobación de herramientas sensibles). | **No** — WARDEN funciona sin wallet |
 | **Correr de forma totalmente autónoma offline** | Asistente local de primera clase, asegurado por MCP, sin red AICOM y sin wallet. La capa de economía ni siquiera se construye. | **No** |
@@ -246,7 +246,7 @@ disponibles — nunca son un error.
 **Sin wallet** (funciona sin `ARGUS_WALLET_KEY`): lecturas de oráculo donde son
 gratis, descubrimiento de capacidades, asistencia local y WARDEN.
 **Requiere wallet** (solo con una wallet conectada): invocaciones de pago del Hub,
-venta/listado en la Mesh, la lotería y operar en ACEX.
+venta/listado en la Mesh, la lotería y operar en Agent Capital Exchange.
 
 > Detalles del flujo consumidor/proveedor: **[economy-integration.md](./economy-integration.md)**.
 > La garantía de autonomía: **[autonomy.md](./autonomy.md)**.
@@ -306,9 +306,9 @@ solo mi firewall de seguridad interno.
 **P: ¿Qué puedes comprar / hacer en el ecosistema?**
 R: Ver la tabla de capacidades en [§4](#4--qué-puede-hacer-argus-en-el-ecosistema). En
 resumen: llamar oráculos (lecturas gratis), descubrir e invocar capacidades de pago
-del Hub (USDC sobre Base), jugar la lotería del oráculo (ETH nativo), operar en ACEX
+del Hub (USDC sobre Base), jugar la lotería del oráculo (ETH nativo), operar en Agent Capital Exchange
 (USDC, ALTO riesgo, marcado), registrar y vender capacidades en la Mesh y defender
-contra servidores MCP maliciosos. La lotería, ACEX, las invocaciones de pago y la
+contra servidores MCP maliciosos. La lotería, Agent Capital Exchange, las invocaciones de pago y la
 venta necesitan una wallet conectada; las lecturas de oráculo, el descubrimiento, la
 asistencia local y WARDEN funcionan sin wallet.
 

@@ -65,7 +65,7 @@ Part of the [AICOM open agent economy](https://magic-ai-factory.com).
 
 ARGUS is the **demand-side reference client** the agent economy was missing. The
 ecosystem already has producers (the Factory 🏭), a broker (the Hub 🛒), pricing
-(ACEX 📈), trust math (the LUMEN oracle 🔮) and observability (the Monitor 👽).
+(Agent Capital Exchange 📈), trust math (the LUMEN oracle 🔮) and observability (the Monitor 👽).
 What it lacked was a first-class agent an ordinary person runs — one that
 **discovers, pays for, consumes and sells** capabilities. That's ARGUS.
 
@@ -86,7 +86,7 @@ unavailable.** No wallet, no network to AICOM? It's still a best-in-class local,
 MCP-secured assistant.
 
 > ### 🔒 Crypto is OFF by default
-> **A blockchain is not required to run ARGUS-3.** Wallet, lottery, ACEX, paid
+> **A blockchain is not required to run ARGUS-3.** Wallet, lottery, Agent Capital Exchange, paid
 > invokes, and on-chain settlement are **disabled by default** and turn on only
 > when you set **`ARGUS_CRYPTO_ENABLED=1`** (plus a wallet). Out of the box you get
 > the full agent — WARDEN, any model, memory, channels, and **free off-chain oracle
@@ -326,7 +326,7 @@ the game mechanics a young, global audience already loves — Duolingo-style str
 Wrapped-style shareable cards, gaming rank cards:
 
 - **XP & levels** — earn XP for finishing tasks, selling capabilities, playing the
-  oracle lottery, trading on ACEX, and staying frugal (low `$`/task).
+  oracle lottery, trading on Agent Capital Exchange, and staying frugal (low `$`/task).
 - **Daily streaks** 🔥 — keep your agent active day after day.
 - **Quests & badges** — *First Blood* (first lottery win), *Rainmaker* (first `$1`
   earned selling capabilities), *Frugal* (a task under `$0.001`), *Trusted* (top-half
@@ -364,7 +364,7 @@ Use the **TEST · LIVE · UNI** switcher on the Arena page to flip between demo 
 
 > `aicom` Factory **builds** agents → listed & invoked through **AIMarket** (Hub +
 > protocol) → **Oracles** (LUMEN trust, randomness, VDF, consensus) price and
-> secure them → financed on **ACEX** → visualised by **Alien Monitor**.
+> secure them → financed on **Agent Capital Exchange** → visualised by **Alien Monitor**.
 >
 > **ARGUS is the demand side**: the agent that *spends* in this market, *sells*
 > into it, and *defends* the user against the MCP supply chain — with a firewall

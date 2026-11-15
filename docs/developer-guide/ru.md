@@ -178,7 +178,7 @@ argus economy invoke demo-hello greet@v1 --input '{"name":"argus"}'
 | `ARGUS_CRYPTO_ENABLED=1` | Главный переключатель платных вызовов hub |
 | Пополненный USDC-канал | Base mainnet или hub sandbox в зависимости от деплоя |
 
-Включите кошелёк в вашей установке ARGUS (`argus setup` → crypto ВКЛ, пополните USDC в Base). Каждый платный вызов направляет **USDC** в пул выручки листинга capability (ACEX CapShares при IPO или прямой расчёт по конфигурации hub).
+Включите кошелёк в вашей установке ARGUS (`argus setup` → crypto ВКЛ, пополните USDC в Base). Каждый платный вызов направляет **USDC** в пул выручки листинга capability (Agent Capital Exchange CapShares при IPO или прямой расчёт по конфигурации hub).
 
 ### HTTP `POST /ask` vs economy CLI
 
@@ -207,7 +207,7 @@ argus economy invoke demo-hello greet@v1 --input '{"name":"argus"}'
 |-----------|-----|
 | MCP-обёртка для Cursor | [aimarket-mcp-packager](https://github.com/alexar76/aimarket-plugins) |
 | Полный oracle / верифицируемые выходы | [ARGUS MCP & Oracles](../mcp-oracles-capabilities.md) |
-| ACEX IPO (торгуемая доля выручки) | Hub `/ai-market/v2/capital/ipo` |
+| Agent Capital Exchange IPO (торгуемая доля выручки) | Hub `/ai-market/v2/capital/ipo` |
 | Mesh identity (P2P) | `argus economy register` |
 
 ---

@@ -9,7 +9,7 @@
 
 ARGUS-3 es el **cliente de referencia del lado de la demanda** que le faltaba a la
 economía de agentes. El ecosistema ya tiene productores (la Factory 🏭), un bróker
-(el Hub 🛒), fijación de precios (ACEX 📈), matemática de confianza (el oráculo
+(el Hub 🛒), fijación de precios (Agent Capital Exchange 📈), matemática de confianza (el oráculo
 LUMEN 🔮) y observabilidad (el Monitor 👽). Lo que faltaba era un agente de primera
 clase que ejecuta una persona común — uno que **descubre, paga, consume y vende**
 capacidades. Eso es ARGUS.
@@ -188,7 +188,7 @@ del ecosistema** en las mecánicas de juego que un público joven y global ya ad
 rachas estilo Duolingo, cartas compartibles estilo Wrapped, cartas de rango gaming:
 
 - **XP y niveles** — gana XP por terminar tareas, vender capacidades, jugar la
-  lotería del oráculo, operar en ACEX y mantenerte frugal (bajo `$`/tarea).
+  lotería del oráculo, operar en Agent Capital Exchange y mantenerte frugal (bajo `$`/tarea).
 - **Rachas diarias** 🔥 — mantén tu agente activo día tras día.
 - **Misiones e insignias** — *First Blood* (primera victoria en la lotería),
   *Rainmaker* (primer `$1` ganado vendiendo capacidades), *Frugal* (una tarea bajo
@@ -227,7 +227,7 @@ está definido.
 
 > La Factory `aicom` **construye** agentes → listados e invocados a través de
 > **AIMarket** (Hub + protocolo) → los **Oráculos** (confianza LUMEN, aleatoriedad,
-> VDF, consenso) los fijan precio y aseguran → financiados en **ACEX** →
+> VDF, consenso) los fijan precio y aseguran → financiados en **Agent Capital Exchange** →
 > visualizados por **Alien Monitor**.
 >
 > **ARGUS es el lado de la demanda**: el agente que *gasta* en este mercado, *vende*

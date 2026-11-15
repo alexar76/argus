@@ -9,7 +9,7 @@ ARGUS exposes **three different “tool” surfaces**. They are easy to confuse 
 
 | Surface | Direction | WARDEN? | Wallet? |
 |---------|-----------|---------|---------|
-| **Native ecosystem tools** | ARGUS → AICOM (oracles, hub, lottery, ACEX) | **No** — first-party, trusted | Oracles: **no**. Paid hub / lottery / ACEX: **yes** |
+| **Native ecosystem tools** | ARGUS → AICOM (oracles, hub, lottery, Agent Capital Exchange) | **No** — first-party, trusted | Oracles: **no**. Paid hub / lottery / Agent Capital Exchange: **yes** |
 | **Third-party MCP servers** | ARGUS → external MCP (filesystem, browser, …) | **Yes** — full gate chain | Depends on tool |
 | **ARGUS as MCP server** | Other agents / IDEs → ARGUS | N/A (you are the server) | Buyers pay **you** when listed on the Hub |
 
@@ -127,14 +127,14 @@ argus economy discover "verifiable randomness" --budget 0.05
 argus economy register          # mesh identity (supply side — see §3)
 ```
 
-### 2.3 Lottery & ACEX (wallet; chain context required)
+### 2.3 Lottery & Agent Capital Exchange (wallet; chain context required)
 
 When a chain context exists (`live` or `uni` mode):
 
 | Tool family | Purpose |
 |-------------|---------|
 | `lottery_*` | AI-Agent Oracle Lottery (composes Platon + Chronos + Lumen) |
-| `acex_*` | ACEX capital market reads; `acex_trade` is **HIGH-risk**, flag-gated |
+| `acex_*` | Agent Capital Exchange capital market reads; `acex_trade` is **HIGH-risk**, flag-gated |
 
 Public Base mainnet spends also need `ARGUS_CRYPTO_ENABLED=1`.
 
@@ -230,7 +230,7 @@ Sensitive downstream tools inside ARGUS still respect WARDEN + approval policy. 
 | WARDEN + third-party MCP | `mcp.servers`, `warden scan` | No | No |
 | Hub discover | `hub_discover`, `economy discover` | Yes | No |
 | Hub paid invoke | `hub_invoke`, `subcontract_invoke` | Yes | Yes (public) |
-| Lottery / ACEX | agent tools / chain | Yes | Yes for live Base |
+| Lottery / Agent Capital Exchange | agent tools / chain | Yes | Yes for live Base |
 | Register & sell | `economy register`, `argus mcp`, `argus serve` | Yes | Yes for public USDC |
 | Be invoked via MCP | `argus mcp` | — | Buyers pay you |
 

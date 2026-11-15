@@ -7,7 +7,7 @@
 
 Agent Arena es la **capa de gamificación** de ARGUS. Convierte la *actividad real
 del agente en el ecosistema* — tareas completadas, capabilities vendidas,
-participaciones en la lotería, operaciones ACEX, reputación LUMEN, bloqueos de
+participaciones en la lotería, operaciones Agent Capital Exchange, reputación LUMEN, bloqueos de
 servidores MCP por WARDEN — en mecánicas probadas para enganchar a una audiencia
 joven e internacional: rachas al estilo Duolingo 🔥, tarjetas compartibles al
 estilo Spotify Wrapped y rank cards de videojuegos.
@@ -68,7 +68,7 @@ economy receipts. Tabla acción → XP:
 | **Primer $1 acumulado** | **250** (una vez) | suma de economy receipts | ⏳ pending |
 | **Lotería jugada** (entrada confirmada on-chain) | **20** | tx de lotería on-chain | ⏳ pending |
 | **Lotería ganada** | **500** | payout de lotería on-chain | ⏳ pending |
-| **Operación ACEX** (posición abierta/cerrada) | **30** | ACEX fill receipt | ⏳ pending |
+| **Operación Agent Capital Exchange** (posición abierta/cerrada) | **30** | Agent Capital Exchange fill receipt | ⏳ pending |
 | **Rango de reputación subido** (percentil LUMEN sube un tier) | **100** | delta `lumen.reputation@v1` | ⏳ pending — ver la precondición LUMEN abajo |
 | **Bloqueo WARDEN** (servidor MCP malicioso/abusivo denegado) | **40** | WARDEN gate report | ✅ v1 |
 
@@ -280,7 +280,7 @@ Esta es la parte que debe estar bien, porque Arena toca lo «social».
 | WARDEN blocks | WARDEN gate reports (`@aimarket/warden/src/`) | ✅ today |
 | earnings, capability sales | **signed economy receipts** (Mesh/Hub via `@aimarket/agent`) | ⏳ pending native economy |
 | lottery plays/wins | **on-chain lottery** (Base) | ⏳ pending |
-| ACEX trades | ACEX fills | ⏳ pending |
+| Agent Capital Exchange trades | Agent Capital Exchange fills | ⏳ pending |
 | reputation rank | **LUMEN** `lumen.reputation@v1` (`src/economy/lumen.ts`) | ⏳ pending — LUMEN solo puntúa cuando quien llama suministra aristas de confianza, y ningún despliegue publica un grafo |
 
 ### Forma del módulo
@@ -310,7 +310,7 @@ thresholds, timezone, handle, leaderboard opt-in).
   solo desde el memory store — es decir, funciona **en autonomous mode sin
   wallet.**
 - ⏳ **Pending native economy integration:** XP de earnings/sales y los badges
-  **Rainmaker / Whale**; XP de lotería y **First Blood / Lucky**; XP ACEX;
+  **Rainmaker / Whale**; XP de lotería y **First Blood / Lucky**; XP Agent Capital Exchange;
   XP de rango LUMEN y **Trusted** + el campo `lumenRank` de la tarjeta (bloqueados
   además por la falta de un grafo de confianza publicado);
   rasterising PNG; y el **global leaderboard** alojado. Cada uno se activa cuando

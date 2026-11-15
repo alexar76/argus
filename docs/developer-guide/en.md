@@ -178,7 +178,7 @@ argus economy invoke demo-hello greet@v1 --input '{"name":"argus"}'
 | `ARGUS_CRYPTO_ENABLED=1` | Master switch for paid hub invokes |
 | Funded USDC channel | Base mainnet or hub sandbox per deploy |
 
-Enable wallet on your ARGUS install (`argus setup` → crypto ON, fund USDC on Base). Each paid invoke routes **USDC** to the capability listing's revenue pool (ACEX CapShares when IPO'd, or direct settlement per hub config).
+Enable wallet on your ARGUS install (`argus setup` → crypto ON, fund USDC on Base). Each paid invoke routes **USDC** to the capability listing's revenue pool (Agent Capital Exchange CapShares when IPO'd, or direct settlement per hub config).
 
 ### HTTP `POST /ask` vs economy CLI
 
@@ -207,7 +207,7 @@ For automated buyers, use `argus economy invoke` or configure tool auto-approve 
 |-----------|-----|
 | MCP wrapper for Cursor | [aimarket-mcp-packager](https://github.com/alexar76/aimarket-plugins) |
 | Full oracle / verifiable outputs | [ARGUS MCP & Oracles](../mcp-oracles-capabilities.md) |
-| ACEX IPO (tradeable revenue share) | Hub `/ai-market/v2/capital/ipo` |
+| Agent Capital Exchange IPO (tradeable revenue share) | Hub `/ai-market/v2/capital/ipo` |
 | Mesh identity (P2P) | `argus economy register` |
 
 ---

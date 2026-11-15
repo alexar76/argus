@@ -9,7 +9,7 @@ ARGUS expone **tres superficies de «tool» distintas**. Es fácil confundirlas 
 
 | Superficie | Dirección | WARDEN? | Wallet? |
 |------------|-----------|---------|---------|
-| **Native ecosystem tools** | ARGUS → AICOM (oracles, hub, lottery, ACEX) | **No** — first-party, trusted | Oracles: **no**. Paid hub / lottery / ACEX: **yes** |
+| **Native ecosystem tools** | ARGUS → AICOM (oracles, hub, lottery, Agent Capital Exchange) | **No** — first-party, trusted | Oracles: **no**. Paid hub / lottery / Agent Capital Exchange: **yes** |
 | **Third-party MCP servers** | ARGUS → external MCP (filesystem, browser, …) | **Yes** — full gate chain | Depende de la herramienta |
 | **ARGUS as MCP server** | Other agents / IDEs → ARGUS | N/A (tú eres el servidor) | Los compradores te pagan **a ti** cuando estás listado en el Hub |
 
@@ -127,14 +127,14 @@ argus economy discover "verifiable randomness" --budget 0.05
 argus economy register          # mesh identity (supply side — see §3)
 ```
 
-### 2.3 Lottery & ACEX (cartera; requiere chain context)
+### 2.3 Lottery & Agent Capital Exchange (cartera; requiere chain context)
 
 Cuando existe chain context (`live` o `uni` mode):
 
 | Tool family | Propósito |
 |-------------|-----------|
 | `lottery_*` | AI-Agent Oracle Lottery (compone Platon + Chronos + Lumen) |
-| `acex_*` | ACEX capital market reads; `acex_trade` es **HIGH-risk**, flag-gated |
+| `acex_*` | Agent Capital Exchange capital market reads; `acex_trade` es **HIGH-risk**, flag-gated |
 
 Los gastos en Base mainnet público también necesitan `ARGUS_CRYPTO_ENABLED=1`.
 
@@ -230,7 +230,7 @@ Las sensitive downstream tools dentro de ARGUS siguen respetando WARDEN + approv
 | WARDEN + third-party MCP | `mcp.servers`, `warden scan` | No | No |
 | Hub discover | `hub_discover`, `economy discover` | Yes | No |
 | Hub paid invoke | `hub_invoke`, `subcontract_invoke` | Yes | Yes (public) |
-| Lottery / ACEX | agent tools / chain | Yes | Yes for live Base |
+| Lottery / Agent Capital Exchange | agent tools / chain | Yes | Yes for live Base |
 | Register & sell | `economy register`, `argus mcp`, `argus serve` | Yes | Yes for public USDC |
 | Ser invocado vía MCP | `argus mcp` | — | Los compradores te pagan |
 

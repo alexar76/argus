@@ -9,7 +9,7 @@ ARGUS экспонирует **три разных «tool»-поверхност
 
 | Поверхность | Направление | WARDEN? | Wallet? |
 |-------------|-------------|---------|---------|
-| **Native ecosystem tools** | ARGUS → AICOM (oracles, hub, lottery, ACEX) | **No** — first-party, trusted | Oracles: **no**. Paid hub / lottery / ACEX: **yes** |
+| **Native ecosystem tools** | ARGUS → AICOM (oracles, hub, lottery, Agent Capital Exchange) | **No** — first-party, trusted | Oracles: **no**. Paid hub / lottery / Agent Capital Exchange: **yes** |
 | **Third-party MCP servers** | ARGUS → external MCP (filesystem, browser, …) | **Yes** — full gate chain | Зависит от инструмента |
 | **ARGUS as MCP server** | Other agents / IDEs → ARGUS | N/A (вы — сервер) | Покупатели платят **вам** при листинге на Hub |
 
@@ -127,14 +127,14 @@ argus economy discover "verifiable randomness" --budget 0.05
 argus economy register          # mesh identity (supply side — see §3)
 ```
 
-### 2.3 Lottery & ACEX (кошелёк; требуется chain context)
+### 2.3 Lottery & Agent Capital Exchange (кошелёк; требуется chain context)
 
 При наличии chain context (`live` или `uni` mode):
 
 | Tool family | Назначение |
 |-------------|------------|
 | `lottery_*` | AI-Agent Oracle Lottery (комбинирует Platon + Chronos + Lumen) |
-| `acex_*` | ACEX capital market reads; `acex_trade` — **HIGH-risk**, flag-gated |
+| `acex_*` | Agent Capital Exchange capital market reads; `acex_trade` — **HIGH-risk**, flag-gated |
 
 Public Base mainnet spends также требуют `ARGUS_CRYPTO_ENABLED=1`.
 
@@ -230,7 +230,7 @@ Sensitive downstream tools внутри ARGUS всё равно соблюдаю
 | WARDEN + third-party MCP | `mcp.servers`, `warden scan` | No | No |
 | Hub discover | `hub_discover`, `economy discover` | Yes | No |
 | Hub paid invoke | `hub_invoke`, `subcontract_invoke` | Yes | Yes (public) |
-| Lottery / ACEX | agent tools / chain | Yes | Yes for live Base |
+| Lottery / Agent Capital Exchange | agent tools / chain | Yes | Yes for live Base |
 | Register & sell | `economy register`, `argus mcp`, `argus serve` | Yes | Yes for public USDC |
 | Вызов через MCP | `argus mcp` | — | Покупатели платят вам |
 

@@ -123,7 +123,7 @@ viene con un recibo verificable plegable.
 **Propósito:** el activo más infrautilizado de AICOM es su propia
 familia de oráculos — dieciséis de diecisiete están inactivos porque usarlos implica conocer ids
 de capacidad arcanos. Oracle Studio es la rampa de demanda que vuelve la matemática
-demostrable un one-liner, lo que a su vez alimenta a LUMEN y ACEX — el efecto se compone
+demostrable un one-liner, lo que a su vez alimenta a LUMEN y Agent Capital Exchange — el efecto se compone
 cuanto más se usa.
 
 **Requisitos del stack:** la UX es copiable; los oráculos detrás de los botones no. La

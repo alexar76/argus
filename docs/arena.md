@@ -6,7 +6,7 @@
 > [architecture](./architecture.md) · [security-warden](./security-warden.md) · [economy-integration](./economy-integration.md) · [token-economy](./token-economy.md) · [autonomy](./autonomy.md) · **arena**
 
 Agent Arena is the **gamification layer** of ARGUS. It turns the agent's *real
-ecosystem activity* — tasks completed, capabilities sold, lottery plays, ACEX
+ecosystem activity* — tasks completed, capabilities sold, lottery plays, Agent Capital Exchange
 trades, LUMEN reputation (see the precondition in §2), MCP servers blocked — into
 mechanics proven to engage a young, international audience: Duolingo-style
 streaks 🔥, Spotify-Wrapped-style shareable cards, and gaming-style rank cards.
@@ -65,7 +65,7 @@ economy receipts. The action → XP table:
 | **First $1 cumulatively earned** | **250** (one-time) | summed economy receipts | ⏳ pending |
 | **Lottery played** (entry confirmed on-chain) | **20** | on-chain lottery tx | ⏳ pending |
 | **Lottery won** | **500** | on-chain lottery payout | ⏳ pending |
-| **ACEX trade** (position opened/closed) | **30** | ACEX fill receipt | ⏳ pending |
+| **Agent Capital Exchange trade** (position opened/closed) | **30** | Agent Capital Exchange fill receipt | ⏳ pending |
 | **Reputation rank gained** (LUMEN percentile up a tier) | **100** | `lumen.reputation@v1` delta | ⏳ pending — see the LUMEN precondition below |
 | **WARDEN block** (a malicious/abusive MCP server denied) | **40** | WARDEN gate report | ✅ v1 |
 
@@ -271,7 +271,7 @@ This is the part that has to be right, because Arena touches "social."
 | WARDEN blocks | WARDEN gate reports (`@aimarket/warden/src/`) | ✅ today |
 | earnings, capability sales | **signed economy receipts** (Mesh/Hub via `@aimarket/agent`) | ⏳ pending native economy |
 | lottery plays/wins | **on-chain lottery** (Base) | ⏳ pending |
-| ACEX trades | ACEX fills | ⏳ pending |
+| Agent Capital Exchange trades | Agent Capital Exchange fills | ⏳ pending |
 | reputation rank | **LUMEN** `lumen.reputation@v1` (`src/economy/lumen.ts`) | ⏳ not obtainable — `scoreEntity` is called with no trust edges, and no deployment publishes a graph to score |
 
 ### Module shape
@@ -301,7 +301,7 @@ handler (owner-locked), and `arena.*` keys in `argus.config.json`
   from the memory store alone — i.e. it works **in autonomous mode with no
   wallet.**
 - ⏳ **Pending native economy integration:** earnings/sales XP and the
-  **Rainmaker / Whale** badges; lottery XP and **First Blood / Lucky**; ACEX XP;
+  **Rainmaker / Whale** badges; lottery XP and **First Blood / Lucky**; Agent Capital Exchange XP;
   LUMEN-rank XP and **Trusted** + the card's `lumenRank` field; PNG rasterising;
   and the hosted **global leaderboard**. Each lights up when its source connects;
   none is on the critical path. The LUMEN items wait on something outside ARGUS:
