@@ -7,6 +7,10 @@ import { ml_dsa65 } from "@noble/post-quantum/ml-dsa.js";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Logger } from "../types.js";
 
+/** AES-GCM tags are always 16 bytes. Fixed here, so a file whose tag was cut short fails to decrypt: Node would
+ *  otherwise accept a 4-byte tag and the forgery bound drops from 2^128 to 2^32. */
+const GCM = { authTagLength: 16 } as const;
+
 /** v1 — scrypt + AES-256-GCM (classical). v2 — hybrid ML-KEM-768 wrap + ML-DSA-65 integrity. */
 export interface KeystoreFileV1 {
   v: 1;
@@ -142,7 +146,7 @@ function encryptKeystoreV1(secret: WalletSecret, passphrase: string, address?: s
   const salt = randomBytes(16);
   const key = scryptSync(passphrase, salt, KEYLEN, { N, r: R, p: P, maxmem: MAXMEM });
   const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const cipher = createCipheriv("aes-256-gcm", key, iv, GCM);
   // AAD binds the KDF parameters to the ciphertext — an attacker with write access
   // cannot weaken scrypt (N/r/p) and re-encrypt without detection.
   const aad = Buffer.from(`argus-keystore:v1:scrypt:${N}:${R}:${P}:${salt.toString("hex")}:${iv.toString("hex")}`, "utf8");
@@ -170,7 +174,7 @@ function encryptKeystoreV2(secret: WalletSecret, passphrase: string, address?: s
   const { cipherText: kemCtBytes, sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
   const aesKey = Buffer.from(sharedSecret).subarray(0, KEYLEN);
   const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", aesKey, iv);
+  const cipher = createCipheriv("aes-256-gcm", aesKey, iv, GCM);
   // AAD binds the KDF parameters + kemCt to the GCM layer. The ML-DSA-65 signature
   // also covers the JSON body, so this is defense-in-depth.
   const aad = Buffer.from(`argus-keystore:v2:pqc:scrypt:${salt.toString("hex")}:${iv.toString("hex")}`, "utf8");
@@ -227,7 +231,7 @@ function decryptKeystoreV1(file: KeystoreFileV1, passphrase: string): WalletSecr
     p,
     maxmem: MAXMEM,
   });
-  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(file.iv, "hex"));
+  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(file.iv, "hex"), GCM);
   decipher.setAuthTag(Buffer.from(file.tag, "hex"));
   // AAD must match encrypt — binds scrypt params to the ciphertext so parameter
   // weakening is detected as an auth failure.
@@ -253,7 +257,7 @@ function decryptKeystoreV2(file: KeystoreFileV2, passphrase: string): WalletSecr
   const kemKeys = ml_kem768.keygen(domainSeed64(master, "ml-kem768"));
   const sharedSecret = ml_kem768.decapsulate(fromHex(file.kemCt), kemKeys.secretKey);
   const aesKey = Buffer.from(sharedSecret).subarray(0, KEYLEN);
-  const decipher = createDecipheriv("aes-256-gcm", aesKey, Buffer.from(file.iv, "hex"));
+  const decipher = createDecipheriv("aes-256-gcm", aesKey, Buffer.from(file.iv, "hex"), GCM);
   decipher.setAuthTag(Buffer.from(file.tag, "hex"));
   const aad = Buffer.from(`argus-keystore:v2:pqc:scrypt:${file.salt}:${file.iv}`, "utf8");
   decipher.setAAD(aad);
@@ -355,7 +359,7 @@ export function encryptToken(secret: string, passphrase: string, purpose: Encryp
   const salt = randomBytes(16);
   const key = scryptSync(passphrase, salt, KEYLEN, { N, r: R, p: P, maxmem: MAXMEM });
   const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const cipher = createCipheriv("aes-256-gcm", key, iv, GCM);
   const aad = Buffer.from(`argus-${purpose}:v1:${salt.toString("hex")}:${iv.toString("hex")}`, "utf8");
   cipher.setAAD(aad);
   const ct = Buffer.concat([cipher.update(secret, "utf8"), cipher.final()]);
@@ -380,7 +384,7 @@ export function decryptToken(blob: EncryptedBlob, passphrase: string, purpose: E
     p: blob.p,
     maxmem: MAXMEM,
   });
-  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(blob.iv, "hex"));
+  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(blob.iv, "hex"), GCM);
   decipher.setAuthTag(Buffer.from(blob.tag, "hex"));
   const aad = Buffer.from(`argus-${purpose}:v1:${blob.salt}:${blob.iv}`, "utf8");
   decipher.setAAD(aad);

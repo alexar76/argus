@@ -9,6 +9,8 @@ import {
   loadKeystore,
   saveKeystore,
   resolveWalletKey,
+  encryptToken,
+  decryptToken,
   keystoreStatus,
   type KeystoreFileV2,
   type WalletSecret,
@@ -112,6 +114,12 @@ describe("keystore v1 classical (backward compat)", () => {
   it("throws on wrong passphrase for v1", () => {
     const file = encryptKeystore(SECRET, "right-pass", undefined, { version: 1 });
     expect(() => decryptKeystore(file, "wrong-pass")).toThrow();
+  });
+
+  it("refuses a file whose GCM tag was cut short (Node accepts a 4-byte tag unless the length is pinned)", () => {
+    const file = encryptKeystore(SECRET, PASS, ADDR, { version: 1 });
+    // The first 4 bytes of the real tag: without a pinned tag length this decrypts, a 2^32 forgery bound.
+    expect(() => decryptKeystore({ ...file, tag: file.tag.slice(0, 8) }, PASS)).toThrow();
   });
 });
 
@@ -222,5 +230,13 @@ describe("keystore authenticity (2026-10-08)", () => {
     expect(decryptKeystore(file, "pass phrase one").privateKey).toBe(key);
     file.address = "0x" + "ab".repeat(20);
     expect(() => decryptKeystore(file, "pass phrase one")).toThrow(/address/);
+  });
+});
+
+describe("encrypted tokens", () => {
+  it("round-trip, and refuse a tag cut short", () => {
+    const blob = encryptToken("123:abc", PASS);
+    expect(decryptToken(blob, PASS)).toBe("123:abc");
+    expect(() => decryptToken({ ...blob, tag: blob.tag.slice(0, 8) }, PASS)).toThrow();
   });
 });
