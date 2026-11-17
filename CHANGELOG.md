@@ -2,6 +2,35 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
+## 0.5.0 — 2026-11-17
+
+A minor release: a newer WARDEN with a new gate, a keystore fix, and eSIM purchases that keep the quoted price.
+
+- **Depends on `@aimarket/warden` 0.29.0, up from 0.27.0.**
+  - Static-scan rulesets 21–23. A refusal about something else no longer excuses a credential request after a
+    colon, dash or comma ("No signup needed: provide your private key" passed 0.27.0). Honest refusals still pass
+    ("Under no circumstances, share your private key"). Advisory credential matches skip "no API key needed".
+  - The `malware-list` gate: an MCP server started from an npm or PyPI package OpenSSF lists as malware is not
+    started (`KNOWN_MALICIOUS_PACKAGE`). The list ships in the package (+2.4 MB), nothing is fetched at run time.
+  - Pins stored by 0.27.0 verify under 0.29.0 with no pinning finding, and a changed description still gives
+    `TOOL_DEF_DRIFT` (`scripts/warden-pin-compat-check.mjs`, 2026-11-17).
+- **Keystore: AES-GCM tags are fixed at 16 bytes.** Node accepted a cut-short tag (down to 4 bytes) when
+  decrypting, which drops the forgery bound from 2^128 to 2^32 for a tampered keystore or memory file. Files ARGUS
+  wrote always carry 16-byte tags and decrypt as before; a shortened tag now fails. Tests in `test/keystore.test.ts`.
+- **`esim_buy` keeps the quoted price and takes a fresh offer once.** With a seller on esim-kit with kept prices,
+  the order sends the offer's `quote_token` from `esim_offers`, so the seller asks at most the quoted price while
+  it is valid. A `409` that brings `current_offer` (the quote expired after a price rise, the wholesale price
+  moved) charged nothing; ARGUS orders that offer once if it is within the cap and says so in its answer. Sellers
+  without tokens are bought from as before. Tests in `test/esim.test.ts`.
+- **Purchases can open their browser again: `playwright-core` 1.64.1, the version of the checkout browser kit.**
+  0.4.0 shipped 1.65.0 (an imported Dependabot bump) while `deploy/checkout-browser` builds a 1.64.1 Playwright
+  server, and that server refuses a client of another major.minor version (`428 Precondition Required`, "Playwright
+  version mismatch") when ARGUS connects to it. With npm 0.4.0 and the kit's browser, `/buy_hudson` and the itch.io
+  checkout could not start. `test/checkout-browser-version.test.ts` now fails when the two differ.
+- **`pdfjs-dist` 6.5.438**, up from 5.6.205 (npm audit: a high advisory in 5.x). It reads the Hudson Link PDF
+  receipt; the receipt tests pass unchanged.
+- **Ecosystem knowledge says "Agent Capital Exchange"** instead of the acronym; the `acex` ids stay.
+
 ## 0.4.0 — 2026-11-15
 
 A minor release: since 0.3.6 ARGUS gained mail, purchases from Telegram and a new peer range, not only a new WARDEN.

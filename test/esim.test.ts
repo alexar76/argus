@@ -16,9 +16,11 @@ import type { Tool } from "../src/types.js";
 const LPA = "LPA:1$rsp-eu.example.com$SECRET-MATCHING-ID";
 const quiet = { info() {}, warn() {}, error() {}, debug() {}, child() { return quiet; } } as any;
 
-interface Seen { paid: any[]; refunds: number; installed: boolean }
+interface Seen { paid: any[]; refunds: number; installed: boolean; bodies?: any[] }
 
-function seller(seen: Seen, priceUnits = "310000", demo = false): Promise<{ url: string; server: Server }> {
+// requote: the kit 0.5 seller's kept price. The quote's offer carries quote_token "q1-old"; an order with it is a
+// 409 quote_expired with current_offer at 0.35 USDC and token "q1-new" (the price rose after the quote expired).
+function seller(seen: Seen, priceUnits = "310000", demo = false, requote = false): Promise<{ url: string; server: Server }> {
   const server = createServer(async (req, res) => {
     let body = "";
     for await (const c of req) body += c;
@@ -26,10 +28,18 @@ function seller(seen: Seen, priceUnits = "310000", demo = false): Promise<{ url:
       res.writeHead(status, { "content-type": "application/json", ...headers });
       res.end(JSON.stringify(obj));
     };
-    const offer = { offer_id: "TR_0.1_7", name: "Turkey 100MB 7Days", coverage: { kind: "country", countries: ["TR"] },
-                    data_gb: 0.1, days: 7, price: { usd: (Number(priceUnits) / 1e6).toFixed(2), currency: "USDC" } };
+    const offer: Record<string, any> = { offer_id: "TR_0.1_7", name: "Turkey 100MB 7Days", coverage: { kind: "country", countries: ["TR"] },
+                    data_gb: 0.1, days: 7, price: { usd: (Number(priceUnits) / 1e6).toFixed(2), currency: "USDC" },
+                    ...(requote ? { quote_token: "q1-old", price_valid_until: "2026-11-17T12:10:00.000Z" } : {}) };
     if (req.url === "/quote") return json(200, { success: true, result: { seller: { name: demo ? "demo seller" : "test seller", demo }, offers: [offer], order: { url: `${url}/order` } } });
     if (req.url === "/order") {
+      const sent = JSON.parse(body || "{}");
+      (seen.bodies ??= []).push(sent);
+      if (requote && sent.quote_token === "q1-old") {
+        return json(409, { success: false, error: "quote_expired", message: "the quote has expired and the price has gone up since; you were not charged",
+                           current_offer: { ...offer, price: { usd: "0.35", currency: "USDC" }, quote_token: "q1-new", price_valid_until: "2026-11-17T12:21:00.000Z" } });
+      }
+      if (requote && sent.quote_token === "q1-new") priceUnits = "350000";
       const sig = req.headers["payment-signature"];
       const terms = { scheme: "exact", network: "eip155:8453", amount: priceUnits, asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                       payTo: "0x1111111111111111111111111111111111111111", maxTimeoutSeconds: 300, extra: { name: "USD Coin", version: "2" } };
@@ -268,3 +278,40 @@ describe("the owner can keep ARGUS's purchases to itself", () => {
   });
 });
 
+describe("ARGUS and a seller that keeps its quoted price (esim-kit 0.5)", () => {
+  const key = generatePrivateKey();
+  const setup = async (maxUsd: number) => {
+    const seen: Seen = { paid: [], refunds: 0, installed: false };
+    const srv = await seller(seen, "310000", false, true);
+    setOwnerSink(async () => {});
+    const stateDir = mkdtempSync(join(tmpdir(), "argus-esim-q-"));
+    const t = Object.fromEntries(buildEsimTools({ seller: srv.url, hubs: [], maxUsd, walletKey: () => key, stateDir, log: quiet }).map((x) => [x.def.name, x]));
+    return { seen, srv, t };
+  };
+
+  it("sends the quote's token, and takes the fresh offer a 409 brings once, within the cap", async () => {
+    const { seen, srv, t } = await setup(1);
+    try {
+      await t.esim_offers.run({ country: "TR" }, { log: quiet });
+      const bought = await t.esim_buy.run({ offer_id: "TR_0.1_7" }, { log: quiet, approved: true });
+      expect(bought.ok).toBe(true);
+      expect(seen.bodies?.[0]).toEqual({ offer_id: "TR_0.1_7", quote_token: "q1-old" });
+      expect(seen.bodies?.some((b) => b.quote_token === "q1-new")).toBe(true);
+      expect(seen.paid).toHaveLength(1);
+      expect(seen.paid[0].payload.authorization.value).toBe("350000");
+      expect(bought.content).toContain("price had changed since the quote");
+    } finally { setOwnerSink(null); await new Promise((r) => srv.server.close(r)); }
+  });
+
+  it("does not take a fresh offer above the cap: nothing is paid", async () => {
+    const { seen, srv, t } = await setup(0.32);
+    try {
+      await t.esim_offers.run({ country: "TR" }, { log: quiet });
+      const r = await t.esim_buy.run({ offer_id: "TR_0.1_7" }, { log: quiet, approved: true });
+      expect(r.ok).toBe(false);
+      expect(r.content).toContain("quote_expired");
+      expect(seen.paid).toHaveLength(0);
+      expect(seen.bodies).toHaveLength(1);
+    } finally { setOwnerSink(null); await new Promise((r) => srv.server.close(r)); }
+  });
+});

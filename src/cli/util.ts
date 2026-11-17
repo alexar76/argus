@@ -6,7 +6,7 @@ import type { ApprovalRequest } from "../core/agent.js";
 import { MAX_EXACT_APPROVAL_LENGTH, renderApprovalArgs, requiresExactApproval } from "../core/approval-preview.js";
 import type { MeterSnapshot } from "../types.js";
 
-export const VERSION = "0.4.0";
+export const VERSION = "0.5.0";
 
 /**
  * Restricted file-write helper — only allows writes to cwd or stateDir.

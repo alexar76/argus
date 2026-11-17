@@ -24,6 +24,9 @@ export interface EsimOffer {
   days: number;
   speed?: string;
   price: { usd: string; currency: string };
+  /** The seller keeps this price until price_valid_until for an order that sends quote_token (kit 0.5+). */
+  quote_token?: string;
+  price_valid_until?: string;
 }
 
 /** What the seller hands the payer (esim-kit/rails/spec/esim-v1/delivery.schema.json). */
@@ -176,7 +179,12 @@ export class EsimClient {
     return { quotes, errors };
   }
 
-  async buy(orderUrl: string, offerId: string, privateKey: Hex, maxUsd: number): Promise<{ delivery: EsimDelivery; transaction: string | null; payer: string; priceUsd: string }> {
+  /**
+   * esim.order@v1. With `quoteToken` (from the quote) the seller asks at most the quoted price while it is
+   * valid. A 409 that brings `current_offer` charged nothing and says what the offer is now (the quote
+   * expired after a price rise, or the wholesale price moved): it is taken once, within `maxUsd`.
+   */
+  async buy(orderUrl: string, offerId: string, privateKey: Hex, maxUsd: number, quoteToken?: string): Promise<{ delivery: EsimDelivery; transaction: string | null; payer: string; priceUsd: string; requoted?: string }> {
     // A seller's base URL (…/agents) or its order URL (…/agents/order), as a quote names it.
     const target = /\/order$/.test(sellerUrl(orderUrl)) ? sellerUrl(orderUrl) : `${sellerUrl(orderUrl)}/order`;
     const [{ wrapFetchWithPaymentFromConfig }, { ExactEvmScheme }, { privateKeyToAccount }] = await Promise.all([
@@ -203,12 +211,27 @@ export class EsimClient {
       // The x402 client's own ceiling as well, so no other path signs more.
       spendControls: { maxAmountPerPayment: `$${maxUsd}` },
     } as any) as FetchFn;
-    const body = JSON.stringify({ offer_id: offerId });
     const url = target;
-    let res = await paying(url, { method: "POST", headers: { "content-type": "application/json" }, body });
-    for (let i = 0; i < 6 && res.status === 503 && paidHeaders; i++) {
-      await new Promise((r) => setTimeout(r, 1000 * Math.min(Number(res.headers.get("retry-after") || 10), 30)));
-      res = await this.fetchImpl(url, { method: "POST", headers: paidHeaders, body });
+    const order = async (token?: string): Promise<Response> => {
+      paidHeaders = null;
+      askedUnits = null;
+      const body = JSON.stringify({ offer_id: offerId, ...(token ? { quote_token: token } : {}) });
+      let r = await paying(url, { method: "POST", headers: { "content-type": "application/json" }, body });
+      for (let i = 0; i < 6 && r.status === 503 && paidHeaders; i++) {
+        await new Promise((ok) => setTimeout(ok, 1000 * Math.min(Number(r.headers.get("retry-after") || 10), 30)));
+        r = await this.fetchImpl(url, { method: "POST", headers: paidHeaders, body });
+      }
+      return r;
+    };
+    let res = await order(quoteToken);
+    let requoted: string | undefined;
+    if (res.status === 409) {
+      const refused: any = await res.clone().json().catch(() => null);
+      const next = refused?.current_offer;
+      if (next?.offer_id === offerId && refused.catalogue_changed !== false && Number(next.price?.usd) <= maxUsd) {
+        requoted = `${refused.error}: not charged; ordered again at ${next.price.usd} USDC`;
+        res = await order(typeof next.quote_token === "string" ? next.quote_token : undefined);
+      }
     }
     if (res.status === 402) {
       let why = "no reason given";
@@ -221,7 +244,7 @@ export class EsimClient {
     try { transaction = JSON.parse(Buffer.from(res.headers.get("payment-response") ?? "", "base64").toString("utf8")).transaction ?? null; } catch { /* none */ }
     const delivery = json.result as EsimDelivery;
     const priceUsd = delivery.offer?.price?.usd ?? (askedUnits !== null ? (Number(askedUnits) / 1e6).toFixed(2) : "?");
-    return { delivery, transaction, payer: account.address, priceUsd };
+    return { delivery, transaction, payer: account.address, priceUsd, ...(requoted ? { requoted } : {}) };
   }
 
   /** esim.status@v1, without the activation code (the owner already has it). */

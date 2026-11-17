@@ -33,7 +33,7 @@ const COUNTRY = /^[A-Za-z]{2}$/;
 const PROFILE = /^[0-9A-Za-z_-]{6,64}$/;
 
 /** An offer as ARGUS last saw it, with the seller that made it: what esim_buy pays. */
-interface Candidate { offerId: string; name: string; priceUsd: number; seller: string; orderUrl: string; demo: boolean; via: string; hub?: string }
+interface Candidate { offerId: string; name: string; priceUsd: number; seller: string; orderUrl: string; demo: boolean; via: string; hub?: string; quoteToken?: string }
 
 export function buildEsimTools(d: EsimToolDeps): Tool[] {
   const client = d.client ?? new EsimClient(d.stateDir);
@@ -92,6 +92,7 @@ export function buildEsimTools(d: EsimToolDeps): Tool[] {
         const { quotes, errors } = await client.quoteAll(q, { hubs: d.hubs, direct });
         candidates = quotes.flatMap((sq: SellerQuote) => sq.offers.map((o) => ({
           offerId: o.offer_id, name: o.name, priceUsd: Number(o.price.usd), seller: sq.seller, orderUrl: sq.orderUrl, demo: sq.demo, via: sq.via, hub: sq.hub,
+          ...(typeof o.quote_token === "string" ? { quoteToken: o.quote_token } : {}),
         }))).sort((a, b) => a.priceUsd - b.priceUsd);
         if (!candidates.length) {
           return { ok: true, content: `No eSIM seller has an offer for ${cc}.${errors.length ? ` (${errors.join("; ")})` : ""}` };
@@ -137,7 +138,8 @@ export function buildEsimTools(d: EsimToolDeps): Tool[] {
             ? `${offerId} is offered only by a DEMO seller, which sells nothing.`
             : `No seller offers ${offerId} in the last esim_offers: ask esim_offers for the country first.` };
         }
-        const { delivery, transaction, payer, priceUsd } = await client.buy(orderUrl, offerId, key, cap);
+        // The quote's token keeps its price at the seller while it is valid (pick is the seller that quoted it).
+        const { delivery, transaction, payer, priceUsd, requoted } = await client.buy(orderUrl, offerId, key, cap, pick?.quoteToken);
         const p: EsimPurchase = {
           seller: /\/order$/.test(orderUrl) ? baseOf(orderUrl) : orderUrl, offerId, name: delivery.offer?.name ?? offerId, priceUsd, esimTranNo: delivery.esim_tran_no,
           iccid: delivery.iccid, statusToken: delivery.status_token, payer, transaction, at: new Date().toISOString(),
@@ -153,10 +155,11 @@ export function buildEsimTools(d: EsimToolDeps): Tool[] {
           "Scan the QR in Settings → Mobile data → Add eSIM, or paste the activation code below. Install it only if you keep it: an installed eSIM cannot be refunded.",
         ].filter(Boolean).join("\n");
         const sent = await notifyOwner({ text: note, photoUrl: delivery.qr_code_url ?? undefined, copyable: delivery.activation_code });
-        d.log.info(`esim bought: ${offerId} for ${priceUsd} USDC, profile ${delivery.esim_tran_no}, tx ${transaction ?? "?"}`);
+        d.log.info(`esim bought: ${offerId} for ${priceUsd} USDC, profile ${delivery.esim_tran_no}, tx ${transaction ?? "?"}${requoted ? ` (${requoted})` : ""}`);
         return {
           ok: true,
           content: `Bought ${p.name} for ${priceUsd} USDC (tx ${transaction ?? "not reported"}), profile ${delivery.esim_tran_no}. `
+            + (requoted ? `The seller's price had changed since the quote (${requoted}). ` : "")
             + (sent ? "The QR and the activation code were sent to the owner directly; do not ask for them."
                     : hasOwnerSink() ? "Sending the QR to the owner failed; the owner can read it with esim_status later."
                                      : "No owner channel is connected (Telegram), so the QR was not sent; the owner can ask the seller with the status token."),
