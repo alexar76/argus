@@ -2,8 +2,19 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
-## Unreleased
+## 0.6.0 — 2026-11-18
 
+A minor release: WARDEN 0.30.0, eSIM purchases that weigh the other sellers' offers after a refusal, and a Docker image
+that builds again. Prepared first as 0.5.1 on WARDEN 0.29.0; that version was never published.
+
+- **Depends on `@aimarket/warden` 0.30.0, up from 0.29.0.**
+  - The malware gate checks every package a launch line installs: repeatable npm `--package`, `npm:` aliases, Python
+    launchers' `--with` and `pipx run --spec`. An OpenSSF match blocks the launch even when the main package is clean.
+  - After outside text, reading a key (`read_api_key`, `list_keys`, `ssh_keys`) is data, not a key press; keyboard
+    tools still count as keyboard input. A verdict names its `blockAtSeverity`.
+  - 0.30.0 also adds `warden-mcp gateway` (OpenWebUI and other HTTP tool platforms); ARGUS does not use it.
+  - Rulesets unchanged (23). Pins stored by 0.29.0 verify unchanged and a changed description still gives
+    `TOOL_DEF_DRIFT` (`scripts/warden-pin-compat-check.mjs`, 2026-11-18).
 - **eSIM: a refused seller's new price is weighed against the other sellers' offers.** Asked on DEV (2026-11-18)
   whether a buyer that gets `current_offer` at a higher price compares other sellers first. When the seller ARGUS
   ordered from refuses (nothing charged) and its new price is above the quoted price and above another seller's offer
@@ -18,8 +29,12 @@ All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-ward
     offer (`asks_more`).
 - Tests: six more in `test/esim.test.ts` (two sellers through a test hub: stop and name the cheaper one, buy it next,
   choose the refused seller at its new price, a dearer alternative, an alternative with less data, a seller asking more
-  than it quoted, alone and with a cheaper seller). Full suite: 604 passed, 10 skipped.
+  than it quoted, alone and with a cheaper seller).
 - Docs: the eSIM use case (en, es, fr, ru, zh) lists the new safety rail.
+- **The Docker image builds again.** The patched `picomatch` override (`file:third_party/picomatch-4.0.8.tgz`) made
+  `npm ci` in the Dockerfile fail with ENOENT: the Dockerfile copied only `package*.json` and `vendor` first. Both stages
+  now copy `third_party`; `test/dockerfile-local-deps.test.ts` fails when a `file:` dependency or override is not copied
+  before the stage's npm install. Checked by a full build on attested (2026-11-18).
 
 ## 0.5.0 — 2026-11-17
 

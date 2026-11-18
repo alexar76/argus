@@ -17,6 +17,8 @@ WORKDIR /app
 # Install deps first for better layer caching. package-lock.json is present in this repo.
 COPY package.json package-lock.json ./
 COPY vendor ./vendor
+# file: dependencies (package.json overrides, e.g. the patched picomatch) must be in place before npm ci.
+COPY third_party ./third_party
 RUN npm ci
 
 # Bring in the TypeScript sources and compile.
@@ -32,6 +34,7 @@ ENV NODE_ENV=production
 # Production deps only. PDF.js uses an optional native package for its Node.js shim.
 COPY package.json package-lock.json ./
 COPY vendor ./vendor
+COPY third_party ./third_party
 RUN npm install --omit=dev
 
 # Compiled output + the example config (used as a fallback / reference; the real
