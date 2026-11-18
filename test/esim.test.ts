@@ -19,8 +19,11 @@ const quiet = { info() {}, warn() {}, error() {}, debug() {}, child() { return q
 interface Seen { paid: any[]; refunds: number; installed: boolean; bodies?: any[] }
 
 // requote: the kit 0.5 seller's kept price. The quote's offer carries quote_token "q1-old"; an order with it is a
-// 409 quote_expired with current_offer at 0.35 USDC and token "q1-new" (the price rose after the quote expired).
-function seller(seen: Seen, priceUnits = "310000", demo = false, requote = false): Promise<{ url: string; server: Server }> {
+// 409 quote_expired with current_offer at `freshUsd` (0.35) USDC and token "q1-new" (the price rose after the
+// quote expired). `asksUnits`: a seller without quote tokens that asks this at the order, whatever it quoted.
+interface SellerOpts { name?: string; freshUsd?: string; dataGb?: number; asksUnits?: string }
+function seller(seen: Seen, priceUnits = "310000", demo = false, requote = false, opts: SellerOpts = {}): Promise<{ url: string; server: Server }> {
+  const freshUsd = opts.freshUsd ?? "0.35";
   const server = createServer(async (req, res) => {
     let body = "";
     for await (const c of req) body += c;
@@ -29,17 +32,18 @@ function seller(seen: Seen, priceUnits = "310000", demo = false, requote = false
       res.end(JSON.stringify(obj));
     };
     const offer: Record<string, any> = { offer_id: "TR_0.1_7", name: "Turkey 100MB 7Days", coverage: { kind: "country", countries: ["TR"] },
-                    data_gb: 0.1, days: 7, price: { usd: (Number(priceUnits) / 1e6).toFixed(2), currency: "USDC" },
+                    data_gb: opts.dataGb ?? 0.1, days: 7, price: { usd: (Number(priceUnits) / 1e6).toFixed(2), currency: "USDC" },
                     ...(requote ? { quote_token: "q1-old", price_valid_until: "2026-11-17T12:10:00.000Z" } : {}) };
-    if (req.url === "/quote") return json(200, { success: true, result: { seller: { name: demo ? "demo seller" : "test seller", demo }, offers: [offer], order: { url: `${url}/order` } } });
+    if (req.url === "/quote") return json(200, { success: true, result: { seller: { name: opts.name ?? (demo ? "demo seller" : "test seller"), demo }, offers: [offer], order: { url: `${url}/order` } } });
     if (req.url === "/order") {
       const sent = JSON.parse(body || "{}");
       (seen.bodies ??= []).push(sent);
       if (requote && sent.quote_token === "q1-old") {
         return json(409, { success: false, error: "quote_expired", message: "the quote has expired and the price has gone up since; you were not charged",
-                           current_offer: { ...offer, price: { usd: "0.35", currency: "USDC" }, quote_token: "q1-new", price_valid_until: "2026-11-17T12:21:00.000Z" } });
+                           current_offer: { ...offer, price: { usd: freshUsd, currency: "USDC" }, quote_token: "q1-new", price_valid_until: "2026-11-17T12:21:00.000Z" } });
       }
-      if (requote && sent.quote_token === "q1-new") priceUnits = "350000";
+      if (requote && sent.quote_token === "q1-new") priceUnits = String(Math.round(Number(freshUsd) * 1e6));
+      if (opts.asksUnits) priceUnits = opts.asksUnits;
       const sig = req.headers["payment-signature"];
       const terms = { scheme: "exact", network: "eip155:8453", amount: priceUnits, asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                       payTo: "0x1111111111111111111111111111111111111111", maxTimeoutSeconds: 300, extra: { name: "USD Coin", version: "2" } };
@@ -312,6 +316,107 @@ describe("ARGUS and a seller that keeps its quoted price (esim-kit 0.5)", () => 
       expect(r.content).toContain("quote_expired");
       expect(seen.paid).toHaveLength(0);
       expect(seen.bodies).toHaveLength(1);
+    } finally { setOwnerSink(null); await new Promise((r) => srv.server.close(r)); }
+  });
+});
+
+// Two sellers through a hub. Seller A quotes 0.31 and, refused, says it now asks more; Seller B quoted the same
+// plan. The owner approved Seller A at its quoted price, so ARGUS never switches by itself: when A's new price is
+// above B's offer it buys nothing and names B; otherwise it takes A's new price within the cap.
+describe("ARGUS weighs another seller's offer when the seller it chose raises its price", () => {
+  const key = generatePrivateKey();
+  const two = async (aOpts: SellerOpts & { requote?: boolean }, bUnits: string, bOpts: SellerOpts = {}) => {
+    const a: Seen = { paid: [], refunds: 0, installed: false };
+    const b: Seen = { paid: [], refunds: 0, installed: false };
+    const aSrv = await seller(a, "310000", false, aOpts.requote ?? true, { name: "Seller A", ...aOpts });
+    const bSrv = await seller(b, bUnits, false, false, { name: "Seller B", ...bOpts });
+    const h = await hub([{ url: aSrv.url, product: "esim-a" }, { url: bSrv.url, product: "esim-b" }]);
+    setOwnerSink(async () => {});
+    const t = Object.fromEntries(buildEsimTools({ seller: "", hubs: [h.url], maxUsd: 1, walletKey: () => key,
+      stateDir: mkdtempSync(join(tmpdir(), "argus-esim-two-")), log: quiet }).map((x) => [x.def.name, x]));
+    await t.esim_offers.run({ country: "TR" }, { log: quiet });
+    const close = async () => { setOwnerSink(null); await Promise.all([aSrv, bSrv, h].map((x) => new Promise((r) => x.server.close(r)))); };
+    return { a, b, t, close };
+  };
+  const buy = (t: Record<string, Tool>, args: Record<string, unknown>) => t.esim_buy.run(args, { log: quiet, approved: true });
+
+  it("Seller A now asks 0.35, above Seller B's 0.33: nothing is bought, the answer names B, and the next esim_buy buys B at its quote", async () => {
+    const { a, b, t, close } = await two({}, "330000");
+    try {
+      const r = await buy(t, { offer_id: "TR_0.1_7" });
+      expect(r.ok).toBe(false);
+      expect(r.content).toContain("cheaper_elsewhere: quote_expired: not charged. This seller now asks 0.35 USDC for TR_0.1_7 (quoted 0.31)");
+      expect(r.content).toContain('seller "Seller B" offers TR_0.1_7 (Turkey 100MB 7Days) at 0.33 USDC — esim_buy offer_id TR_0.1_7 seller "Seller B"');
+      expect(a.paid).toHaveLength(0);
+      expect(b.paid).toHaveLength(0);
+      expect(a.bodies).toEqual([{ offer_id: "TR_0.1_7", quote_token: "q1-old" }]);
+      const next = await buy(t, { offer_id: "TR_0.1_7" });   // the cheapest now: Seller B
+      expect(next.ok).toBe(true);
+      expect(b.paid).toHaveLength(1);
+      expect(b.paid[0].payload.authorization.value).toBe("330000");
+      expect(a.paid).toHaveLength(0);
+    } finally { await close(); }
+  });
+
+  it("the owner can still choose Seller A at its new price: the fresh token is sent and nothing is refused again", async () => {
+    const { a, b, t, close } = await two({}, "330000");
+    try {
+      expect((await buy(t, { offer_id: "TR_0.1_7" })).content).toContain("cheaper_elsewhere");
+      const r = await buy(t, { offer_id: "TR_0.1_7", seller: "Seller A" });
+      expect(r.ok).toBe(true);
+      expect(a.bodies?.[1]).toEqual({ offer_id: "TR_0.1_7", quote_token: "q1-new" });
+      expect(a.paid).toHaveLength(1);
+      expect(a.paid[0].payload.authorization.value).toBe("350000");
+      expect(b.paid).toHaveLength(0);
+    } finally { await close(); }
+  });
+
+  it("Seller B's offer is dearer than A's new price: A's new price is taken within the cap", async () => {
+    const { a, b, t, close } = await two({}, "360000");
+    try {
+      const r = await buy(t, { offer_id: "TR_0.1_7" });
+      expect(r.ok).toBe(true);
+      expect(r.content).toContain("price had changed since the quote (quote_expired: not charged; ordered again at 0.35 USDC)");
+      expect(a.paid[0].payload.authorization.value).toBe("350000");
+      expect(b.paid).toHaveLength(0);
+    } finally { await close(); }
+  });
+
+  it("an offer with less data is not an alternative: A's new price is taken", async () => {
+    const { a, b, t, close } = await two({}, "330000", { dataGb: 0.05 });
+    try {
+      const r = await buy(t, { offer_id: "TR_0.1_7" });
+      expect(r.ok).toBe(true);
+      expect(a.paid[0].payload.authorization.value).toBe("350000");
+      expect(b.paid).toHaveLength(0);
+    } finally { await close(); }
+  });
+
+  it("a seller without quote tokens that asks more than it quoted gets no signature; the answer names the cheaper seller", async () => {
+    const { a, b, t, close } = await two({ requote: false, asksUnits: "350000" }, "330000");
+    try {
+      const r = await buy(t, { offer_id: "TR_0.1_7" });
+      expect(r.ok).toBe(false);
+      expect(r.content).toContain("cheaper_elsewhere: asks_more: not charged. This seller now asks 0.35 USDC for TR_0.1_7 (quoted 0.31)");
+      expect(a.paid).toHaveLength(0);
+      expect(a.bodies).toEqual([{ offer_id: "TR_0.1_7" }]);
+      expect(b.paid).toHaveLength(0);
+    } finally { await close(); }
+  });
+
+  it("alone, a seller that asks more than it quoted is paid its asking price within the cap, as before", async () => {
+    const seen: Seen = { paid: [], refunds: 0, installed: false };
+    const srv = await seller(seen, "310000", false, false, { asksUnits: "350000" });
+    setOwnerSink(async () => {});
+    try {
+      const t = Object.fromEntries(buildEsimTools({ seller: srv.url, hubs: [], maxUsd: 1, walletKey: () => key,
+        stateDir: mkdtempSync(join(tmpdir(), "argus-esim-asks-")), log: quiet }).map((x) => [x.def.name, x]));
+      await t.esim_offers.run({ country: "TR" }, { log: quiet });
+      const r = await buy(t, { offer_id: "TR_0.1_7" });
+      expect(r.ok).toBe(true);
+      expect(r.content).toContain("asks_more: not charged; ordered again at 0.35 USDC");
+      expect(seen.paid).toHaveLength(1);
+      expect(seen.paid[0].payload.authorization.value).toBe("350000");
     } finally { setOwnerSink(null); await new Promise((r) => srv.server.close(r)); }
   });
 });

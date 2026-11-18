@@ -103,6 +103,7 @@ Le portefeuille d'ARGUS vient de `argus setup` (un coffre de clés chiffré). Me
 
 - **Le propriétaire approuve chaque paiement et chaque remboursement.** `esim_buy` et `esim_refund` correspondent aux motifs d'approbation intégrés `*buy*` et `*refund*` ; un fichier de configuration peut ajouter des motifs, jamais en retirer.
 - **Un plafond de dépense strict.** Le client x402 refuse de signer plus que `ARGUS_ESIM_MAX_USD`, vérifié sur les conditions du vendeur lui-même avant toute signature.
+- **Jamais plus que l'offre, jamais de changement en silence.** ARGUS ne signe pas plus que le prix que le propriétaire a vu, ou la nouvelle offre du vendeur quand il a refusé la première commande sans rien facturer. Si ce nouveau prix dépasse l'offre d'un autre vendeur avec au moins autant de données et de jours, ARGUS n'achète rien et nomme cette offre (`cheaper_elsewhere`) : le propriétaire a approuvé un vendeur, c'est donc lui qui choisit. (Depuis le 2026-11-18.)
 - **Le secret contourne le modèle.** Les codes d'activation ne vont que de l'outil au propriétaire (voir le schéma ci-dessus).
 - **Les règles du remboursement sont celles du vendeur.** Seulement une eSIM inutilisée, seulement vers l'adresse qui a payé, une seule fois. ARGUS ne peut pas rembourser ce qu'il n'a pas acheté : le vendeur vérifie le jeton de statut.
 - **Un agent prudent.** ARGUS a refusé d'acheter et de rembourser aussitôt dans une même demande, et a d'abord demandé l'intention réelle du propriétaire.

@@ -103,6 +103,7 @@ La cartera de ARGUS la crea `argus setup` (un almacén de claves cifrado). Pon e
 
 - **El propietario aprueba cada pago y cada reembolso.** `esim_buy` y `esim_refund` coinciden con los patrones de aprobación integrados `*buy*` y `*refund*`; un archivo de configuración puede añadir patrones, nunca quitarlos.
 - **Un límite de gasto estricto.** El cliente x402 se niega a firmar más de `ARGUS_ESIM_MAX_USD`, comprobado sobre los términos del propio vendedor antes de firmar nada.
+- **Nunca más que la oferta, nunca un cambio silencioso.** ARGUS no firma más que el precio que vio el propietario, o la nueva oferta del vendedor cuando rechazó el primer pedido sin cobrar nada. Si ese nuevo precio supera la oferta de otro vendedor con no menos datos ni días, ARGUS no compra nada y nombra esa oferta (`cheaper_elsewhere`): el propietario aprobó un vendedor, así que elige el propietario. (Desde el 2026-11-18.)
 - **El secreto no pasa por el modelo.** Los códigos de activación viajan solo herramienta → propietario (ver el diagrama).
 - **Las reglas del reembolso son del vendedor.** Solo una eSIM sin usar, solo a la dirección que pagó, solo una vez. ARGUS no puede reembolsar lo que no compró: el vendedor comprueba el token de estado.
 - **Un agente prudente.** ARGUS se negó a comprar y reembolsar al instante en una sola petición y primero preguntó la intención real del propietario.

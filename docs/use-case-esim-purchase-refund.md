@@ -103,6 +103,7 @@ ARGUS's wallet comes from `argus setup` (an encrypted keystore). Fund it with a 
 
 - **The owner approves every payment and every refund.** `esim_buy` and `esim_refund` match the built-in approval patterns `*buy*` and `*refund*`; a config file can add patterns, never remove them.
 - **A hard spending cap.** The x402 client refuses to sign more than `ARGUS_ESIM_MAX_USD`, checked on the seller's own terms before anything is signed.
+- **No paying above the offer, no silent switch.** ARGUS signs no more than the price the owner was shown, or the seller's new offer when it refused the first order and charged nothing. If that new price is above another seller's offer with no less data or days, ARGUS buys nothing and names that offer (`cheaper_elsewhere`): the owner approved one seller, so the owner chooses. (Since 2026-11-18.)
 - **The secret skips the model.** Activation codes travel tool → owner only (see the diagram above).
 - **The refund rules are the seller's.** Only an unused eSIM, only to the paying address, only once. ARGUS cannot refund anything it did not buy: the seller checks the status token.
 - **A careful agent.** ARGUS declined to buy and instantly refund in one request, and asked for the owner's real intent first.

@@ -2,6 +2,25 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
+## Unreleased
+
+- **eSIM: a refused seller's new price is weighed against the other sellers' offers.** Asked on DEV (2026-11-18)
+  whether a buyer that gets `current_offer` at a higher price compares other sellers first. When the seller ARGUS
+  ordered from refuses (nothing charged) and its new price is above the quoted price and above another seller's offer
+  from the last `esim_offers` with no less data or days, within the cap, `esim_buy` buys nothing and answers
+  `cheaper_elsewhere`, naming that offer and the `esim_buy` call for it. The owner approved one seller at one price, so
+  the owner chooses. Otherwise the new price is taken once within the cap, as in 0.5.0.
+  - The refused seller's new offer (price, fresh `quote_token`, validity) replaces its entry in the last offers, which
+    are sorted by price again: the next `esim_buy` takes the cheapest, and the refused seller, if chosen, is ordered at
+    its new price without a second refusal.
+  - ARGUS signs no more than the price the owner was shown, or the seller's new offer after a refusal. A seller that
+    issues no quote tokens and asks more than it quoted gets no signature; its asking price is handled like a new
+    offer (`asks_more`).
+- Tests: six more in `test/esim.test.ts` (two sellers through a test hub: stop and name the cheaper one, buy it next,
+  choose the refused seller at its new price, a dearer alternative, an alternative with less data, a seller asking more
+  than it quoted, alone and with a cheaper seller). Full suite: 604 passed, 10 skipped.
+- Docs: the eSIM use case (en, es, fr, ru, zh) lists the new safety rail.
+
 ## 0.5.0 — 2026-11-17
 
 A minor release: a newer WARDEN with a new gate, a keystore fix, and eSIM purchases that keep the quoted price.

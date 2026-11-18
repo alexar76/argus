@@ -77,8 +77,12 @@ export interface SellerQuote {
 }
 
 export class EsimError extends Error {
-  constructor(readonly code: string, message: string) { super(message); }
+  /** `offer`: what the seller offers now, when a refusal said so (current_offer); nothing was charged. */
+  constructor(readonly code: string, message: string, readonly offer?: EsimOffer) { super(message); }
 }
+
+/** Another seller's offer to weigh against a refused seller's new price: no less data or days, within the cap. */
+export interface EsimAlternative { priceUsd: number; label: string }
 
 type FetchFn = typeof fetch;
 
@@ -180,19 +184,28 @@ export class EsimClient {
   }
 
   /**
-   * esim.order@v1. With `quoteToken` (from the quote) the seller asks at most the quoted price while it is
-   * valid. A 409 that brings `current_offer` charged nothing and says what the offer is now (the quote
-   * expired after a price rise, or the wholesale price moved): it is taken once, within `maxUsd`.
+   * esim.order@v1. With `quote.token` (from the quote) the seller asks at most the quoted price while it is
+   * valid, and ARGUS signs no more than `quote.usd`, the price the owner was shown. A refusal that charged
+   * nothing and says what the offer is now (a 409 with `current_offer`: the quote expired after a price rise,
+   * or the wholesale price moved), or terms above the quoted price, which ARGUS does not sign, is ordered again
+   * once at the new price, within `maxUsd` — unless the price rose above `alternative`, another seller's offer
+   * with no less data or days: then nothing is bought, and the error (`cheaper_elsewhere`) says which, so the
+   * owner chooses. Each refusal's error carries the seller's new offer.
    */
-  async buy(orderUrl: string, offerId: string, privateKey: Hex, maxUsd: number, quoteToken?: string): Promise<{ delivery: EsimDelivery; transaction: string | null; payer: string; priceUsd: string; requoted?: string }> {
+  async buy(orderUrl: string, offerId: string, privateKey: Hex, maxUsd: number,
+            quote: { token?: string; usd?: number } = {}, alternative?: EsimAlternative): Promise<{ delivery: EsimDelivery; transaction: string | null; payer: string; priceUsd: string; requoted?: string }> {
     // A seller's base URL (…/agents) or its order URL (…/agents/order), as a quote names it.
     const target = /\/order$/.test(sellerUrl(orderUrl)) ? sellerUrl(orderUrl) : `${sellerUrl(orderUrl)}/order`;
     const [{ wrapFetchWithPaymentFromConfig }, { ExactEvmScheme }, { privateKeyToAccount }] = await Promise.all([
       import("@x402/fetch"), import("@x402/evm"), import("viem/accounts"),
     ]);
     const account = privateKeyToAccount(privateKey);
+    const units = (usd: number) => BigInt(Math.round(usd * 1e6));
+    const usdOf = (u: bigint) => (Number(u) / 1e6).toFixed(2);
     let paidHeaders: Headers | null = null;
     let askedUnits: bigint | null = null;
+    let expectUnits: bigint | null = quote.usd !== undefined ? units(quote.usd) : null;   // the most this order may ask
+    let askedMore: bigint | null = null;
     const keep: FetchFn = async (input, init) => {
       const req = new Request(input as string | URL | Request, init);
       if (req.headers.has("PAYMENT-SIGNATURE")) paidHeaders = new Headers(req.headers);
@@ -200,50 +213,78 @@ export class EsimClient {
     };
     const paying = wrapFetchWithPaymentFromConfig(keep, {
       schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(account) }],
-      // The spending cap is checked on the seller's own terms, before anything is signed.
+      // The spending cap and the offer's price are checked on the seller's own terms, before anything is signed.
       paymentRequirementsSelector: (_v: number, accepts: Array<{ amount: string; network: string }>) => {
         const pick = accepts.find((a) => a.network === "eip155:8453") ?? accepts[0];
         if (!pick) throw new EsimError("no_terms", "the seller offered no way to pay");
         askedUnits = BigInt(pick.amount);
         if (Number(askedUnits) / 1e6 > maxUsd) throw new EsimError("over_budget", `the seller asks ${Number(askedUnits) / 1e6} USDC, above the ${maxUsd} USDC cap`);
+        if (expectUnits !== null && askedUnits > expectUnits) {
+          askedMore = askedUnits;
+          throw new EsimError("asks_more", `the seller asks ${usdOf(askedUnits)} USDC, more than its offer at ${usdOf(expectUnits)}`);
+        }
         return pick;
       },
       // The x402 client's own ceiling as well, so no other path signs more.
       spendControls: { maxAmountPerPayment: `$${maxUsd}` },
     } as any) as FetchFn;
     const url = target;
-    const order = async (token?: string): Promise<Response> => {
+    // null: the seller asked more than the offer, and nothing was signed or sent with a payment.
+    const order = async (token?: string): Promise<Response | null> => {
       paidHeaders = null;
       askedUnits = null;
+      askedMore = null;
       const body = JSON.stringify({ offer_id: offerId, ...(token ? { quote_token: token } : {}) });
-      let r = await paying(url, { method: "POST", headers: { "content-type": "application/json" }, body });
+      let r: Response;
+      try {
+        r = await paying(url, { method: "POST", headers: { "content-type": "application/json" }, body });
+      } catch (err) {
+        if (askedMore !== null) return null;
+        throw err;
+      }
       for (let i = 0; i < 6 && r.status === 503 && paidHeaders; i++) {
         await new Promise((ok) => setTimeout(ok, 1000 * Math.min(Number(r.headers.get("retry-after") || 10), 30)));
         r = await this.fetchImpl(url, { method: "POST", headers: paidHeaders, body });
       }
       return r;
     };
-    let res = await order(quoteToken);
+    let res = await order(quote.token);
     let requoted: string | undefined;
-    if (res.status === 409) {
+    // What the seller offers now, after a refusal that charged nothing: its current_offer, or the terms it asked.
+    let next: EsimOffer | undefined;
+    let why = "";
+    if (res === null) {
+      next = { offer_id: offerId, price: { usd: usdOf(askedMore!), currency: "USDC" } } as EsimOffer;
+      why = "asks_more";
+    } else if (res.status === 409) {
       const refused: any = await res.clone().json().catch(() => null);
-      const next = refused?.current_offer;
-      if (next?.offer_id === offerId && refused.catalogue_changed !== false && Number(next.price?.usd) <= maxUsd) {
-        requoted = `${refused.error}: not charged; ordered again at ${next.price.usd} USDC`;
-        res = await order(typeof next.quote_token === "string" ? next.quote_token : undefined);
-      }
+      if (refused?.current_offer?.offer_id === offerId && refused.catalogue_changed !== false) { next = refused.current_offer; why = refused.error; }
     }
+    if (next && Number(next.price?.usd) <= maxUsd) {
+      const now = Number(next.price.usd);
+      if (alternative && quote.usd !== undefined && now > quote.usd && now > alternative.priceUsd) {
+        throw new EsimError("cheaper_elsewhere", `${why}: not charged. This seller now asks ${next.price.usd} USDC for ${offerId} (quoted ${quote.usd.toFixed(2)}); `
+          + `${alternative.label}. Nothing was bought: ask the owner which one to buy`, next);
+      }
+      requoted = `${why}: not charged; ordered again at ${next.price.usd} USDC`;
+      expectUnits = units(now);
+      res = await order(typeof next.quote_token === "string" ? next.quote_token : undefined);
+    }
+    if (res === null) throw new EsimError("asks_more", `the seller asks ${usdOf(askedMore!)} USDC, more than its offer; nothing was signed`, next);
     if (res.status === 402) {
-      let why = "no reason given";
-      try { why = JSON.parse(Buffer.from(res.headers.get("payment-required") ?? "", "base64").toString("utf8")).error || why; } catch { /* none */ }
-      throw new EsimError("payment_refused", `the seller refused the payment: ${why}`);
+      let why402 = "no reason given";
+      try { why402 = JSON.parse(Buffer.from(res.headers.get("payment-required") ?? "", "base64").toString("utf8")).error || why402; } catch { /* none */ }
+      throw new EsimError("payment_refused", `the seller refused the payment: ${why402}`);
     }
     const json: any = await res.json().catch(() => null);
-    if (!res.ok || !json?.success) throw new EsimError(json?.error ?? `http_${res.status}`, json?.message ?? "the order failed");
+    if (!res.ok || !json?.success) {
+      const offer = json?.current_offer?.offer_id === offerId ? json.current_offer as EsimOffer : undefined;
+      throw new EsimError(json?.error ?? `http_${res.status}`, json?.message ?? "the order failed", offer);
+    }
     let transaction: string | null = null;
     try { transaction = JSON.parse(Buffer.from(res.headers.get("payment-response") ?? "", "base64").toString("utf8")).transaction ?? null; } catch { /* none */ }
     const delivery = json.result as EsimDelivery;
-    const priceUsd = delivery.offer?.price?.usd ?? (askedUnits !== null ? (Number(askedUnits) / 1e6).toFixed(2) : "?");
+    const priceUsd = delivery.offer?.price?.usd ?? (askedUnits !== null ? usdOf(askedUnits) : "?");
     return { delivery, transaction, payer: account.address, priceUsd, ...(requoted ? { requoted } : {}) };
   }
 

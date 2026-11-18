@@ -33,7 +33,10 @@ const COUNTRY = /^[A-Za-z]{2}$/;
 const PROFILE = /^[0-9A-Za-z_-]{6,64}$/;
 
 /** An offer as ARGUS last saw it, with the seller that made it: what esim_buy pays. */
-interface Candidate { offerId: string; name: string; priceUsd: number; seller: string; orderUrl: string; demo: boolean; via: string; hub?: string; quoteToken?: string }
+interface Candidate {
+  offerId: string; name: string; priceUsd: number; seller: string; orderUrl: string; demo: boolean; via: string; hub?: string;
+  dataGb: number; days: number; quoteToken?: string; validUntil?: string;
+}
 
 export function buildEsimTools(d: EsimToolDeps): Tool[] {
   const client = d.client ?? new EsimClient(d.stateDir);
@@ -92,7 +95,9 @@ export function buildEsimTools(d: EsimToolDeps): Tool[] {
         const { quotes, errors } = await client.quoteAll(q, { hubs: d.hubs, direct });
         candidates = quotes.flatMap((sq: SellerQuote) => sq.offers.map((o) => ({
           offerId: o.offer_id, name: o.name, priceUsd: Number(o.price.usd), seller: sq.seller, orderUrl: sq.orderUrl, demo: sq.demo, via: sq.via, hub: sq.hub,
+          dataGb: Number(o.data_gb) || 0, days: Number(o.days) || 0,
           ...(typeof o.quote_token === "string" ? { quoteToken: o.quote_token } : {}),
+          ...(typeof o.price_valid_until === "string" ? { validUntil: o.price_valid_until } : {}),
         }))).sort((a, b) => a.priceUsd - b.priceUsd);
         if (!candidates.length) {
           return { ok: true, content: `No eSIM seller has an offer for ${cc}.${errors.length ? ` (${errors.join("; ")})` : ""}` };
@@ -113,7 +118,7 @@ export function buildEsimTools(d: EsimToolDeps): Tool[] {
     source: { kind: "builtin" },
     def: {
       name: "esim_buy",
-      description: `Buy one travel eSIM (esim.order@v1) for the owner: an offer_id from esim_offers, paid in USDC on Base from ARGUS's wallet over x402 to the seller that offered it, at most ${d.maxUsd} USDC. DEMO sellers are never paid. The QR code and activation code go to the owner directly; you get the profile number. Needs the owner's approval.`,
+      description: `Buy one travel eSIM (esim.order@v1) for the owner: an offer_id from esim_offers, paid in USDC on Base from ARGUS's wallet over x402 to the seller that offered it, at most ${d.maxUsd} USDC. DEMO sellers are never paid. If the seller's price has risen above another seller's offer with no less data or days, nothing is bought and the answer (cheaper_elsewhere) names that offer for the owner to choose. The QR code and activation code go to the owner directly; you get the profile number. Needs the owner's approval.`,
       inputSchema: { type: "object", required: ["offer_id"], properties: {
         offer_id: { type: "string", description: "from esim_offers" },
         max_usd: { type: "number", description: `the most to pay; at most ${d.maxUsd}` },
@@ -139,7 +144,27 @@ export function buildEsimTools(d: EsimToolDeps): Tool[] {
             : `No seller offers ${offerId} in the last esim_offers: ask esim_offers for the country first.` };
         }
         // The quote's token keeps its price at the seller while it is valid (pick is the seller that quoted it).
-        const { delivery, transaction, payer, priceUsd, requoted } = await client.buy(orderUrl, offerId, key, cap, pick?.quoteToken);
+        // If the seller refuses and its price rises above another seller's offer with no less data or days,
+        // ARGUS buys nothing and says which: the owner approved this seller at the quoted price, not a switch.
+        const alt = pick ? candidates.filter((c) => !c.demo && c.orderUrl !== pick.orderUrl && c.dataGb >= pick.dataGb
+          && c.days >= pick.days && c.priceUsd <= cap)[0] : undefined;
+        const alternative = alt ? { priceUsd: alt.priceUsd, label: `seller "${alt.seller}" offers ${alt.offerId} (${alt.name}) at ${alt.priceUsd.toFixed(2)} USDC`
+          + (alt.validUntil ? `, its quote holds until ${alt.validUntil}` : "") + ` — esim_buy offer_id ${alt.offerId} seller "${alt.seller}"` } : undefined;
+        let bought: Awaited<ReturnType<EsimClient["buy"]>>;
+        try {
+          bought = await client.buy(orderUrl, offerId, key, cap, pick ? { token: pick.quoteToken, usd: pick.priceUsd } : {}, alternative);
+        } catch (err) {
+          // A refusal that charged nothing and said what the offer is now: the next esim_buy orders that.
+          const now = err instanceof EsimError ? err.offer : undefined;
+          if (pick && now?.offer_id === pick.offerId && Number.isFinite(Number(now.price?.usd))) {
+            pick.priceUsd = Number(now.price.usd);
+            if (typeof now.quote_token === "string") pick.quoteToken = now.quote_token; else delete pick.quoteToken;
+            if (typeof now.price_valid_until === "string") pick.validUntil = now.price_valid_until; else delete pick.validUntil;
+            candidates.sort((a, b) => a.priceUsd - b.priceUsd);
+          }
+          throw err;
+        }
+        const { delivery, transaction, payer, priceUsd, requoted } = bought;
         const p: EsimPurchase = {
           seller: /\/order$/.test(orderUrl) ? baseOf(orderUrl) : orderUrl, offerId, name: delivery.offer?.name ?? offerId, priceUsd, esimTranNo: delivery.esim_tran_no,
           iccid: delivery.iccid, statusToken: delivery.status_token, payer, transaction, at: new Date().toISOString(),
