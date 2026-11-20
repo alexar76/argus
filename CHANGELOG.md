@@ -2,6 +2,21 @@
 
 All notable changes to ARGUS-3 (`@alexar76/argus3`, CLI `argus`, npm `argus-warden`).
 
+## 0.6.1 — 2026-11-20
+
+A patch release: WARDEN 0.33.0 and a refreshed list of ecosystem components in ARGUS's built-in knowledge.
+
+- **Depends on `@aimarket/warden` 0.33.0, up from 0.30.0.**
+  - 0.32.0: after outside text, shell code that reads a credential from the environment (`$GH_TOKEN`,
+    `printenv NAME`, `env | curl`, `/proc/<pid>/environ`) is a credential send, not ordinary shell review. This
+    concerns agents that run the flow guard as a hook or plugin; ARGUS itself has no shell tool.
+  - 0.31.0 and 0.33.0: OpenWebUI set-up in one command and Open Terminal calls checked through the gateway;
+    modules ARGUS does not load.
+  - Rulesets (23), the known-malicious package list and scan verdicts are as in 0.30.0.
+- The built-in knowledge of the ecosystem (`src/ecosystem/knowledge.ts`) follows the current component map.
+- Pins stored by WARDEN 0.30.0 verify under 0.33.0, and a changed description after such an approval is still
+  caught (`scripts/warden-pin-compat-check.mjs`), so servers approved before the update stay approved.
+
 ## 0.6.0 — 2026-11-18
 
 A minor release: WARDEN 0.30.0, eSIM purchases that weigh the other sellers' offers after a refusal, and a Docker image
