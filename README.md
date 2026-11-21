@@ -120,12 +120,12 @@ curl -fsSL https://magic-ai-factory.com/install | bash
 **Or install from npm** (same CLI, no curl script):
 
 ```bash
-npm install -g @alexar76/argus3@0.6.1
+npm install -g @alexar76/argus3@0.6.2
 mkdir -p ~/.argus/agent && cd ~/.argus/agent
 argus setup && argus doctor
 ```
 
-Package: [`@alexar76/argus3` on npm](https://www.npmjs.com/package/@alexar76/argus3) · CLI: `argus` · `npx -y @alexar76/argus3@0.6.1 --help`
+Package: [`@alexar76/argus3` on npm](https://www.npmjs.com/package/@alexar76/argus3) · CLI: `argus` · `npx -y @alexar76/argus3@0.6.2 --help`
 
 Use the scoped package for current releases. The legacy `argus-warden` package remains at 0.3.1 with an older WARDEN dependency.
 
@@ -134,7 +134,7 @@ Then `argus chat` or `argus serve`.
 ### Run as MCP server (stdio)
 
 ```bash
-npm install -g @alexar76/argus3@0.6.1
+npm install -g @alexar76/argus3@0.6.2
 # or: npm install && npm run build && node dist/index.js mcp
 argus mcp
 ```
