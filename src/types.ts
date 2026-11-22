@@ -42,6 +42,8 @@ export interface LLMRequest {
   system?: string;
   messages: Message[];
   tools?: ToolDef[];
+  /** Provenance of bridged tools, used by the local model usage journal. */
+  mcpToolServers?: ReadonlyMap<string, string>;
   maxTokens?: number;
   temperature?: number;
   /** Hint: mark the stable prefix (system + tools) as cacheable. */

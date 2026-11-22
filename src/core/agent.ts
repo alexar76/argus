@@ -295,6 +295,10 @@ export class Agent {
     const lessons = await memory.recall(task, 5);
     const system = this.buildSystem(lessons.map((l) => l.text));
     const toolDefs = this.deps.tools.map((t) => t.def);
+    const mcpToolServers = new Map<string, string>();
+    for (const tool of this.deps.tools) {
+      if (tool.source.kind === "mcp") mcpToolServers.set(tool.def.name, tool.source.server);
+    }
     const usedTools = new Set<string>();
     const provenance = new ProvenanceCollector();
     const startedAt = new Date().toISOString();
@@ -351,6 +355,7 @@ export class Agent {
           system,
           messages,
           tools: toolDefs,
+          mcpToolServers,
           cachePrefix: true,
           signal,
         });

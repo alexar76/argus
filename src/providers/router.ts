@@ -3,6 +3,8 @@ import { type ArgusConfig, type ModelConfig, parseModelRef, providerKey } from "
 import type { Logger } from "../types.js";
 import { AnthropicProvider } from "./anthropic.js";
 import { OpenAICompatProvider } from "./openai.js";
+import { modelUsageSink } from "./model-usage.js";
+import { expandHome } from "../memory/store.js";
 
 /**
  * Routes a request to the right provider for a tier and resolves the concrete
@@ -14,6 +16,7 @@ export class ProviderRouter {
   private readonly providers = new Map<string, Provider>();
 
   constructor(private readonly cfg: ArgusConfig, private readonly log: Logger) {
+    const usageSink = modelUsageSink(expandHome(cfg.stateDir), cfg.mode, log);
     for (const p of cfg.providers) {
       try {
         if (p.kind === "anthropic") {
@@ -22,7 +25,7 @@ export class ProviderRouter {
             log.debug(`provider ${p.id} skipped (no ${p.apiKeyEnv})`);
             continue;
           }
-          this.providers.set(p.id, new AnthropicProvider({ id: p.id, apiKey: key }));
+          this.providers.set(p.id, new AnthropicProvider({ id: p.id, apiKey: key, usageSink }));
         } else {
           // openai-compatible + local
           if (!p.baseUrl) {
@@ -35,7 +38,7 @@ export class ProviderRouter {
             log.debug(`provider ${p.id} skipped (no ${p.apiKeyEnv})`);
             continue;
           }
-          this.providers.set(p.id, new OpenAICompatProvider({ id: p.id, kind: p.kind, baseUrl: p.baseUrl, apiKey: key }));
+          this.providers.set(p.id, new OpenAICompatProvider({ id: p.id, kind: p.kind, baseUrl: p.baseUrl, apiKey: key, usageSink }));
         }
       } catch (err) {
         log.warn(`provider ${p.id} failed to init: ${(err as Error).message}`);

@@ -1,4 +1,4 @@
-import { fetchNoRedirect } from "../credential-fetch.js";
+import { modelResponse, type ModelUsageSink } from "./model-usage.js";
 import type { LLMRequest, LLMResponse, Message, Provider, ProviderKind, StopReason, ToolCall } from "../types.js";
 
 export interface AnthropicOptions {
@@ -7,6 +7,7 @@ export interface AnthropicOptions {
   baseUrl?: string;
   version?: string;
   timeoutMs?: number;
+  usageSink?: ModelUsageSink;
 }
 
 /**
@@ -22,6 +23,7 @@ export class AnthropicProvider implements Provider {
   private readonly baseUrl: string;
   private readonly version: string;
   private readonly timeoutMs: number;
+  private readonly usageSink?: ModelUsageSink;
 
   constructor(opts: AnthropicOptions) {
     this.id = opts.id ?? "anthropic";
@@ -29,6 +31,7 @@ export class AnthropicProvider implements Provider {
     this.baseUrl = (opts.baseUrl ?? "https://api.anthropic.com").replace(/\/$/, "");
     this.version = opts.version ?? "2023-06-01";
     this.timeoutMs = opts.timeoutMs ?? 120_000;
+    this.usageSink = opts.usageSink;
   }
 
   async chat(req: LLMRequest): Promise<LLMResponse> {
@@ -58,31 +61,15 @@ export class AnthropicProvider implements Provider {
       body.tools = tools;
     }
 
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs);
-    const signal = req.signal ?? ctrl.signal;
-    let res: Response;
-    try {
-      res = await fetchNoRedirect(`${this.baseUrl}/v1/messages`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": this.apiKey,
-          "anthropic-version": this.version,
-        },
-        body: JSON.stringify(body),
-        signal,
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`anthropic HTTP ${res.status}: ${text.slice(0, 500)}`);
-    }
-
-    const json: any = await res.json();
+    const json = await modelResponse({
+      endpoint: `${this.baseUrl}/v1/messages`, provider: this.id, wire: "anthropic",
+      request: req, body, timeoutMs: this.timeoutMs, sink: this.usageSink,
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": this.apiKey,
+        "anthropic-version": this.version,
+      },
+    });
     const blocks: any[] = json.content ?? [];
     let content = "";
     const toolCalls: ToolCall[] = [];

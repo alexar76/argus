@@ -1,5 +1,5 @@
-import { fetchNoRedirect } from "../credential-fetch.js";
 import type { LLMRequest, LLMResponse, Message, Provider, ProviderKind, StopReason, ToolCall } from "../types.js";
+import { modelResponse, type ModelUsageSink } from "./model-usage.js";
 
 export interface OpenAICompatOptions {
   id: string;
@@ -7,6 +7,7 @@ export interface OpenAICompatOptions {
   baseUrl: string;
   apiKey?: string;
   timeoutMs?: number;
+  usageSink?: ModelUsageSink;
 }
 
 /**
@@ -20,6 +21,7 @@ export class OpenAICompatProvider implements Provider {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
   private readonly timeoutMs: number;
+  private readonly usageSink?: ModelUsageSink;
 
   constructor(opts: OpenAICompatOptions) {
     this.id = opts.id;
@@ -27,6 +29,7 @@ export class OpenAICompatProvider implements Provider {
     this.baseUrl = opts.baseUrl.replace(/\/$/, "");
     this.apiKey = opts.apiKey;
     this.timeoutMs = opts.timeoutMs ?? 120_000;
+    this.usageSink = opts.usageSink;
   }
 
   async chat(req: LLMRequest): Promise<LLMResponse> {
@@ -48,27 +51,10 @@ export class OpenAICompatProvider implements Provider {
     const headers: Record<string, string> = { "content-type": "application/json" };
     if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
 
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs);
-    const signal = req.signal ?? ctrl.signal;
-    let res: Response;
-    try {
-      res = await fetchNoRedirect(`${this.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-        signal,
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`${this.id} HTTP ${res.status}: ${text.slice(0, 500)}`);
-    }
-
-    const json: any = await res.json();
+    const json = await modelResponse({
+      endpoint: `${this.baseUrl}/chat/completions`, provider: this.id, wire: "openai",
+      request: req, body, headers, timeoutMs: this.timeoutMs, sink: this.usageSink,
+    });
     const choice = json.choices?.[0] ?? {};
     const msg = choice.message ?? {};
     const toolCalls: ToolCall[] = (msg.tool_calls ?? []).map((tc: any) => ({
